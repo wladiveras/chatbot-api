@@ -17,6 +17,10 @@ jobs:
           php-version: '8.3'
           tools: composer:v2	
           coverage: none
+      
+      - name: Install Composer dependencies
+        run: composer install --no-dev
+
       - name: Require Vapor CLI
         run: composer global require laravel/vapor-cli
       
