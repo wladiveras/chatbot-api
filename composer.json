@@ -54,12 +54,6 @@
             "dont-discover": []
         }
     },
-   "repositories": [
-        {
-            "type": "git",
-            "url": "git@github.com:sonhardigital/marinabot-api.git"
-        }
-    ],
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
