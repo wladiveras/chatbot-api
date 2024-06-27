@@ -1,5 +1,6 @@
 id: 62853
 name: marinabot-api
+domain: api.marinabot.com.br
 environments:
     production:
         memory: 1024
