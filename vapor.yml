@@ -5,8 +5,9 @@ environments:
         domain: api.marinabot.com.br
         database: marinabot
         memory: 1024
-        cli-memory: 512
+        cli-memory: 1024
         runtime: 'php-8.3:al2'
+        queues: true
         build:
             - 'composer install --no-dev'
             - 'php artisan event:cache'
