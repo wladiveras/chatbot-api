@@ -67,6 +67,7 @@ return [
 
     'apps' => [
         'provider' => 'config',
+
         'apps' => [
             [
                 'key' => env('REVERB_APP_KEY'),
