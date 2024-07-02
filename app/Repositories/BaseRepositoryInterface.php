@@ -2,12 +2,15 @@
 
 namespace App\Repositories;
 
+use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Collection;
 use stdClass;
 
 interface BaseRepositoryInterface
 {
     public function all(): Collection;
+
+    public function paginate(int $limitPerPage): CursorPaginator;
 
     public function find(int|string $id): ?stdClass;
 

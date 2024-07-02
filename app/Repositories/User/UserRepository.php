@@ -2,6 +2,7 @@
 
 namespace App\Repositories\User;
 
+use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\BaseRepository;
 use App\Models\User;
@@ -17,6 +18,10 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     public function all(): Collection
     {
         return $this->model->all();
+    }
+    public function paginate(int $limitPerPage): CursorPaginator
+    {
+        return $this->model->cursorPaginate($limitPerPage);
     }
 
     public function find(int|string $id): ?stdClass

@@ -1,13 +1,13 @@
 <?php
 namespace App\Services\User;
 
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 use stdClass;
 
 interface UserServiceInterface
 {
 
-    public function findAllUsers(): Collection;
+    public function findAllUsers(): CursorPaginator;
     public function findUser(int|string $id): ?stdClass;
     public function createUser(array $data): stdClass;
     public function updateUser(int|string $id, array $data): ?stdClass;

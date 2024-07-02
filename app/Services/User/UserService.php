@@ -2,9 +2,9 @@
 
 namespace App\Services\User;
 
+use Illuminate\Contracts\Pagination\CursorPaginator;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\User\UserServiceInterface;
-use Illuminate\Database\Eloquent\Collection;
 use stdClass;
 
 class UserService implements UserServiceInterface
@@ -16,9 +16,9 @@ class UserService implements UserServiceInterface
         $this->userRepository = $userRepository;
     }
 
-    public function findAllUsers(): Collection
+    public function findAllUsers(): CursorPaginator
     {
-        return $this->userRepository->all();
+        return $this->userRepository->paginate(1);
     }
 
     public function findUser(int|string $id): ?stdClass

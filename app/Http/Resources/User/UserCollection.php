@@ -16,9 +16,6 @@ class UserCollection extends ResourceCollection
     {
         return [
             'data' => $this->collection,
-            'links' => [
-                'self' => config('app.url') . '/api/users',
-            ],
         ];
     }
 }
