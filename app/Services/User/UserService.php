@@ -2,10 +2,8 @@
 
 namespace App\Services\User;
 
-use Illuminate\Contracts\Pagination\CursorPaginator;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\User\UserServiceInterface;
-use stdClass;
 
 class UserService implements UserServiceInterface
 {
@@ -16,27 +14,27 @@ class UserService implements UserServiceInterface
         $this->userRepository = $userRepository;
     }
 
-    public function findAllUsers(): CursorPaginator
+    public function findAllUsers()
     {
         return $this->userRepository->paginate(10);
     }
 
-    public function findUser(int|string $id): ?stdClass
+    public function findUser(int|string $id)
     {
         return (object) $this->userRepository->find($id);
     }
 
-    public function createUser(array $data): stdClass
+    public function createUser(array $data)
     {
         return (object) $this->userRepository->create($data);
     }
 
-    public function updateUser(int|string $id, array $data): ?stdClass
+    public function updateUser(int|string $id, array $data)
     {
         return $this->userRepository->update($id, $data);
     }
 
-    public function deleteUser(int|string $id): bool
+    public function deleteUser(int|string $id)
     {
         return $this->userRepository->delete($id);
     }

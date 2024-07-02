@@ -7,9 +7,9 @@ use stdClass;
 interface UserServiceInterface
 {
 
-    public function findAllUsers(): CursorPaginator;
-    public function findUser(int|string $id): ?stdClass;
-    public function createUser(array $data): stdClass;
-    public function updateUser(int|string $id, array $data): ?stdClass;
-    public function deleteUser(int|string $id): bool;
+    public function findAllUsers();
+    public function findUser(int|string $id);
+    public function createUser(array $data);
+    public function updateUser(int|string $id, array $data);
+    public function deleteUser(int|string $id);
 }
