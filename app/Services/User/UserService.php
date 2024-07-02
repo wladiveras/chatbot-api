@@ -18,7 +18,7 @@ class UserService implements UserServiceInterface
 
     public function findAllUsers(): CursorPaginator
     {
-        return $this->userRepository->paginate(1);
+        return $this->userRepository->paginate(10);
     }
 
     public function findUser(int|string $id): ?stdClass

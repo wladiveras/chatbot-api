@@ -16,28 +16,28 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-    public function index()
+    public function index(): UserCollection
     {
         $users = $this->userService->findAllUsers();
 
         return new UserCollection($users);
     }
 
-    public function store(UserRequest $request)
+    public function store(UserRequest $request): UserResource
     {
         $user = $this->userService->createUser($request->validated());
 
         return new UserResource($user);
     }
 
-    public function show(int|string $id)
+    public function show(int|string $id): UserResource
     {
         $user = $this->userService->findUser($id);
 
         return new UserResource($user);
     }
 
-    public function update(UserRequest $request, int|string $id)
+    public function update(UserRequest $request, int|string $id): UserResource
     {
         $user = $this->userService->updateUser($id, $request->validated());
 
