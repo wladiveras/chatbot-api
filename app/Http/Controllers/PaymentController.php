@@ -19,7 +19,7 @@ class PaymentController extends Controller
 
     public function pay(string $gateway, PaymentRequest $request)
     {
-        Log::debug(__CLASS__.__FUNCTION__." => start", [
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
             'data' => [
                 'request' => $request->validated(),
                 'gateway' => $gateway,
@@ -28,7 +28,7 @@ class PaymentController extends Controller
 
         $payment = $this->paymentService->gateway($gateway)->pay($request->validated());
 
-        Log::debug(__CLASS__.__FUNCTION__." => end", [
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => end", [
             'data' => [
                 'request' => $request->validated(),
                 'gateway' => $gateway,
@@ -40,7 +40,7 @@ class PaymentController extends Controller
 
     public function checkPayment(string $gateway, int|string $id)
     {
-        Log::debug(__CLASS__.__FUNCTION__." => start", [
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
             'data' => [
                 'id' => $id,
                 'gateway' => $gateway,
@@ -49,7 +49,7 @@ class PaymentController extends Controller
 
         $payment = $this->paymentService->gateway($gateway)->checkPayment($id);
 
-        Log::debug(__CLASS__.__FUNCTION__." => end", [
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => end", [
             'data' => [
                 'id' => $id,
                 'gateway' => $gateway,
