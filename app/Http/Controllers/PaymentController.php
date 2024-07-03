@@ -21,7 +21,7 @@ class PaymentController extends Controller
     {
         Log::debug(__CLASS__.__FUNCTION__." => start", [
             'data' => [
-                'request' => $request,
+                'request' => $request->validated(),
                 'gateway' => $gateway,
             ],
         ]);
@@ -30,7 +30,7 @@ class PaymentController extends Controller
 
         Log::debug(__CLASS__.__FUNCTION__." => end", [
             'data' => [
-                'request' => $request,
+                'request' => $request->validated(),
                 'gateway' => $gateway,
             ],
         ]);
