@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Services\User\UserService;
-use app\Http\Requests\User\UserRequest;
-use App\Http\Resources\User\UserResource;
-use App\Http\Resources\User\UserCollection;
+use app\Http\Requests\UserRequest;
+use App\Http\Resources\UserResource;
+use App\Http\Resources\UserCollection;
 
 class UserController extends Controller
 {

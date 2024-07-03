@@ -5,7 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Services\User\UserServiceInterface;
 use App\Services\User\UserService;
-
+use App\Services\Payment\PaymentServiceInterface;
+use App\Services\Payment\PaymentService;
 
 class ServicesProvider extends ServiceProvider
 {
@@ -23,5 +24,6 @@ class ServicesProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->bind(UserServiceInterface::class, UserService::class);
+        $this->app->bind(PaymentServiceInterface::class, PaymentService::class);
     }
 }

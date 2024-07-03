@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Services\Payment\PaymentService;
-use app\Http\Requests\User\UserRequest;
-use App\Http\Resources\User\UserResource;
-use App\Http\Resources\User\UserCollection;
+use App\Http\Requests\PaymentRequest;
+use App\Http\Resources\PaymentResource;
+use App\Http\Resources\PaymentCollection;
 
 class PaymentController extends Controller
 {
@@ -16,12 +16,17 @@ class PaymentController extends Controller
         $this->paymentService = $paymentService;
     }
 
-    public function pay(string $gateway = 'braip', array $data)
+    public function pay(string $gateway, PaymentRequest $request)
     {
-        $this->paymentService->gateway($gateway)->pay($data);
+        $payment = $this->paymentService->gateway($gateway)->pay($request->validated());
+
+        return new PaymentResource($payment);
     }
-    public function checkPayment(string $gateway = 'braip', int|string $id)
+
+    public function checkPayment(string $gateway, int|string $id)
     {
-        $this->paymentService->gateway($gateway)->checkPayment($id);
+        $payment = $this->paymentService->gateway($gateway)->checkPayment($id);
+
+        return new PaymentResource($payment);
     }
 }
