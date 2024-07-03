@@ -1,8 +1,10 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -17,7 +19,25 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
+
+        $exceptions->render(function (NotFoundHttpException $notFoundHttpException, Request $request) {
+            if ($request->is('api/*') || $request->is('api')) {
+                return response()->json([
+                    'message' => 'result not found.'
+                ], 404);
+            }
+        });
+
+        $exceptions->shouldRenderJsonWhen(function (Request $request) {
+            if ($request->is('api/*') || $request->is('api')) {
+                return true;
+            }
+
+            return $request->expectsJson();
+        });
+
         if (App::environment('production')) {
             Integration::handles($exceptions);
         }
+
     })->create();
