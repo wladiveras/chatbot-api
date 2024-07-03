@@ -31,7 +31,7 @@ class PaymentController extends Controller
         Log::debug(__CLASS__.'.'.__FUNCTION__." => end", [
             'data' => [
                 'request' => $request->validated(),
-                'gateway' => $gateway,
+                'payment' => $payment,
             ],
         ]);
 
@@ -49,10 +49,10 @@ class PaymentController extends Controller
 
         $payment = $this->paymentService->gateway($gateway)->checkPayment($id);
 
-        Log::debug(__CLASS__.'.'.__FUNCTION__." => end", [
+        Log::debug(__CLASS__.'.'. __FUNCTION__." => end", [
             'data' => [
                 'id' => $id,
-                'gateway' => $gateway,
+                'payment' => $payment,
             ],
         ]);
         return new PaymentResource($payment);
