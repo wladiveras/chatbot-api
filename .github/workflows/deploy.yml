@@ -18,6 +18,12 @@ jobs:
           coverage: none
       - name: Require Vapor CLI
         run: composer global require laravel/vapor-cli
+
+      - name: Set Vapor Team
+        run: vapor team:switch --id=63903
+        env:
+          VAPOR_API_TOKEN: ${{ secrets.VAPOR_API_TOKEN }}
+
       - name: Install Project Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
