@@ -3,6 +3,7 @@ namespace App\Services\Payment\Gateway;
 
 use App\Services\Payment\PaymentServiceInterface;
 use App\Enums\PaymentStatus;
+//use App\Models\Order;
 
 class BraipGateway implements PaymentServiceInterface
 {
@@ -11,7 +12,7 @@ class BraipGateway implements PaymentServiceInterface
         return (object) [
             'id' => null,
             'gateway' => 'braip',
-            'status' => 'pending',
+            'status' => $data,
         ];
     }
 

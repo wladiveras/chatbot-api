@@ -3,6 +3,7 @@ namespace App\Services\Payment;
 
 use App\Services\Payment\Gateway\BraipGateway;
 
+
 class PaymentService
 {
     public static function gateway(string $gateway): PaymentServiceInterface

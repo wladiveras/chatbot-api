@@ -21,32 +21,27 @@ class UserController extends Controller
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start");
 
-        $users = $this->userService->findAllUsers();
-
-        Log::debug(__CLASS__.'.'.__FUNCTION__." => end", [
-            'data' => [
-                'users' => $users,
-            ],
-        ]);
-
+        try{
+            $users = $this->userService->findAllUsers();
+        }
+        catch(\Exception $exception) {
+            $this->error(exception: $exception);
+        }
         return new UserCollection($users);
     }
 
     public function store(UserRequest $request): UserResource
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__." => end", [
-            'data' => [
-                'request' => $request->validated(),
-            ],
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+            'request' => $request,
         ]);
 
-        $user = $this->userService->createUser($request->validated());
-
-        Log::debug(__CLASS__.'.'.__FUNCTION__." => end", [
-            'data' => [
-                'user' => $user,
-            ],
-        ]);
+        try {
+            $user = $this->userService->createUser($request->validated());
+        }
+        catch(\Exception $exception) {
+            $this->error(data: $request, exception: $exception);
+        }
 
         return new UserResource($user);
     }
@@ -54,12 +49,15 @@ class UserController extends Controller
     public function show(int|string $id): UserResource
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
-            'data' => [
-                'id' => $id,
-            ],
+            'id' => $id,
         ]);
 
-        $user = $this->userService->findUser($id);
+        try {
+            $user = $this->userService->findUser($id);
+        }
+        catch(\Exception $exception) {
+            $this->error(data: $id, exception: $exception);
+        }
 
         return new UserResource($user);
     }
@@ -67,19 +65,16 @@ class UserController extends Controller
     public function update(UserRequest $request, int|string $id): UserResource
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
-            'data' => [
-                'request' => $request->validated(),
-                'id' => $id,
-            ],
+            'id' => $id,
+            'request' => $request,
         ]);
 
-        $user = $this->userService->updateUser($id, $request->validated());
-
-        Log::debug(__CLASS__.'.'.__FUNCTION__." => end", [
-            'data' => [
-                'user' => $user,
-            ],
-        ]);
+        try {
+            $user = $this->userService->updateUser($id, $request->validated());
+        }
+        catch(\Exception $exception) {
+            $this->error(data: $request, exception: $exception);
+        }
 
         return new UserResource($user);
     }
@@ -87,19 +82,26 @@ class UserController extends Controller
     public function destroy(int|string $id): bool
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
-            'data' => [
-                'id' => $id,
-            ],
+            'id' => $id,
         ]);
 
-        $user = $this->userService->deleteUser($id);
-
-        Log::debug(__CLASS__.'.'.__FUNCTION__." => end", [
-            'data' => [
-                'user' => $user,
-            ],
-        ]);
+        try{
+            $user = $this->userService->deleteUser($id);
+        }
+        catch(\Exception $exception) {
+            $this->error(data: $id, exception: $exception);
+        }
 
         return $user;
+    }
+
+    private function error($data = [], \Exception $exception) {
+        Log::error(__CLASS__.'.'. __FUNCTION__." => error", [
+            'data' => $data,
+            'exception' => $exception,
+            'message' => $exception->getMessage(),
+        ]);
+
+        abort(500, $exception->getMessage());
     }
 }

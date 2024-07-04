@@ -19,21 +19,17 @@ class PaymentController extends Controller
 
     public function pay(string $gateway, PaymentRequest $request)
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
-            'data' => [
-                'request' => $request->validated(),
-                'gateway' => $gateway,
-            ],
-        ]);
+    Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+        'request' => $request,
+        'gateway' => $gateway,
+    ]);
 
+    try {
         $payment = $this->paymentService->gateway($gateway)->pay($request->validated());
-
-        Log::debug(__CLASS__.'.'.__FUNCTION__." => end", [
-            'data' => [
-                'request' => $request->validated(),
-                'payment' => $payment,
-            ],
-        ]);
+    }
+    catch(\Exception $exception) {
+        $this->error(data: $request, exception: $exception);
+    }
 
         return new PaymentResource($payment);
     }
@@ -41,20 +37,27 @@ class PaymentController extends Controller
     public function checkPayment(string $gateway, int|string $id)
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
-            'data' => [
-                'id' => $id,
-                'gateway' => $gateway,
-            ],
+            'id' => $id,
+            'gateway' => $gateway,
         ]);
 
-        $payment = $this->paymentService->gateway($gateway)->checkPayment($id);
+        try {
+            $payment = $this->paymentService->gateway($gateway)->checkPayment($id);
+            return new PaymentResource($payment);
+        }
 
-        Log::debug(__CLASS__.'.'. __FUNCTION__." => end", [
-            'data' => [
-                'id' => $id,
-                'payment' => $payment,
-            ],
+        catch(\Exception $exception) {
+            $this->error(data: [$id, $gateway], exception: $exception);
+        }
+    }
+
+    private function error($data, $exception) {
+        Log::error(__CLASS__.'.'. __FUNCTION__." => error", [
+            'data' => $data,
+            'exception' => $exception,
+            'message' => $exception->getMessage(),
         ]);
-        return new PaymentResource($payment);
+
+        abort(500, $exception->getMessage());
     }
 }
