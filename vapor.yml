@@ -3,7 +3,8 @@ name: marinabot-api
 environments:
     production:
         domain: api.marinabot.com.br
-        database: marinabot
+        database: marinabot-db-production
+        cache: marinabot-cache-production
         memory: 1024
         cli-memory: 1024
         runtime: 'php-8.3:al2'
