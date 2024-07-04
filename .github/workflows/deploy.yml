@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -17,6 +19,7 @@ jobs:
           php-version: 8.3
           tools: composer:v2
           coverage: none
+
 
       - name: Require Vapor CLI
         run: composer global require laravel/vapor-cli
