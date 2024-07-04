@@ -8,7 +8,8 @@ environments:
         cli-memory: 1024
         runtime: 'php-8.3:al2'
         build:
-            - 'composer install --no-dev'
+            - 'COMPOSER_MIRROR_PATH_REPOS=1 composer install --no-dev'
             - 'php artisan event:cache'
         deploy:
             - 'php artisan migrate --force'
+
