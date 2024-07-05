@@ -1,66 +1,160 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 1. Marinabot
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+WhatsApp Chatbot for E-commerce
 
-## About Laravel
+This is a WhatsApp chatbot project that helps customers with their purchases on an e-commerce store. The chatbot uses a workflow gerated by a flow chart creator per connection. It integrates with the e-commerce store's API to provide a seamless customer experience.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![[marinabot]()](https://i.imgur.com/FgPbPGA.png)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 1.1. Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Responds to customer inquiries about products
+Recommends products based on customer preferences
+Provides product information and pricing
+Allows customers to make purchases directly from the chatbot
+Integrates with e-commerce store's API for seamless checkout
 
-## Learning Laravel
+* PHP 8.3
+* Laravel 11
+* laravel reverb
+* Laravel Sail
+* Laravel Pest
+* Laravel Pint
+* Laravel Sanctum
+* laravel tinker
+* Laravel Pail
+* Laravel Promps
+* Mysql
+* Redis
+* Docker
+* Docker Composer
+* E-commerce store API (braip)
+* Whataspp Evolution API
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 1.2. Design Patterns
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+    Factory pattern to integration and payment checkout
+    Repository pattern to isolate code steps and repetitive code, 
+    Strategy pattern to notification features.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 1.3. How it Works
 
-## Laravel Sponsors
+    Customer initiates conversation with the chatbot on WhatsApp
+    chatbot responds to customer inquiries using EVOLUTION API
+    chatbot recommends products based on customer preferences by connection
+    Customer selects product and marinabot flow that`s provides a product url link.
+    soon Customer makes purchase directly from the chatbot
+    chatbot integrates with e-commerce store's API for seamless checkout
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 1.4. Setup
 
-### Premium Partners
+Welcome to marinaBot, create a new branch and starting coding with us.
+Step to setup project in your machine.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 1.4.1. Install docker and docker compose
 
-## Contributing
+Docker and Docker Compose installation method varies depending on your system.
+For Linux Ubuntu:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Install Docker using the convenience script provided by Docker:
 
-## Code of Conduct
+``` bash
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 
-## Security Vulnerabilities
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+After installation, give your user the permission to run Docker commands:
 
-## License
+```bash
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+sudo usermod -aG docker ${USER}
+
+```
+
+To apply these new permissions, log out and log back in, or you can use:
+
+```bash
+
+newgrp docker
+
+```
+
+Download the current stable release of Docker Compose with:
+
+```bash
+
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+```
+
+Apply executable permissions to the binary:
+
+```bash
+
+sudo chmod +x /usr/local/bin/docker-compose
+
+```
+
+Verify the installation by checking the version:
+
+```bash
+
+docker-compose --version
+
+```
+
+Now install Laravel sail following this steps: <https://laravel.com/docs/11.x/sail#installing-sail-into-existing-applications>
+
+then start development server with:
+
+```bash
+
+sail up -d 
+
+ # or 
+
+ ./vendor/bin/sail up -d
+
+```
+
+### 1.4.2. project setup
+
+Make sure to install the dependencies and run migrations:
+
+```bash
+
+# Laravel sail
+
+sail artisan install && sail artisan migrate
+```
+
+## 1.5. Development Server
+
+Start the development server on `http://laravel.test or localhost`:
+
+```bash
+sail up -d
+```
+
+When you done, close server connection with:
+
+```bash
+sail down -d
+```
+
+Check out the [Laravel Documentation](https://laravel.com/docs) and [Postman Collection](https://www.postman.com/wladiveras/workspace/nuvem/collection/10368732-2cd24e99-b9a2-498b-8252-9efa614019ce?action=share&creator=10368732&active-environment=10368732-60c8c68b-9bda-4183-9f20-f573bca4936d) for more information.
+
+## 1.6. Utils Links
+
+[Evolution API](https://doc.evolution-api.com/pt/get-started/introduction)
+[Laravel Pint](https://laravel.com/docs/11.x/pint)
+[Laravel Eloquent](https://laravel.com/docs/11.x/eloquent)
+[Laravel Rerverb](https://reverb.laravel.com/)
+[Introduction to the Repository Pattern](https://tallstackdev.medium.com/introduction-to-the-repository-pattern-in-laravel-c025eb1cc7fd)
+[Understanding the Strategy Design Pattern in PHP](https://hashemirafsan.medium.com/understanding-the-strategy-design-pattern-in-php-with-a-simple-example-775791d30be1)
+[Understanding the Factory Design Pattern in PHP](https://hashemirafsan.medium.com/understanding-the-factory-design-pattern-in-php-ddae58b59f25)
+
+## 1.7. Licence
+
+[MIT](./LICENSE)
