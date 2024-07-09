@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Log;
 use App\Services\Integration\IntegrationService;
-use App\Http\Requests\PaymentRequest;
-use App\Http\Resources\PaymentResource;
-use App\Http\Resources\PaymentCollection;
+use App\Http\Requests\IntegrationRequest;
+use App\Http\Resources\IntegrationResource;
+use App\Http\Resources\IntegrationCollection;
 
 class IntegrationController extends Controller
 {
@@ -17,45 +17,45 @@ class IntegrationController extends Controller
         $this->integrationService = $integrationService;
     }
 
-    public function createInstance(string $integration, PaymentRequest $request)
+    public function createInstance(string $connection, IntegrationRequest $request)
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
             'request' => $request,
-            'integration' => $integration,
+            'integration' => $connection,
         ]);
 
         try {
-            $payment = $this->integrationService->integration($integration)->createInstance($request->validated());
+            $integration = $this->integrationService->integration($connection)->createInstance($request->validated());
         }
         catch(\Exception $exception) {
             $this->error(data: $request, exception: $exception);
         }
 
-        return new PaymentResource($payment);
+        return new IntegrationResource($integration);
     }
 
-    public function connectInstance(string $integration, int|string $id)
+    public function connectInstance(string $connection, int|string $id)
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
             'id' => $id,
-            'integration' => $integration,
+            'integration' => $connection,
         ]);
 
         try {
-            $payment = $this->integrationService->integration($integration)->connectInstance($id);
-            return new PaymentResource($payment);
+            $integration = $this->integrationService->integration($connection)->connectInstance($id);
+            return new IntegrationResource($integration);
         }
 
         catch(\Exception $exception) {
-            $this->error(data: [$id, $integration], exception: $exception);
+            $this->error(data: [$id, $connection], exception: $exception);
         }
     }
 
     private function error($data, $exception) {
         Log::error(__CLASS__.'.'. __FUNCTION__." => error", [
+            'message' => $exception->getMessage(),
             'data' => $data,
             'exception' => $exception,
-            'message' => $exception->getMessage(),
         ]);
 
         abort(500, $exception->getMessage());
