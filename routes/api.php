@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\IntegrationController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -24,4 +25,12 @@ Route::prefix('/payment/{gateway}')
 ->group(function () {
     Route::post('/pay', [PaymentController::class, 'pay']);
     Route::post('/callback/{id}', [PaymentController::class, 'checkPayment']);
+});
+
+
+Route::prefix('/integration/{integration}')
+//->middleware(['first', 'second'])
+->group(function () {
+    Route::post('/create-instance', [IntegrationController::class, 'createInstance']);
+    Route::post('/connect-instance/{instance}', [IntegrationController::class, 'connectInstance']);
 });
