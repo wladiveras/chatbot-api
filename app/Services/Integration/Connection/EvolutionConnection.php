@@ -2,7 +2,9 @@
 namespace App\Services\Integration\Connection;
 
 use App\Services\Integration\IntegrationServiceInterface;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+
 
 class EvolutionConnection implements IntegrationServiceInterface
 {
@@ -12,19 +14,34 @@ class EvolutionConnection implements IntegrationServiceInterface
 
     public function __construct()
     {
-        $this->url = config(['evolution.url']);
-        $this->key = config(['evolution.key']);
+        $this->url = Config::get('evolution.url');
+        $this->key = Config::get('evolution.key');
 
         $this->request = Http::withHeaders([
             'apikey' => $this->key,
-        ]);
+        ])
+        ->acceptJson();
     }
 
     public function createInstance(array|object $data): array|object
     {
+
+        $payload = [
+            "number" => $data['number'],
+            "options" => [
+                "delay" => 1200,
+                "presence" => "composing",
+                "linkPreview" => false
+            ],
+            "textMessage" => [
+                "text" => $data['message']
+            ]
+        ];
+
+        $response = $this->request->post("{$this->url}/message/sendText/{$data['instance']}", $payload);
+
         return (object) [
-            'url' => $this->url,
-            'key' => $this->key,
+            'id' => $response->json(),
         ];
     }
 
@@ -58,6 +75,30 @@ class EvolutionConnection implements IntegrationServiceInterface
             'id' => $id,
         ];
     }
+
+    // Message section
+    public function sendPlainText(array|object $data): array|object
+    {
+
+        $payload = [
+            "number" => $data['number'],
+            "options" => [
+                "delay" => $data['delay'] ?? 1200,
+                "presence" => "composing",
+                "linkPreview" => false
+            ],
+            "textMessage" => [
+                "text" => $data['message']
+            ]
+        ];
+
+        $response = $this->request->post("{$this->url}/message/sendText/{$data['instance']}", $payload);
+
+        return (object) [
+            'id' => $response,
+        ];
+    }
+
 }
 
 

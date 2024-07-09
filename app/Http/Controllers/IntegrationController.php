@@ -51,6 +51,23 @@ class IntegrationController extends Controller
         }
     }
 
+    public function sendPlainText(string $connection, IntegrationRequest $request)
+    {
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+            'request' => $request,
+            'integration' => $connection,
+        ]);
+
+        try {
+            $integration = $this->integrationService->integration($connection)->sendPlainText($request->validated());
+        }
+        catch(\Exception $exception) {
+            $this->error(data: $request, exception: $exception);
+        }
+
+        return new IntegrationResource($integration);
+    }
+
     private function error($data, $exception) {
         Log::error(__CLASS__.'.'. __FUNCTION__." => error", [
             'message' => $exception->getMessage(),

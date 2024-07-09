@@ -22,7 +22,11 @@ class IntegrationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'data' => ['required', 'array'],
+            'delay' => 'integer',
+            'message' => 'required|max:255',
+            'instance' => 'required|max:255',
+            'number' => ['required', 'string'],
+
         ];
     }
 }
