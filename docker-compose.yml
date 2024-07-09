@@ -93,10 +93,29 @@ services:
                 - 'http://localhost:9000/minio/health/live'
             retries: 3
             timeout: 5s
+    evolution_api:
+        image: atendai/evolution-api:latest
+        restart: always
+        ports:
+            - 1997:8080
+        volumes:
+            - evolution-instances:/evolution/instances
+            - evolution-store:/evolution/store
+        networks:
+            - sail
+        env_file:
+            - ./.docker/.env
+        command: ['node', './dist/src/main.js']
+        expose:
+            - 1997
 networks:
     sail:
         driver: bridge
 volumes:
+    evolution-instances:
+        driver: local
+    evolution-store:
+        driver: local
     sail-mysql:
         driver: local
     sail-redis:

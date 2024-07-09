@@ -53,6 +53,7 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+    'evolution_url' => env('EVOLUTION_API_URL', 'http://localhost'),
 
     /*
     |--------------------------------------------------------------------------
