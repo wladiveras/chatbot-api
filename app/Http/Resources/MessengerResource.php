@@ -17,7 +17,7 @@ class MessengerResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id ?? null,
+            'data' => $this->data ?? [],
         ];
     }
 }

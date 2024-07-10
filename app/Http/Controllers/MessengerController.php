@@ -7,6 +7,7 @@ use App\Services\Messenger\MessengerService;
 use App\Http\Requests\MessengerRequest;
 use App\Http\Resources\MessengerResource;
 use App\Http\Resources\MessengerCollection;
+use App\Http\Requests\CreateConnectionRequest;
 
 class MessengerController extends Controller
 {
@@ -17,7 +18,7 @@ class MessengerController extends Controller
         $this->messengerService = $messengerService;
     }
 
-    public function createConnection(string $provinder, MessengerRequest $request)
+    public function createConnection(string $provinder, CreateConnectionRequest $request)
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
             'request' => $request,
@@ -25,13 +26,13 @@ class MessengerController extends Controller
         ]);
 
         try {
-            $integration = $this->messengerService->integration($provinder)->createConnection($request->validated());
+            $messengerService = $this->messengerService->integration($provinder)->createConnection($request->validated());
         }
         catch(\Exception $exception) {
             $this->error(data: $request, exception: $exception);
         }
 
-        return new MessengerResource($integration);
+        return new MessengerResource($messengerService);
     }
 
     public function connect(string $provinder, int|string $connection)
@@ -42,8 +43,8 @@ class MessengerController extends Controller
         ]);
 
         try {
-            $messenger = $this->messengerService->integration($provinder)->connect($connection);
-            return new MessengerResource($messenger);
+            $messengerService = $this->messengerService->integration($provinder)->connect($connection);
+            return new MessengerResource($messengerService);
         }
 
         catch(\Exception $exception) {
@@ -60,13 +61,13 @@ class MessengerController extends Controller
 
         // Aqui vai definir qual vai ser o tipo de mensagem a ser enviada e chamar sua função expecifica.
         try {
-            $messenger = $this->messengerService->integration($provider)->send($request->validated());
+            $messengerService = $this->messengerService->integration($provider)->send($request->validated());
         }
         catch(\Exception $exception) {
             $this->error(data: $request, exception: $exception);
         }
 
-        return new MessengerResource($messenger);
+        return new MessengerResource($messengerService);
     }
 
     private function error($data, $exception) {

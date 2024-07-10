@@ -4,7 +4,8 @@ namespace App\Services\Messenger\Provinder;
 use App\Services\Messenger\MessengerServiceInterface;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Enums\MessagesType;
 
 class WhatsappProvinder implements MessengerServiceInterface
@@ -27,14 +28,12 @@ class WhatsappProvinder implements MessengerServiceInterface
     public function createConnection(array|object $data): array|object
     {
 
-        $instanceToken = Hash::make(rand(1, 9999) + time());
-
         $payload = [
-            "instanceName" => $data['connection'],
-            "token" => $instanceToken,
+            "instanceName" => Str::uuid()->toString(),
+            "token" => Str::uuid()->toString(),
             "qrcode" => true,
-            "number" => $data['number'],
-            "webhook" => 'https://webhook.site/1b1b1b1b-1b1b-1b1b-1b1b-1b1b1b1b1b1b',
+            "number" => $data['connection_key'],
+            "webhook" => 'https://webhook.site/632b3dac-5c51-49b8-a311-f147d5977516',
             "webhook_by_events" => true,
             "events" => [
                 "QRCODE_UPDATED",
@@ -43,24 +42,37 @@ class WhatsappProvinder implements MessengerServiceInterface
             ]
         ];
 
-        $response = $this->request->post("{$this->url}/message/sendText/{$data['connection']}", $payload);
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+            'data' => $data,
+            'payload' => $payload,
+        ]);
 
-        return (object) [
-            'response' => $response->json(),
-        ];
+        try {
+            $response = $this->request->post("{$this->url}/instance/create", $payload);
+
+            return (object) [
+                'data' => $response->json(),
+            ];
+
+        } catch (\Exception $exception) {
+            throw new \Exception($exception->getMessage());
+        }
     }
 
     public function send(array|object $data): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+            'data' => $data,
+        ]);
 
         $payload = $this->parse($data);
 
-        if($data['type'] === MessagesType::TEXT){
+        if($data['type'] === 'text'){
             $response = $this->request->post("{$this->url}/message/sendText/{$data['connection']}", $payload);
         }
 
         return (object) [
-            'id' => $response->json(),
+            'data' => $response->json() ?? [],
         ];
     }
 
@@ -106,6 +118,10 @@ class WhatsappProvinder implements MessengerServiceInterface
     // Function to handle the webhook
     public function callback(array|object $data): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+            'data' => $data,
+        ]);
+
         return [
             'data' => $data,
         ];
