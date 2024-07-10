@@ -5,6 +5,7 @@ use App\Services\Messenger\MessengerServiceInterface;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
+use App\Enums\MessagesType;
 
 class WhatsappProvinder implements MessengerServiceInterface
 {
@@ -54,7 +55,9 @@ class WhatsappProvinder implements MessengerServiceInterface
 
         $payload = $this->parse($data);
 
-        $response = $this->request->post("{$this->url}/message/sendText/{$data['connection']}", $payload);
+        if($data['type'] === MessagesType::TEXT){
+            $response = $this->request->post("{$this->url}/message/sendText/{$data['connection']}", $payload);
+        }
 
         return (object) [
             'id' => $response->json(),
