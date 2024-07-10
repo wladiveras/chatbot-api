@@ -32,7 +32,10 @@ Route::prefix('/integration/{integration}')
 //->middleware(['first', 'second'])
 ->group(function () {
     Route::post('/create-connection', [MessengerController::class, 'createConnection']);
-    Route::get('/connection/{connection}', [MessengerController::class, 'connect']);
+    Route::delete('/{connection}/status', [MessengerController::class, 'status']);
+    Route::get('/{connection}/connect', [MessengerController::class, 'connect']);
+    Route::delete('/{connection}/delete', [MessengerController::class, 'delete']);
+    Route::delete('/{connection}/disconnect', [MessengerController::class, 'disconnect']);
     Route::post('/send-message', [MessengerController::class, 'sendMessage']);
     Route::post('/callback', [MessengerController::class, 'callback']);
 });

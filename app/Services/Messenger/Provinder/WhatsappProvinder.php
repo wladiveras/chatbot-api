@@ -39,7 +39,6 @@ class WhatsappProvinder implements MessengerServiceInterface
             "events" => [
                 "QRCODE_UPDATED",
                 "MESSAGES_UPSERT",
-                "CONNECTION_UPDATE",
             ]
         ];
 
@@ -92,14 +91,12 @@ class WhatsappProvinder implements MessengerServiceInterface
             'options' => [
                 "delay" => $data['delay'] ?? 1200,
                 "presence" => $data['type'] === 'audio' ? "recording" : "composing",
-
             ]
         ];
 
         $mediaMessage = [];
         $textMessage = [];
         $audioMessage = [];
-        $stickerMessage = [];
 
         if ($data['type'] === 'video' || $data['type'] === 'image' || $data['type'] === 'media_audio') {
             $mediaMessage = [
@@ -127,7 +124,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
         }
 
-        $message = array_merge($options, $mediaMessage, $textMessage, $audioMessage, $stickerMessage);
+        $message = array_merge($options, $mediaMessage, $textMessage, $audioMessage);
 
         Log::debug(__CLASS__.'.'.__FUNCTION__." => parse data", [
             'type' => $data['type'],
@@ -139,7 +136,6 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function connect(int|string $connection): array|object
     {
-
         $response = $this->request->get("{$this->url}/instance/connect/{$connection}");
 
         return (object) [
@@ -155,20 +151,27 @@ class WhatsappProvinder implements MessengerServiceInterface
     }
     public function status(string|int $connection): array|object
     {
+        $response = $this->request->delete("{$this->url}/instance/connectionState/{$connection}");
+
         return (object) [
-            'connection' => $connection,
+            'data' => $response->json() ?? [],
         ];
     }
     public function disconnect(string|int $connection): array|object
     {
+        $response = $this->request->delete("{$this->url}/instance/logout/{$connection}");
+
         return (object) [
-            'connection' => $connection,
+            'data' => $response->json() ?? [],
         ];
     }
+
     public function delete(string|int $connection): array|object
     {
+        $response = $this->request->delete("{$this->url}/instance/delete/{$connection}");
+
         return (object) [
-            'connection' => $connection,
+            'data' => $response->json() ?? [],
         ];
     }
 

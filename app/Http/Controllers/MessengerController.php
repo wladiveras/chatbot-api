@@ -52,6 +52,55 @@ class MessengerController extends Controller
             $this->error(data: [$connection, $provinder], exception: $exception);
         }
     }
+    public function status(string $provinder, int|string $connection)
+    {
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+            'connection' => $connection,
+            'provinder' => $provinder,
+        ]);
+
+        try {
+            $messengerService = $this->messengerService->integration($provinder)->status($connection);
+            return new MessengerResource($messengerService);
+        }
+        catch(\Exception $exception) {
+            $this->error(data: [$connection, $provinder], exception: $exception);
+        }
+    }
+
+    public function disconnect(string $provinder, int|string $connection)
+    {
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+            'connection' => $connection,
+            'provinder' => $provinder,
+        ]);
+
+        try {
+            $messengerService = $this->messengerService->integration($provinder)->disconnect($connection);
+            return new MessengerResource($messengerService);
+        }
+
+        catch(\Exception $exception) {
+            $this->error(data: [$connection, $provinder], exception: $exception);
+        }
+    }
+
+    public function delete(string $provinder, int|string $connection)
+    {
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+            'connection' => $connection,
+            'provinder' => $provinder,
+        ]);
+
+        try {
+            $messengerService = $this->messengerService->integration($provinder)->delete($connection);
+            return new MessengerResource($messengerService);
+        }
+
+        catch(\Exception $exception) {
+            $this->error(data: [$connection, $provinder], exception: $exception);
+        }
+    }
 
     public function sendMessage(string $provider, MessengerRequest $request)
     {
