@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Support\Facades\Log;
+use App\Services\Messenger\MessengerService;
+use App\Http\Requests\MessengerRequest;
+use App\Http\Resources\MessengerResource;
+use App\Http\Resources\MessengerCollection;
+
+class MessengerController extends Controller
+{
+    private MessengerService $messengerService;
+
+    public function __construct(MessengerService $messengerService)
+    {
+        $this->messengerService = $messengerService;
+    }
+
+    public function createConnection(string $provinder, MessengerRequest $request)
+    {
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+            'request' => $request,
+            'provinder' => $provinder,
+        ]);
+
+        try {
+            $integration = $this->messengerService->integration($provinder)->createConnection($request->validated());
+        }
+        catch(\Exception $exception) {
+            $this->error(data: $request, exception: $exception);
+        }
+
+        return new MessengerResource($integration);
+    }
+
+    public function connect(string $provinder, int|string $instance)
+    {
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+            'instance' => $instance,
+            'provinder' => $provinder,
+        ]);
+
+        try {
+            $messenger = $this->messengerService->integration($provinder)->connect($instance);
+            return new MessengerResource($messenger);
+        }
+
+        catch(\Exception $exception) {
+            $this->error(data: [$instance, $provinder], exception: $exception);
+        }
+    }
+
+    public function sendMessage(string $provider, MessengerRequest $request)
+    {
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+            'request' => $request,
+            'provider' => $provider,
+        ]);
+
+        // Aqui vai definir qual vai ser o tipo de mensagem a ser enviada e chamar sua função expecifica.
+        try {
+            $messenger = $this->messengerService->integration($provider)->send($request->validated());
+        }
+        catch(\Exception $exception) {
+            $this->error(data: $request, exception: $exception);
+        }
+
+        return new MessengerResource($messenger);
+    }
+
+    private function error($data, $exception) {
+        Log::error(__CLASS__.'.'. __FUNCTION__." => error", [
+            'message' => $exception->getMessage(),
+            'data' => $data,
+            'exception' => $exception,
+        ]);
+
+        abort(500, $exception->getMessage());
+    }
+}

@@ -3,8 +3,11 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use App\Enums\MessagesType;
 
-class IntegrationRequest extends FormRequest
+
+class MessengerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +25,13 @@ class IntegrationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'delay' => 'integer',
-            'message' => 'required|max:255',
-            'instance' => 'required|max:255',
+            'type' => [Rule::enum(MessagesType::class)],
+            'message' => ['required', 'string'],
+            'connection' => ['required', 'string'],
             'number' => ['required', 'string'],
-
+            'delay' => ['integer'],
+            'caption' => ['string'],
+            'file_url' => ['string'],
         ];
     }
 }

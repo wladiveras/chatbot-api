@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\IntegrationController;
+use App\Http\Controllers\MessengerController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -31,7 +31,7 @@ Route::prefix('/payment/{gateway}')
 Route::prefix('/integration/{integration}')
 //->middleware(['first', 'second'])
 ->group(function () {
-    Route::post('/create-connection', [IntegrationController::class, 'createConnection']);
-    Route::post('/check-connection/{connection}', [IntegrationController::class, 'CheckConnection']);
-    Route::post('/send-message', [IntegrationController::class, 'sendMessage']);
+    Route::post('/create-connection', [MessengerController::class, 'createConnection']);
+    Route::post('/check-connection/{connection}', [MessengerController::class, 'CheckConnection']);
+    Route::post('/send-message', [MessengerController::class, 'sendMessage']);
 });
