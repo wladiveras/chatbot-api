@@ -34,20 +34,20 @@ class MessengerController extends Controller
         return new MessengerResource($integration);
     }
 
-    public function connect(string $provinder, int|string $instance)
+    public function connect(string $provinder, int|string $connection)
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
-            'instance' => $instance,
+            'connection' => $connection,
             'provinder' => $provinder,
         ]);
 
         try {
-            $messenger = $this->messengerService->integration($provinder)->connect($instance);
+            $messenger = $this->messengerService->integration($provinder)->connect($connection);
             return new MessengerResource($messenger);
         }
 
         catch(\Exception $exception) {
-            $this->error(data: [$instance, $provinder], exception: $exception);
+            $this->error(data: [$connection, $provinder], exception: $exception);
         }
     }
 

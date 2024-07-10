@@ -5,7 +5,6 @@ use App\Services\Messenger\MessengerServiceInterface;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
-use App\Enums\MessagesType;
 
 class WhatsappProvinder implements MessengerServiceInterface
 {
@@ -30,7 +29,7 @@ class WhatsappProvinder implements MessengerServiceInterface
         $instanceToken = Hash::make(rand(1, 9999) + time());
 
         $payload = [
-            "instanceName" => $data['instance'],
+            "instanceName" => $data['connection'],
             "token" => $instanceToken,
             "qrcode" => true,
             "number" => $data['number'],
@@ -43,7 +42,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             ]
         ];
 
-        $response = $this->request->post("{$this->url}/message/sendText/{$data['instance']}", $payload);
+        $response = $this->request->post("{$this->url}/message/sendText/{$data['connection']}", $payload);
 
         return (object) [
             'response' => $response->json(),
@@ -55,7 +54,7 @@ class WhatsappProvinder implements MessengerServiceInterface
 
         $payload = $this->parse($data);
 
-        $response = $this->request->post("{$this->url}/message/sendText/{$data['instance']}", $payload);
+        $response = $this->request->post("{$this->url}/message/sendText/{$data['connection']}", $payload);
 
         return (object) [
             'id' => $response->json(),
@@ -70,10 +69,10 @@ class WhatsappProvinder implements MessengerServiceInterface
         };
     }
 
-    public function connect(int|string $instance): array|object
+    public function connect(int|string $connection): array|object
     {
         return (object) [
-            'id' => $instance,
+            'id' => $connection,
         ];
     }
     public function fetch(string|int $id): array|object
@@ -115,7 +114,7 @@ class WhatsappProvinder implements MessengerServiceInterface
 
         $payload = $this->parse($data);
 
-        $response = $this->request->post("{$this->url}/message/sendText/{$data['instance']}", $payload);
+        $response = $this->request->post("{$this->url}/message/sendText/{$data['connection']}", $payload);
 
         return (object) [
             'id' => $response->json(),
@@ -123,7 +122,7 @@ class WhatsappProvinder implements MessengerServiceInterface
     }
     private function parseTextMessage(array|object $data): array|object
     {
-        [
+        $data = [
             "number" => $data['number'],
             "options" => [
                 "delay" => $data['delay'] ?? 1200,

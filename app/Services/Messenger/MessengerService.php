@@ -1,7 +1,7 @@
 <?php
 namespace App\Services\Messenger;
 
-use App\Services\Messenger\Messenger\WhatsappProvinder;
+use App\Services\Messenger\Provinder\WhatsappProvinder;
 
 
 class MessengerService
