@@ -34,7 +34,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             "qrcode" => true,
             "number" => $data['connection_key'],
             "webhook" => 'https://webhook.site/632b3dac-5c51-49b8-a311-f147d5977516',
-            "webhook_by_events" => true,
+            "webhook_by_events" => false,
             "events" => [
                 "QRCODE_UPDATED",
                 "MESSAGES_UPSERT",
