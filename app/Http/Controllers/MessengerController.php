@@ -8,6 +8,7 @@ use App\Http\Requests\MessengerRequest;
 use App\Http\Resources\MessengerResource;
 use App\Http\Resources\MessengerCollection;
 use App\Http\Requests\CreateConnectionRequest;
+use Illuminate\Http\Request;
 
 class MessengerController extends Controller
 {
@@ -68,6 +69,23 @@ class MessengerController extends Controller
         }
 
         return new MessengerResource($messengerService);
+    }
+
+    public function callback(string $provider, Request $request)
+    {
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+            'request' => $request,
+            'provider' => $provider,
+        ]);
+
+        try {
+            $messengerService = $this->messengerService->integration($provider)->callback($request->all());
+        }
+        catch(\Exception $exception) {
+            $this->error(data: $request, exception: $exception);
+        }
+
+        return (object) $messengerService;
     }
 
     private function error($data, $exception) {

@@ -28,12 +28,13 @@ class WhatsappProvinder implements MessengerServiceInterface
     public function createConnection(array|object $data): array|object
     {
 
+
         $payload = [
             "instanceName" => Str::uuid()->toString(),
             "token" => Str::uuid()->toString(),
             "qrcode" => true,
             "number" => $data['connection_key'],
-            "webhook" => 'https://webhook.site/632b3dac-5c51-49b8-a311-f147d5977516',
+            "webhook" => "http://laravel.test/api/integration/whatsapp/callback",
             "webhook_by_events" => false,
             "events" => [
                 "QRCODE_UPDATED",
@@ -87,42 +88,43 @@ class WhatsappProvinder implements MessengerServiceInterface
     public function connect(int|string $connection): array|object
     {
         return (object) [
-            'id' => $connection,
+            'connection' => $connection,
         ];
     }
-    public function fetch(string|int $id): array|object
+    public function fetch(string|int $connection): array|object
     {
         return (object) [
-            'id' => $id,
+            'connection' => $connection,
         ];
     }
-    public function status(string|int $id): array|object
+    public function status(string|int $connection): array|object
     {
         return (object) [
-            'id' => $id,
+            'connection' => $connection,
         ];
     }
-    public function disconnect(string|int $id): array|object
+    public function disconnect(string|int $connection): array|object
     {
         return (object) [
-            'id' => $id,
+            'connection' => $connection,
         ];
     }
-    public function delete(string|int $id): array|object
+    public function delete(string|int $connection): array|object
     {
         return (object) [
-            'id' => $id,
+            'connection' => $connection,
         ];
     }
 
     // Function to handle the webhook
     public function callback(array|object $data): array|object
     {
+
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
             'data' => $data,
         ]);
 
-        return [
+        return (object) [
             'data' => $data,
         ];
     }
@@ -136,7 +138,7 @@ class WhatsappProvinder implements MessengerServiceInterface
         $response = $this->request->post("{$this->url}/message/sendText/{$data['connection']}", $payload);
 
         return (object) [
-            'id' => $response->json(),
+            'data' => $response->json(),
         ];
     }
     private function parseTextMessage(array|object $data): array|object

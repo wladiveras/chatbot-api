@@ -34,4 +34,5 @@ Route::prefix('/integration/{integration}')
     Route::post('/create-connection', [MessengerController::class, 'createConnection']);
     Route::post('/check-connection/{connection}', [MessengerController::class, 'CheckConnection']);
     Route::post('/send-message', [MessengerController::class, 'sendMessage']);
+    Route::post('/callback', [MessengerController::class, 'callback']);
 });
