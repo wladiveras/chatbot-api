@@ -19,7 +19,7 @@ class WhatsappProvinder implements MessengerServiceInterface
     {
         $this->url = Config::get('evolution.url');
         $this->key = Config::get('evolution.key');
-        $this->callback_url = Config::get('evolution.callback');
+        $this->callback_url = Config::get('app.url');
 
         $this->request = Http::withHeaders([
             'apikey' => $this->key,
@@ -127,21 +127,28 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
         }
 
-
-
         $message = array_merge($options, $mediaMessage, $textMessage, $audioMessage, $stickerMessage);
+
+        Log::debug(__CLASS__.'.'.__FUNCTION__." => parse data", [
+            'type' => $data['type'],
+            'message' => $message,
+        ]);
 
         return $message;
     }
 
     public function connect(int|string $connection): array|object
     {
+
+        $response = $this->request->get("{$this->url}/instance/connect/{$connection}");
+
         return (object) [
-            'connection' => $connection,
+            'data' => $response->json() ?? [],
         ];
     }
     public function fetch(string|int $connection): array|object
     {
+        // Esse fetch vai trazer todas as conexoes vinculada ao usuario
         return (object) [
             'connection' => $connection,
         ];

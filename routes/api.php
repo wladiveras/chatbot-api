@@ -32,7 +32,7 @@ Route::prefix('/integration/{integration}')
 //->middleware(['first', 'second'])
 ->group(function () {
     Route::post('/create-connection', [MessengerController::class, 'createConnection']);
-    Route::post('/check-connection/{connection}', [MessengerController::class, 'CheckConnection']);
+    Route::get('/connection/{connection}', [MessengerController::class, 'connect']);
     Route::post('/send-message', [MessengerController::class, 'sendMessage']);
     Route::post('/callback', [MessengerController::class, 'callback']);
 });
