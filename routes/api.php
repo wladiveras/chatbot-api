@@ -31,6 +31,7 @@ Route::prefix('/payment/{gateway}')
 Route::prefix('/integration/{integration}')
 //->middleware(['first', 'second'])
 ->group(function () {
-    Route::post('/create-instance', [IntegrationController::class, 'createInstance']);
-    Route::post('/connect-instance/{instance}', [IntegrationController::class, 'connectInstance']);
+    Route::post('/create-connection', [IntegrationController::class, 'createConnection']);
+    Route::post('/check-connection/{connection}', [IntegrationController::class, 'CheckConnection']);
+    Route::post('/send-message', [IntegrationController::class, 'sendMessage']);
 });

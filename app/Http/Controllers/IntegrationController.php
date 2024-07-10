@@ -17,7 +17,7 @@ class IntegrationController extends Controller
         $this->integrationService = $integrationService;
     }
 
-    public function createInstance(string $connection, IntegrationRequest $request)
+    public function createConnection(string $connection, IntegrationRequest $request)
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
             'request' => $request,
@@ -25,7 +25,7 @@ class IntegrationController extends Controller
         ]);
 
         try {
-            $integration = $this->integrationService->integration($connection)->createInstance($request->validated());
+            $integration = $this->integrationService->integration($connection)->createConnection($request->validated());
         }
         catch(\Exception $exception) {
             $this->error(data: $request, exception: $exception);
@@ -34,32 +34,33 @@ class IntegrationController extends Controller
         return new IntegrationResource($integration);
     }
 
-    public function connectInstance(string $connection, int|string $id)
+    public function connectInstance(string $connection, int|string $instance)
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
-            'id' => $id,
+            'instance' => $instance,
             'integration' => $connection,
         ]);
 
         try {
-            $integration = $this->integrationService->integration($connection)->connectInstance($id);
+            $integration = $this->integrationService->integration($connection)->connectInstance($instance);
             return new IntegrationResource($integration);
         }
 
         catch(\Exception $exception) {
-            $this->error(data: [$id, $connection], exception: $exception);
+            $this->error(data: [$instance, $connection], exception: $exception);
         }
     }
 
-    public function sendPlainText(string $connection, IntegrationRequest $request)
+    public function sendMessage(string $connection, IntegrationRequest $request)
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
             'request' => $request,
             'integration' => $connection,
         ]);
 
+        // Aqui vai definir qual vai ser o tipo de mensagem a ser enviada e chamar sua função expecifica.
         try {
-            $integration = $this->integrationService->integration($connection)->sendPlainText($request->validated());
+            $integration = $this->integrationService->integration($connection)->sendTextMessage($request->validated());
         }
         catch(\Exception $exception) {
             $this->error(data: $request, exception: $exception);
