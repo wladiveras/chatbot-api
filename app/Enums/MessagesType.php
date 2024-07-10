@@ -4,7 +4,13 @@ enum MessagesType: string
 {
     case TEXT = 'text';
 
-    case MEDIA = 'media';
+    case IMAGE = 'image';
+
+    case STICKER = 'sticker';
+
+    case VIDEO = 'video';
+
+    case MEDIA_AUDIO = 'media_audio';
 
     case AUDIO = 'audio';
 

@@ -13,11 +13,13 @@ class WhatsappProvinder implements MessengerServiceInterface
     private mixed $url;
     private mixed $key;
     private mixed $request;
+    private mixed $callback_url;
 
     public function __construct()
     {
         $this->url = Config::get('evolution.url');
         $this->key = Config::get('evolution.key');
+        $this->callback_url = Config::get('evolution.callback');
 
         $this->request = Http::withHeaders([
             'apikey' => $this->key,
@@ -27,14 +29,12 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function createConnection(array|object $data): array|object
     {
-
-
         $payload = [
             "instanceName" => Str::uuid()->toString(),
             "token" => Str::uuid()->toString(),
             "qrcode" => true,
             "number" => $data['connection_key'],
-            "webhook" => "http://laravel.test/api/integration/whatsapp/callback",
+            "webhook" => "{$this->callback_url}/api/integration/whatsapp/callback",
             "webhook_by_events" => false,
             "events" => [
                 "QRCODE_UPDATED",
@@ -68,9 +68,17 @@ class WhatsappProvinder implements MessengerServiceInterface
 
         $payload = $this->parse($data);
 
-        if($data['type'] === 'text'){
-            $response = $this->request->post("{$this->url}/message/sendText/{$data['connection']}", $payload);
-        }
+        $endpoint = match ($data['type']) {
+            'text' => 'sendText',
+            'audio' => 'sendWhatsAppAudio',
+            'image' => 'sendMedia',
+            'video' => 'sendMedia',
+            'media_audio' => 'sendMedia',
+            'sticker' => 'sendSticker',
+            default => throw new \Exception("Type not found"),
+        };
+
+        $response = $this->request->post("{$this->url}/message/{$endpoint}/{$data['connection']}", $payload);
 
         return (object) [
             'data' => $response->json() ?? [],
@@ -79,10 +87,51 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function parse($data): array|object
     {
-        return match ($data['type']) {
-            'text' => $this->parseTextMessage($data),
-            default => throw new \InvalidArgumentException('Type of message not found.'),
-        };
+        $options = [
+            "number" => $data['number'],
+            'options' => [
+                "delay" => $data['delay'] ?? 1200,
+                "presence" => $data['type'] === 'audio' ? "recording" : "composing",
+
+            ]
+        ];
+
+        $mediaMessage = [];
+        $textMessage = [];
+        $audioMessage = [];
+        $stickerMessage = [];
+
+        if ($data['type'] === 'video' || $data['type'] === 'image' || $data['type'] === 'media_audio') {
+            $mediaMessage = [
+                "mediaMessage" => [
+                    "mediatype" => $data['type'] === 'media_audio' ? 'audio' : $data['type'],
+                    "caption" => $data['caption'],
+                    "media" => $data['file_url']
+                ]
+            ];
+        }
+
+        if ($data['type'] === 'text') {
+            $textMessage = [
+                "textMessage" => [
+                    "text" => $data['message'],
+                ]
+            ];
+        }
+
+        if ($data['type'] === 'audio') {
+            $audioMessage = [
+                "audioMessage" => [
+                    "audio" => $data['file_url'],
+                ]
+            ];
+        }
+
+
+
+        $message = array_merge($options, $mediaMessage, $textMessage, $audioMessage, $stickerMessage);
+
+        return $message;
     }
 
     public function connect(int|string $connection): array|object
@@ -127,35 +176,6 @@ class WhatsappProvinder implements MessengerServiceInterface
         return (object) [
             'data' => $data,
         ];
-    }
-
-    //  All code above can be called private to avoid the use of the function in the controller and maintain the integrity of the code.
-    private function sendTextMessage(array|object $data): array|object
-    {
-
-        $payload = $this->parse($data);
-
-        $response = $this->request->post("{$this->url}/message/sendText/{$data['connection']}", $payload);
-
-        return (object) [
-            'data' => $response->json(),
-        ];
-    }
-    private function parseTextMessage(array|object $data): array|object
-    {
-        $data = [
-            "number" => $data['number'],
-            "options" => [
-                "delay" => $data['delay'] ?? 1200,
-                "presence" => "composing",
-                "linkPreview" => false
-            ],
-            "textMessage" => [
-                "text" => $data['message']
-            ]
-        ];
-
-        return $data;
     }
 
 

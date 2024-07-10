@@ -26,7 +26,7 @@ class MessengerRequest extends FormRequest
     {
         return [
             'type' => [Rule::enum(MessagesType::class)],
-            'message' => ['required', 'string'],
+            'message' => ['string'],
             'connection' => ['required', 'string'],
             'number' => ['required', 'string'],
             'delay' => ['integer'],
