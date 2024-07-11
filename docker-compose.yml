@@ -17,6 +17,7 @@ services:
             XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
+            EVOLUTION_API_URL: ${EVOLUTION_API_URL:-http://localhost:8080}
         volumes:
             - '.:/var/www/html'
         networks:
@@ -26,6 +27,7 @@ services:
             - redis
             - mailpit
             - minio
+            - evolution_api
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:
@@ -93,10 +95,27 @@ services:
                 - 'http://localhost:9000/minio/health/live'
             retries: 3
             timeout: 5s
+    evolution_api:
+        image: atendai/evolution-api:latest
+        restart: always
+        ports:
+            - 8080:8080
+        volumes:
+            - evolution-instances:/evolution/instances
+            - evolution-store:/evolution/store
+        networks:
+            - sail
+        env_file:
+            - ./.docker/.env
+        command: ['node', './dist/src/main.js']
 networks:
     sail:
         driver: bridge
 volumes:
+    evolution-instances:
+        driver: local
+    evolution-store:
+        driver: local
     sail-mysql:
         driver: local
     sail-redis:
