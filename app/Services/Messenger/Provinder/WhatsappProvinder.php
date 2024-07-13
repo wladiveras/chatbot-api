@@ -178,7 +178,6 @@ class WhatsappProvinder implements MessengerServiceInterface
     // Function to handle the webhook
     public function callback(array|object $data): array|object
     {
-
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
             'data' => $data,
         ]);
