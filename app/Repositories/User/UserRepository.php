@@ -2,10 +2,10 @@
 
 namespace App\Repositories\User;
 
+use App\Models\User;
+use App\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Collection;
-use App\Repositories\BaseRepository;
-use App\Models\User;
 use stdClass;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
@@ -19,6 +19,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         return $this->model->all();
     }
+
     public function paginate(int $limitPerPage): CursorPaginator
     {
         return $this->model->cursorPaginate($limitPerPage);

@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use App\Services\User\UserServiceInterface;
-use App\Services\User\UserService;
-use App\Services\Payment\PaymentServiceInterface;
 use App\Services\Payment\PaymentService;
+use App\Services\Payment\PaymentServiceInterface;
+use App\Services\User\UserService;
+use App\Services\User\UserServiceInterface;
+use Illuminate\Support\ServiceProvider;
 
 class ServicesProvider extends ServiceProvider
 {

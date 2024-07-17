@@ -26,5 +26,4 @@ class Connection extends Model
     {
         return $this->hasOne(ConnectionSetting::class);
     }
-
 }

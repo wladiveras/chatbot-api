@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\UserStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
-use App\Enums\UserStatus;
 
 class UserRequest extends FormRequest
 {

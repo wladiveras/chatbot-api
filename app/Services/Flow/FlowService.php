@@ -3,7 +3,6 @@
 namespace App\Services\Flow;
 
 use App\Repositories\Flow\FlowRepositoryInterface;
-use App\Services\Flow\FlowServiceInterface;
 
 class FlowService implements FlowServiceInterface
 {
@@ -16,7 +15,7 @@ class FlowService implements FlowServiceInterface
 
     public function validate(array $data): void
     {
-        if($data) {
+        if ($data) {
 
             $data = [
                 'user_id' => $data['name'],

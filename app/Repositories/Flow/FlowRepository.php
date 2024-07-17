@@ -2,10 +2,10 @@
 
 namespace App\Repositories\Flow;
 
+use App\Models\Flow;
+use App\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Collection;
-use App\Repositories\BaseRepository;
-use App\Models\Flow;
 use stdClass;
 
 class FlowRepository extends BaseRepository implements FlowRepositoryInterface
@@ -19,6 +19,7 @@ class FlowRepository extends BaseRepository implements FlowRepositoryInterface
     {
         return $this->model->all();
     }
+
     public function paginate(int $limitPerPage): CursorPaginator
     {
         return $this->model->cursorPaginate($limitPerPage);

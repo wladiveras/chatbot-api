@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services\Messenger\Provinder;
 
 use App\Services\Messenger\MessengerServiceInterface;
@@ -6,13 +7,15 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use App\Enums\MessagesType;
 
 class WhatsappProvinder implements MessengerServiceInterface
 {
     private mixed $url;
+
     private mixed $key;
+
     private mixed $request;
+
     private mixed $callback_url;
 
     public function __construct()
@@ -24,25 +27,25 @@ class WhatsappProvinder implements MessengerServiceInterface
         $this->request = Http::withHeaders([
             'apikey' => $this->key,
         ])
-        ->acceptJson();
+            ->acceptJson();
     }
 
     public function createConnection(array|object $data): array|object
     {
         $payload = [
-            "instanceName" => Str::uuid()->toString(),
-            "token" => Str::uuid()->toString(),
-            "qrcode" => true,
-            "number" => $data['connection_key'],
-            "webhook" => "{$this->callback_url}/api/integration/whatsapp/callback",
-            "webhook_by_events" => false,
-            "events" => [
-                "QRCODE_UPDATED",
-                "MESSAGES_UPSERT",
-            ]
+            'instanceName' => Str::uuid()->toString(),
+            'token' => Str::uuid()->toString(),
+            'qrcode' => true,
+            'number' => $data['connection_key'],
+            'webhook' => "{$this->callback_url}/api/integration/whatsapp/callback",
+            'webhook_by_events' => false,
+            'events' => [
+                'QRCODE_UPDATED',
+                'MESSAGES_UPSERT',
+            ],
         ];
 
-        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
             'data' => $data,
             'payload' => $payload,
         ]);
@@ -61,7 +64,7 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function send(array|object $data): array|object
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
             'data' => $data,
         ]);
 
@@ -73,7 +76,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             'image' => 'sendMedia',
             'video' => 'sendMedia',
             'media_audio' => 'sendMedia',
-            default => throw new \Exception("Type not found"),
+            default => throw new \Exception('Type not found'),
         };
 
         $response = $this->request->post("{$this->url}/message/{$endpoint}/{$data['connection']}", $payload);
@@ -86,11 +89,11 @@ class WhatsappProvinder implements MessengerServiceInterface
     public function parse($data): array|object
     {
         $options = [
-            "number" => $data['number'],
+            'number' => $data['number'],
             'options' => [
-                "delay" => $data['delay'] ?? 1200,
-                "presence" => $data['type'] === 'audio' ? "recording" : "composing",
-            ]
+                'delay' => $data['delay'] ?? 1200,
+                'presence' => $data['type'] === 'audio' ? 'recording' : 'composing',
+            ],
         ];
 
         $mediaMessage = [];
@@ -99,33 +102,33 @@ class WhatsappProvinder implements MessengerServiceInterface
 
         if ($data['type'] === 'video' || $data['type'] === 'image' || $data['type'] === 'media_audio') {
             $mediaMessage = [
-                "mediaMessage" => [
-                    "mediatype" => $data['type'] === 'media_audio' ? 'audio' : $data['type'],
-                    "caption" => $data['caption'],
-                    "media" => $data['file_url']
-                ]
+                'mediaMessage' => [
+                    'mediatype' => $data['type'] === 'media_audio' ? 'audio' : $data['type'],
+                    'caption' => $data['caption'],
+                    'media' => $data['file_url'],
+                ],
             ];
         }
 
         if ($data['type'] === 'text') {
             $textMessage = [
-                "textMessage" => [
-                    "text" => $data['message'],
-                ]
+                'textMessage' => [
+                    'text' => $data['message'],
+                ],
             ];
         }
 
         if ($data['type'] === 'audio') {
             $audioMessage = [
-                "audioMessage" => [
-                    "audio" => $data['file_url'],
-                ]
+                'audioMessage' => [
+                    'audio' => $data['file_url'],
+                ],
             ];
         }
 
         $message = array_merge($options, $mediaMessage, $textMessage, $audioMessage);
 
-        Log::debug(__CLASS__.'.'.__FUNCTION__." => parse data", [
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => parse data', [
             'type' => $data['type'],
             'message' => $message,
         ]);
@@ -141,6 +144,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             'data' => $response->json() ?? [],
         ];
     }
+
     public function fetch(string|int $connection): array|object
     {
         // Esse fetch vai trazer todas as conexoes vinculada ao usuario
@@ -148,6 +152,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             'connection' => $connection,
         ];
     }
+
     public function status(string|int $connection): array|object
     {
         $response = $this->request->delete("{$this->url}/instance/connectionState/{$connection}");
@@ -156,6 +161,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             'data' => $response->json() ?? [],
         ];
     }
+
     public function disconnect(string|int $connection): array|object
     {
         $response = $this->request->delete("{$this->url}/instance/logout/{$connection}");
@@ -177,32 +183,26 @@ class WhatsappProvinder implements MessengerServiceInterface
     // Function to handle the webhook
     public function callback(array|object $data): array|object
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
             'data' => $data,
         ]);
 
-
         if (isset($data['event'])) {
             if ($data['event'] === 'QRCODE_UPDATED') {
-                Log::debug(__CLASS__.'.'.__FUNCTION__." => QRCODE_UPDATED", [
+                Log::debug(__CLASS__.'.'.__FUNCTION__.' => QRCODE_UPDATED', [
                     'data' => $data,
                 ]);
             }
 
             if ($data['event'] === 'MESSAGES_UPSERT') {
-                Log::debug(__CLASS__.'.'.__FUNCTION__." => MESSAGES_UPSERT", [
+                Log::debug(__CLASS__.'.'.__FUNCTION__.' => MESSAGES_UPSERT', [
                     'data' => $data,
                 ]);
             }
         }
 
-
         return (object) [
             'data' => $data,
         ];
     }
-
-
 }
-
-

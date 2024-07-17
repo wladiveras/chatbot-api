@@ -3,7 +3,6 @@
 namespace App\Services\User;
 
 use App\Repositories\User\UserRepositoryInterface;
-use App\Services\User\UserServiceInterface;
 
 class UserService implements UserServiceInterface
 {
@@ -38,5 +37,4 @@ class UserService implements UserServiceInterface
     {
         return $this->userRepository->delete($id);
     }
-
 }

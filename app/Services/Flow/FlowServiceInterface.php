@@ -1,13 +1,10 @@
 <?php
-namespace App\Services\Flow;
 
-use Illuminate\Contracts\Pagination\CursorPaginator;
-use stdClass;
+namespace App\Services\Flow;
 
 interface FlowServiceInterface
 {
-
     public function validate(array $data);
-    public function create();
 
+    public function create();
 }
