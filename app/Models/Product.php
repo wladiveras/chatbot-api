@@ -5,14 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Flow extends Model
+class Product extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'name',
-        'payload',
-        'is_active',
-        'is_public',
+        'type',
+        'amount',
+        'currency_id',
     ];
 }

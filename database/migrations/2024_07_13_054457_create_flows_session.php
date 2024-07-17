@@ -11,10 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::disableForeignKeyConstraints();
+
         Schema::create('flows_sessions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('flow_id')->constrained()->onDelete('cascade');
+            $table->foreignId('connection_id')->constrained()->onDelete('cascade');
+            $table->string('session_key')->nullable();
+            $table->timestamp('session_start')->useCurrent();
+            $table->timestamp('session_end')->nullable();
             $table->timestamps();
         });
+
+        Schema::enableForeignKeyConstraints();
+
     }
 
     /**

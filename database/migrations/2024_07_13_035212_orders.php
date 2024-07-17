@@ -11,22 +11,32 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::disableForeignKeyConstraints();
+
         Schema::create('orders', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->id();
             $table->foreignId('user_id')->nullable()->index();
-            $table->foreignId('lead_id ')->nullable()->index();
+            $table->foreignId('lead_id')->nullable()->index();
+            $table->foreignId('client_id')->nullable()->index();
             $table->foreignId('product_id')->nullable()->index();
             $table->foreignId('payment_id')->nullable()->index();
+            $table->foreignId('currency_id')->nullable()->default(1)->index();
             $table->string('fee')->nullable();
             $table->string('amount')->nullable();
             $table->string('total')->nullable();
+            $table->string('currency')->default('BRL')->nullable();
+            $table->string('payment_method')->nullable();
+            $table->string('payment_status')->nullable();
+            $table->string('payment_gateway')->nullable();
+            $table->string('payment_gateway_id')->nullable();
             $table->integer('last_activity')->index();
             $table->timestamps();
         });
 
         Schema::create('payment_requests', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->id();
             $table->foreignId('user_id')->nullable()->index();
+            $table->foreignId('order_id')->nullable()->index();
             $table->foreignId('product_id')->nullable()->index();
             $table->longText('payload');
             $table->string('ip_address', 45)->nullable();
@@ -34,6 +44,8 @@ return new class extends Migration
             $table->integer('last_activity')->index();
             $table->timestamps();
         });
+
+        Schema::enableForeignKeyConstraints();
     }
 
     /**

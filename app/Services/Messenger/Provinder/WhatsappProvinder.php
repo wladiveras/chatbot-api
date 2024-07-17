@@ -73,7 +73,6 @@ class WhatsappProvinder implements MessengerServiceInterface
             'image' => 'sendMedia',
             'video' => 'sendMedia',
             'media_audio' => 'sendMedia',
-            'sticker' => 'sendSticker',
             default => throw new \Exception("Type not found"),
         };
 
@@ -181,6 +180,22 @@ class WhatsappProvinder implements MessengerServiceInterface
         Log::debug(__CLASS__.'.'.__FUNCTION__." => start", [
             'data' => $data,
         ]);
+
+
+        if (isset($data['event'])) {
+            if ($data['event'] === 'QRCODE_UPDATED') {
+                Log::debug(__CLASS__.'.'.__FUNCTION__." => QRCODE_UPDATED", [
+                    'data' => $data,
+                ]);
+            }
+
+            if ($data['event'] === 'MESSAGES_UPSERT') {
+                Log::debug(__CLASS__.'.'.__FUNCTION__." => MESSAGES_UPSERT", [
+                    'data' => $data,
+                ]);
+            }
+        }
+
 
         return (object) [
             'data' => $data,

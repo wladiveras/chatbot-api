@@ -11,13 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('flows', function (Blueprint $table) {
+        Schema::create('leads', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->index();
             $table->string('name');
-            $table->json('payload');
-            $table->boolean('is_active')->default(true);
-            $table->boolean('is_public')->default(false);
+            $table->string('phone');
+            $table->string('email');
+            $table->string('address');
+            $table->string('complement');
+            $table->string('city');
+            $table->string('state');
+            $table->string('country')->default('BR');
+            $table->string('zipcode');
             $table->timestamps();
         });
     }
@@ -27,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('flows');
+        Schema::dropIfExists('leads');
     }
 };

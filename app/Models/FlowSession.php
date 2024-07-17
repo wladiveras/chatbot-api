@@ -5,14 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Flow extends Model
+class FlowSession extends Model
 {
     use HasFactory;
     protected $fillable = [
         'user_id',
-        'name',
-        'payload',
-        'is_active',
-        'is_public',
+        'flow_id',
+        'connection_id',
+        'session_key',
+        'session_start',
+        'session_end',
     ];
 }

@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('flows', function (Blueprint $table) {
+        Schema::create('currency', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('name');
-            $table->json('payload');
-            $table->boolean('is_active')->default(true);
-            $table->boolean('is_public')->default(false);
+            $table->float('rate')->default(1);
+            $table->string('code')->default('BRL');
+            $table->string('country')->default('BR');
+            $table->string('token')->default('default');
             $table->timestamps();
         });
+
     }
 
     /**
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('flows');
+        Schema::dropIfExists('currency');
     }
 };

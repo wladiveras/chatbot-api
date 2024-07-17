@@ -5,14 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Flow extends Model
+class Lead extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id',
         'name',
-        'payload',
-        'is_active',
-        'is_public',
+        'phone',
+        'email',
+        'address',
+        'complement',
+        'city',
+        'state',
+        'country',
+        'zipcode',
     ];
 }

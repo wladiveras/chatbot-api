@@ -14,10 +14,26 @@ class FlowService implements FlowServiceInterface
         $this->flowRepository = $flowRepository;
     }
 
-    public function findAllUsers()
+    public function validate(array $data): void
     {
-        return $this->flowRepository->paginate(10);
+        if($data) {
+
+            $data = [
+                'user_id' => $data['name'],
+                'description' => $data['description'],
+            ];
+
+            $this->flowRepository->create($data);
+
+        }
+
+        throw new \Exception('Data is empty');
     }
 
-
+    public function create(): array
+    {
+        return [
+            'data' => $this->flowRepository->all(),
+        ];
+    }
 }

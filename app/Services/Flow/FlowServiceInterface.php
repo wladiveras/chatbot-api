@@ -7,6 +7,7 @@ use stdClass;
 interface FlowServiceInterface
 {
 
-    public function findAllUsers();
+    public function validate(array $data);
+    public function create();
 
 }

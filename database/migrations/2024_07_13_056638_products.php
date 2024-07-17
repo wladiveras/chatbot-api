@@ -12,21 +12,26 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->id();
             $table->foreignId('user_id')->nullable()->index();
+            $table->foreignId('currency_id')->nullable()->default(1)->index();
             $table->string('name');
             $table->string('type');
             $table->float('amount');
             $table->timestamps();
         });
 
+        Schema::disableForeignKeyConstraints();
+
         Schema::create('users_products', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->id();
             $table->foreignId('user_id')->nullable()->index();
             $table->foreignId('product_id')->nullable()->index();
             $table->foreignId('client_id')->nullable()->index();
             $table->timestamps();
         });
+
+        Schema::enableForeignKeyConstraints();
     }
 
     /**

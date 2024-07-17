@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('flows', function (Blueprint $table) {
+        Schema::create('connections_settings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('name');
-            $table->json('payload');
-            $table->boolean('is_active')->default(true);
-            $table->boolean('is_public')->default(false);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('connection_id')->constrained()->onDelete('cascade');
+            $table->string('name')->nullable();
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('flows');
+        Schema::dropIfExists('connections_settings');
     }
 };
