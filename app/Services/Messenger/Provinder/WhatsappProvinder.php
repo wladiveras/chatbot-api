@@ -88,6 +88,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function parse($data): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'data' => $data,
+        ]);
+
         $options = [
             'number' => $data['number'],
             'options' => [
@@ -138,6 +142,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function connect(int|string $connection): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'connection' => $connection,
+        ]);
+
         $response = $this->request->get("{$this->url}/instance/connect/{$connection}");
 
         return (object) [
@@ -147,6 +155,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function fetch(string|int $connection): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'connection' => $connection,
+        ]);
+
         // Esse fetch vai trazer todas as conexoes vinculada ao usuario
         return (object) [
             'connection' => $connection,
@@ -155,6 +167,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function status(string|int $connection): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'connection' => $connection,
+        ]);
+
         $response = $this->request->delete("{$this->url}/instance/connectionState/{$connection}");
 
         return (object) [
@@ -164,6 +180,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function disconnect(string|int $connection): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'connection' => $connection,
+        ]);
+
         $response = $this->request->delete("{$this->url}/instance/logout/{$connection}");
 
         return (object) [
@@ -173,6 +193,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function delete(string|int $connection): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'connection' => $connection,
+        ]);
+
         $response = $this->request->delete("{$this->url}/instance/delete/{$connection}");
 
         return (object) [
