@@ -9,10 +9,7 @@ use stdClass;
 
 class BaseRepository implements BaseRepositoryInterface
 {
-    public function __construct(protected Model $model)
-    {
-
-    }
+    public function __construct(protected Model $model) {}
 
     public function all(): Collection
     {

@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\MessagesType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Enums\MessagesType;
-
 
 class MessengerRequest extends FormRequest
 {

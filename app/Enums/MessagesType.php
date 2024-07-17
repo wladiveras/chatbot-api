@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Enums;
+
 enum MessagesType: string
 {
     case TEXT = 'text';
