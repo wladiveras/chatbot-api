@@ -9,6 +9,8 @@ class Flow extends Model
 {
     use HasFactory;
 
+    protected $table = 'flows';
+
     protected $fillable = [
         'user_id',
         'name',

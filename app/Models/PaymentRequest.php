@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Payment extends Model
+class PaymentRequest extends Model
 {
     use HasFactory;
+
+    protected $table = 'payments_requests';
 
     protected $fillable = [
         'user_id',

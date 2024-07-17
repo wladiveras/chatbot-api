@@ -9,6 +9,8 @@ class Connection extends Model
 {
     use HasFactory;
 
+    protected $table = 'connections';
+
     protected $fillable = [
         'user_id',
         'name',
@@ -26,4 +28,6 @@ class Connection extends Model
     {
         return $this->hasOne(ConnectionSetting::class);
     }
+
+
 }
