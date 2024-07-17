@@ -15,4 +15,9 @@ class Flow extends Model
         'is_active',
         'is_public',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -48,4 +48,24 @@ class User extends Authenticatable
             'status' => UserStatus::class,
         ];
     }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function flows()
+    {
+        return $this->hasMany(Flow::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
 }

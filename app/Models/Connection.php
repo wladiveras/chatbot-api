@@ -16,4 +16,15 @@ class Connection extends Model
         'token',
         'is_active',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function connectionSettings()
+    {
+        return $this->hasOne(ConnectionSetting::class);
+    }
+
 }

@@ -11,18 +11,21 @@ class Payment extends Model
 
     protected $fillable = [
         'user_id',
-        'lead_id',
-        'client_id',
-        'product_id',
-        'payment_id',
-        'fee',
-        'amount',
-        'total',
-        'currency',
-        'payment_method',
-        'payment_status',
-        'payment_gateway',
-        'payment_gateway_id',
+        'order_id',
+        'request',
+        'response',
+        'ip_address',
+        'user_agent',
         'last_activity',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
 }

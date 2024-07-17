@@ -35,10 +35,10 @@ return new class extends Migration
 
         Schema::create('payment_requests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->index();
             $table->foreignId('order_id')->nullable()->index();
             $table->foreignId('product_id')->nullable()->index();
-            $table->longText('payload');
+            $table->json('request')->nullable();
+            $table->json('response')->nullable();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->integer('last_activity')->index();

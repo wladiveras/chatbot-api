@@ -13,4 +13,9 @@ class Message extends Model
         'flow_id',
         'content',
     ];
+
+    public function flow()
+    {
+        return $this->belongsTo(Flow::class);
+    }
 }

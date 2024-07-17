@@ -25,4 +25,35 @@ class Order extends Model
         'payment_gateway_id',
         'last_activity',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function lead()
+    {
+        return $this->belongsTo(Lead::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class);
+    }
+
+    // no futuro passar os pedidos separados
+    // public function orderItems()
+    // {
+    //     return $this->hasMany(OrderItem::class);
+    // }
 }

@@ -16,4 +16,14 @@ class FlowSession extends Model
         'session_start',
         'session_end',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function flow()
+    {
+        return $this->belongsTo(Flow::class);
+    }
 }
