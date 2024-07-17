@@ -1,0 +1,42 @@
+name: 🐛 Relatório de Bug
+description: Crie um relatório para nos ajudar a melhorar
+title: "[BUG] "
+labels: ["bug", "needs triage"]
+assignees:
+- wladiveras
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por reportar um bug! Para nos ajudar a resolver isso rapidamente, por favor, preencha os seguintes campos da melhor forma possível.
+  - type: input
+    id: what-happened
+    attributes:
+      label: O que aconteceu?
+      description: Descreva o bug que você encontrou.
+      placeholder: Ex, Quando eu clico no botão, nada acontece...
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Passos para reproduzir
+      description: Forneça passos detalhados para reproduzir o problema.
+      placeholder: |
+        1. Vá para '...'
+        2. Clique em '....'
+        3. Role para baixo até '....'
+        4. Veja o erro
+    validations:
+      required: true
+  - type: checkboxes
+    id: version
+    attributes:
+      label: Versões afetadas
+      description: Por favor, selecione as versões que você sabe que são afetadas pelo bug.
+      options:
+        - label: Versão 1.0
+          required: false
+        - label: Versão 2.0
+          required: false

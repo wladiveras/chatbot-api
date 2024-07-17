@@ -1,0 +1,38 @@
+name: 🚀 Solicitação de Feature
+description: Sugira uma ideia para este projeto
+title: "[FEATURE] "
+labels: ["enhancement"]
+assignees:
+- wladiveras
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por sugerir uma nova feature! Para nos ajudar a entender e implementar sua sugestão, por favor, preencha os seguintes campos com o máximo de detalhes possível.
+  - type: input
+    id: feature-summary
+    attributes:
+      label: Resumo da Feature
+      description: Dê um resumo conciso da feature ou melhoria sugerida.
+      placeholder: Ex, Adicionar autenticação via biometria...
+    validations:
+      required: true
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Descrição Detalhada
+      description: Forneça uma descrição detalhada da feature ou melhoria. Inclua qualquer contexto ou capturas de tela que possam ajudar a entender a sugestão.
+      placeholder: |
+        1. Por que essa feature é necessária?
+        2. Como você espera que ela funcione?
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Contexto Adicional
+      description: Adicione qualquer outro contexto ou capturas de tela sobre a solicitação de feature aqui.
+      placeholder: Qualquer informação adicional sobre a feature...
+    validations:
+      required: false
