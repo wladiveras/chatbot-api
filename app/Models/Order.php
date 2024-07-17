@@ -50,7 +50,7 @@ class Order extends Model
 
     public function payment()
     {
-        return $this->belongsTo(Payment::class);
+        return $this->belongsTo(PaymentRequest::class);
     }
 
     // no futuro passar os pedidos separados
