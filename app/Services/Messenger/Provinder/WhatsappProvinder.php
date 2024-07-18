@@ -3,7 +3,6 @@
 namespace App\Services\Messenger\Provinder;
 
 use App\Services\Messenger\MessengerServiceInterface;
-use App\Repositories\Connection\ConnectionRepositoryInterface;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -19,10 +18,7 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     private mixed $callback_url;
 
-    private $connectionRepository;
-
-
-    public function __construct(ConnectionRepositoryInterface $connectionRepository)
+    public function __construct()
     {
         $this->url = Config::get('evolution.url');
         $this->key = Config::get('evolution.key');
@@ -33,7 +29,6 @@ class WhatsappProvinder implements MessengerServiceInterface
         ])
         ->acceptJson();
 
-        $this->connectionRepository = $connectionRepository;
     }
 
     public function createConnection(array|object $data): array|object
@@ -58,6 +53,8 @@ class WhatsappProvinder implements MessengerServiceInterface
 
         try {
             $response = $this->request->post("{$this->url}/instance/create", $payload);
+
+
 
             return (object) [
                 'data' => $response->json(),
@@ -226,15 +223,26 @@ class WhatsappProvinder implements MessengerServiceInterface
             }
 
             if ($data['event'] === 'MESSAGES_UPSERT') {
-                // Inicia sessao com bot correto
+
                 Log::debug(__CLASS__.'.'.__FUNCTION__.' => MESSAGES_UPSERT', [
                     'data' => $data,
                 ]);
+
+                $this->trigger($data);
             }
         }
 
         return (object) [
             'data' => $data,
         ];
+    }
+
+    public function trigger(string|object $data): void
+    {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'data' => $data,
+        ]);
+
+
     }
 }
