@@ -4,6 +4,8 @@ title: "[FEATURE] "
 labels: ["enhancement"]
 assignees:
 - wladiveras
+projects:
+  - "MarinaBot - Central"
 
 body:
   - type: markdown

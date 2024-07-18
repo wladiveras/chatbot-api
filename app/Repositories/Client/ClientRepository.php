@@ -8,7 +8,7 @@ use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Collection;
 use stdClass;
 
-class ConnectionRepository extends BaseRepository implements ClientRepositoryInterface
+class ClientRepository extends BaseRepository implements ClientRepositoryInterface
 {
     public function __construct(Client $model)
     {
