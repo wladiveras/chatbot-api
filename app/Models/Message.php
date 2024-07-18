@@ -9,6 +9,8 @@ class Message extends Model
 {
     use HasFactory;
 
+    protected $table = 'messages';
+
     protected $fillable = [
         'flow_id',
         'content',

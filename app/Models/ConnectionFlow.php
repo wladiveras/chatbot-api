@@ -5,17 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FlowSession extends Model
+class ConnectionFlow extends Model
 {
     use HasFactory;
-    protected $table = 'flows_sessions';
+    protected $table = 'connections_has_flows';
     protected $fillable = [
         'user_id',
         'flow_id',
         'connection_id',
-        'session_key',
-        'session_start',
-        'session_end',
     ];
 
     public function user()
@@ -26,5 +23,10 @@ class FlowSession extends Model
     public function flow()
     {
         return $this->belongsTo(Flow::class);
+    }
+
+    public function connection()
+    {
+        return $this->belongsTo(Connection::class);
     }
 }

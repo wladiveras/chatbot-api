@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Repositories\Flow;
+namespace App\Repositories\Order;
 
-use App\Models\Flow;
+use App\Models\Order;
 use App\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Collection;
 use stdClass;
 
-class FlowRepository extends BaseRepository implements FlowRepositoryInterface
+class OrderRepository extends BaseRepository implements OrderRepositoryInterface
 {
-    public function __construct(Flow $model)
+    public function __construct(Order $model)
     {
         parent::__construct($model);
     }

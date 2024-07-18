@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Repositories\Flow;
+namespace App\Repositories\Message;
 
-use App\Models\Flow;
+use App\Models\Message;
 use App\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Collection;
 use stdClass;
 
-class FlowRepository extends BaseRepository implements FlowRepositoryInterface
+class MessageRepository extends BaseRepository implements MessageRepositoryInterface
 {
-    public function __construct(Flow $model)
+    public function __construct(Message $model)
     {
         parent::__construct($model);
     }

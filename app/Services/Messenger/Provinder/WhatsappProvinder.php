@@ -3,6 +3,7 @@
 namespace App\Services\Messenger\Provinder;
 
 use App\Services\Messenger\MessengerServiceInterface;
+use App\Repositories\Connection\ConnectionRepositoryInterface;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -18,7 +19,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     private mixed $callback_url;
 
-    public function __construct()
+    private $connectionRepository;
+
+
+    public function __construct(ConnectionRepositoryInterface $connectionRepository)
     {
         $this->url = Config::get('evolution.url');
         $this->key = Config::get('evolution.key');
@@ -27,7 +31,9 @@ class WhatsappProvinder implements MessengerServiceInterface
         $this->request = Http::withHeaders([
             'apikey' => $this->key,
         ])
-            ->acceptJson();
+        ->acceptJson();
+
+        $this->connectionRepository = $connectionRepository;
     }
 
     public function createConnection(array|object $data): array|object
@@ -88,6 +94,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function parse($data): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'data' => $data,
+        ]);
+
         $options = [
             'number' => $data['number'],
             'options' => [
@@ -138,6 +148,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function connect(int|string $connection): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'connection' => $connection,
+        ]);
+
         $response = $this->request->get("{$this->url}/instance/connect/{$connection}");
 
         return (object) [
@@ -147,6 +161,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function fetch(string|int $connection): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'connection' => $connection,
+        ]);
+
         // Esse fetch vai trazer todas as conexoes vinculada ao usuario
         return (object) [
             'connection' => $connection,
@@ -155,6 +173,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function status(string|int $connection): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'connection' => $connection,
+        ]);
+
         $response = $this->request->delete("{$this->url}/instance/connectionState/{$connection}");
 
         return (object) [
@@ -164,6 +186,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function disconnect(string|int $connection): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'connection' => $connection,
+        ]);
+
         $response = $this->request->delete("{$this->url}/instance/logout/{$connection}");
 
         return (object) [
@@ -173,6 +199,10 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function delete(string|int $connection): array|object
     {
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+            'connection' => $connection,
+        ]);
+
         $response = $this->request->delete("{$this->url}/instance/delete/{$connection}");
 
         return (object) [
@@ -189,12 +219,14 @@ class WhatsappProvinder implements MessengerServiceInterface
 
         if (isset($data['event'])) {
             if ($data['event'] === 'QRCODE_UPDATED') {
+                // Cria conexao
                 Log::debug(__CLASS__.'.'.__FUNCTION__.' => QRCODE_UPDATED', [
                     'data' => $data,
                 ]);
             }
 
             if ($data['event'] === 'MESSAGES_UPSERT') {
+                // Inicia sessao com bot correto
                 Log::debug(__CLASS__.'.'.__FUNCTION__.' => MESSAGES_UPSERT', [
                     'data' => $data,
                 ]);
