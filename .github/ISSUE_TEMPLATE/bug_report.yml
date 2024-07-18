@@ -5,8 +5,7 @@ labels: ["bug", "needs triage", "back"]
 assignees:
 - wladiveras
 
-projects:
-  - "MarinaBot - Central"
+projects: ["justdocash/4"]
 
 body:
   - type: markdown
