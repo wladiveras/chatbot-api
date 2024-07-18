@@ -1,9 +1,12 @@
 name: 🐛 Relatório de Bug
 description: Crie um relatório para nos ajudar a melhorar
 title: "[BUG] "
-labels: ["bug", "needs triage"]
+labels: ["bug", "needs triage", "back"]
 assignees:
 - wladiveras
+
+projects:
+  - "MarinaBot - Central"
 
 body:
   - type: markdown
