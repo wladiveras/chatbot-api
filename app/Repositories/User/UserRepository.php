@@ -10,9 +10,9 @@ use stdClass;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
-    public function __construct(User $user)
+    public function __construct(User $model)
     {
-        parent::__construct($user);
+        parent::__construct($model);
     }
 
     public function all(): Collection

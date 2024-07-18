@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Repositories\Flow;
+namespace App\Repositories\Lead;
 
-use App\Models\Flow;
+use App\Models\Lead;
 use App\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Collection;
 use stdClass;
 
-class FlowRepository extends BaseRepository implements FlowRepositoryInterface
+class LeadRepository extends BaseRepository implements LeadRepositoryInterface
 {
-    public function __construct(Flow $model)
+    public function __construct(Lead $model)
     {
         parent::__construct($model);
     }

@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Repositories\Flow;
+namespace App\Repositories\PaymentRequest;
 
-use App\Models\Flow;
+use App\Models\PaymentRequest;
 use App\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Collection;
 use stdClass;
 
-class FlowRepository extends BaseRepository implements FlowRepositoryInterface
+class PaymentRequestRepository extends BaseRepository implements PaymentRequestRepositoryInterface
 {
-    public function __construct(Flow $model)
+    public function __construct(PaymentRequest $model)
     {
         parent::__construct($model);
     }

@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Repositories\Flow;
+namespace App\Repositories\Setting;
 
-use App\Models\Flow;
+use App\Models\Setting;
 use App\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Collection;
 use stdClass;
 
-class FlowRepository extends BaseRepository implements FlowRepositoryInterface
+class SettingRepository extends BaseRepository implements SettingRepositoryInterface
 {
-    public function __construct(Flow $model)
+    public function __construct(Setting $model)
     {
         parent::__construct($model);
     }

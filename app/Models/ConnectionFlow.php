@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UserFlow extends Model
+class ConnectionFlow extends Model
 {
     use HasFactory;
     protected $table = 'connections_has_flows';
