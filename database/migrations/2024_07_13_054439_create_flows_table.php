@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('flows', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->index();
-            $table->string('name');
+            $table->string('name')->nullable();
+            $table->string('description')->nullable();
             $table->json('payload');
+            $table->json('commands');
             $table->boolean('is_active')->default(true);
             $table->boolean('is_public')->default(false);
             $table->timestamps();

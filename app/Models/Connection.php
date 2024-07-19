@@ -14,9 +14,13 @@ class Connection extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'description',
         'connection_key',
         'token',
+        'type',
         'is_active',
+        'country',
+        'payload',
     ];
 
     public function user()
@@ -28,6 +32,4 @@ class Connection extends Model
     {
         return $this->hasOne(ConnectionSetting::class);
     }
-
-
 }

@@ -26,6 +26,11 @@ class BaseRepository implements BaseRepositoryInterface
         return (object) $this->model->findOrFail($id)->toArray();
     }
 
+    public function first($column, mixed $value): ?stdClass
+    {
+        return (object) $this->model->where($column, $value)->firstOrFail()->toArray();
+    }
+
     public function create(array $data): stdClass
     {
         return (object) $this->model->create([$data])->toArray();
@@ -39,5 +44,11 @@ class BaseRepository implements BaseRepositoryInterface
     public function delete(int|string $id): bool
     {
         return $this->model->findOrFail($id)->delete();
+    }
+
+    public function exists($column, mixed $value): bool
+    {
+
+        return (bool) $this->model->where($column, $value)->exists();
     }
 }

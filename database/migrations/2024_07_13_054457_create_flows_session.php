@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
 
-        Schema::create('flows_sessions', function (Blueprint $table) {
+        Schema::create('flow_sessions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('flow_id')->constrained()->onDelete('cascade');
             $table->foreignId('connection_id')->constrained()->onDelete('cascade');
             $table->string('session_key')->nullable();

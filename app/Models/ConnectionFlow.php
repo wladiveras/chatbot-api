@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class ConnectionFlow extends Model
 {
     use HasFactory;
+
     protected $table = 'connections_has_flows';
+
     protected $fillable = [
         'user_id',
         'flow_id',
