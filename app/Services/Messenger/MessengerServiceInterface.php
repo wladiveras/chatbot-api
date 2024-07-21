@@ -4,8 +4,6 @@ namespace App\Services\Messenger;
 
 interface MessengerServiceInterface
 {
-    public function __construct();
-
     public function createConnection(array|object $data): array|object;
 
     public function send(array|object $data): array|object;

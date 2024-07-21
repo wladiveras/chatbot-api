@@ -13,14 +13,17 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
 
-        Schema::create('flows_sessions', function (Blueprint $table) {
+        Schema::create('flow_sessions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('flow_id')->constrained()->onDelete('cascade');
             $table->foreignId('connection_id')->constrained()->onDelete('cascade');
             $table->string('session_key')->nullable();
+            $table->integer('step')->default(1);
+            $table->string('country')->default('BR');
+            $table->timestamp('last_active')->useCurrent();
             $table->timestamp('session_start')->useCurrent();
             $table->timestamp('session_end')->nullable();
+
             $table->timestamps();
         });
 

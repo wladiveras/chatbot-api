@@ -22,6 +22,8 @@ class CreateConnectionRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'name' => ['string'],
+            'description' => ['string'],
             'connection_key' => ['string'],
         ];
     }

@@ -21,23 +21,34 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->model->cursorPaginate($limitPerPage);
     }
 
-    public function find(int|string $id): ?stdClass
+    public function find(string $column, mixed $value): ?stdClass
     {
-        return (object) $this->model->findOrFail($id)->toArray();
+        return (object) $this->model->where($column, $value)->firstOrFail()->toArray();
+    }
+
+    public function first($column, mixed $value): ?stdClass
+    {
+        return (object) $this->model->where($column, $value)->firstOrFail()->toArray();
     }
 
     public function create(array $data): stdClass
     {
-        return (object) $this->model->create([$data])->toArray();
+        return (object) $this->model->create($data)->toArray();
     }
 
-    public function update(string|int $id, array $data): ?stdClass
+    public function update(string $column, mixed $value, array $data): ?stdClass
     {
-        return (object) tap($this->model->findOrFail($id))->update($data)->toArray();
+        return (object) tap($this->model->where($column, $value))->update($data)->firstOrFail()->toArray();
     }
 
-    public function delete(int|string $id): bool
+    public function delete(string $column, mixed $value): bool
     {
-        return $this->model->findOrFail($id)->delete();
+        return $this->model->where($column, $value)->delete();
+    }
+
+    public function exists($column, mixed $value): bool
+    {
+
+        return (bool) $this->model->where($column, $value)->exists();
     }
 }

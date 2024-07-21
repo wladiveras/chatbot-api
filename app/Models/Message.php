@@ -13,11 +13,20 @@ class Message extends Model
 
     protected $fillable = [
         'flow_id',
+        'flow_session_id',
         'content',
+        'type',
+        'origin',
+        'payload',
     ];
 
     public function flow()
     {
         return $this->belongsTo(Flow::class);
+    }
+
+    public function flowSession()
+    {
+        return $this->belongsTo(FlowSession::class);
     }
 }

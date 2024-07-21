@@ -12,11 +12,11 @@ interface BaseRepositoryInterface
 
     public function paginate(int $limitPerPage): CursorPaginator;
 
-    public function find(int|string $id): ?stdClass;
+    public function find(string $column, mixed $value): ?stdClass;
 
     public function create(array $data): stdClass;
 
-    public function update(int|string $id, array $data): ?stdClass;
+    public function update(string $column, mixed $value, array $data): ?stdClass;
 
-    public function delete(int|string $id): bool;
+    public function delete(string $column, mixed $value): bool;
 }
