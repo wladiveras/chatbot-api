@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('flow_session_id')->constrained()->onDelete('cascade');
-            $table->foreignId('flow_id')->constrained()->onDelete('cascade');
+            $table->foreignId('flow_session_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('flow_id')->nullable()->constrained()->onDelete('cascade');
             $table->text('content');
+            $table->string('type')->default('text');
+            $table->string('origin')->default('user');
+            $table->json('payload')->nullable();
             $table->timestamps();
         });
     }

@@ -18,8 +18,12 @@ return new class extends Migration
             $table->foreignId('flow_id')->constrained()->onDelete('cascade');
             $table->foreignId('connection_id')->constrained()->onDelete('cascade');
             $table->string('session_key')->nullable();
+            $table->integer('step')->default(1);
+            $table->string('country')->default('BR');
+            $table->timestamp('last_active')->useCurrent();
             $table->timestamp('session_start')->useCurrent();
             $table->timestamp('session_end')->nullable();
+
             $table->timestamps();
         });
 

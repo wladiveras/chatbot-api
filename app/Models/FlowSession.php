@@ -15,6 +15,9 @@ class FlowSession extends Model
         'flow_id',
         'connection_id',
         'session_key',
+        'country',
+        'step',
+        'last_active',
         'session_start',
         'session_end',
     ];

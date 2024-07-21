@@ -2,15 +2,16 @@
 
 namespace App\Services\User;
 
-use App\Repositories\User\UserRepositoryInterface;
+use App\Repositories\User\UserRepository;
+use Illuminate\Support\Facades\App;
 
 class UserService implements UserServiceInterface
 {
     private $userRepository;
 
-    public function __construct(UserRepositoryInterface $userRepository)
+    public function __construct()
     {
-        $this->userRepository = $userRepository;
+        $this->userRepository = App::make(UserRepository::class);
     }
 
     public function findAllUsers()

@@ -51,7 +51,7 @@ class WhatsappProvinder implements MessengerServiceInterface
         $token = Str::uuid()->toString();
         $number = Arr::get($data, 'connection_key');
         $webhook = "{$this->callback_url}/api/integration/whatsapp/callback";
-        $events = ['QRCODE_UPDATED', 'MESSAGES_UPSERT'];
+        $events = ['QRCODE_UPDATED', 'MESSAGES_UPSERT', 'CONNECTION_UPDATE', 'CALL'];
         $name = Arr::get($data, 'name', 'Conexão padrão');
         $description = Arr::get($data, 'description', "Nova conexão com o número $number.");
 
@@ -65,22 +65,23 @@ class WhatsappProvinder implements MessengerServiceInterface
             'events' => $events,
         ];
 
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'data' => $data,
             'payload' => $payload,
         ]);
 
         try {
-            if (! $this->connectionRepository->exists(column: 'connection_key', value: $number)) {
+            if (!$this->connectionRepository->exists(column: 'connection_key', value: $number)) {
                 $response = $this->request->post("{$this->url}/instance/create", $payload);
 
                 if ($response->successful()) {
                     $response = $response->json();
                     $instance = Arr::get($response, 'instance.instanceName');
 
-                    if (! $this->connectionRepository->exists(column: 'token', value: $instance)) {
+                    if (!$this->connectionRepository->exists(column: 'token', value: $instance)) {
+
                         $createConnection = $this->connectionRepository->create([
-                            'user_id' => rand(1, 5),
+                            'user_id' => 1,
                             'name' => $name,
                             'description' => $description,
                             'type' => 'whatsapp',
@@ -109,13 +110,18 @@ class WhatsappProvinder implements MessengerServiceInterface
                 ],
             ];
         } catch (\Exception $exception) {
-            throw new \Exception($exception->getMessage());
+            return (object) [
+                'data' => [
+                    'success' => false,
+                    'message' => $exception->getMessage(),
+                ],
+            ];
         }
     }
 
     public function connect(int|string $connection): array|object
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'connection' => $connection,
         ]);
 
@@ -127,6 +133,7 @@ class WhatsappProvinder implements MessengerServiceInterface
                 $response = $this->request->get("{$this->url}/instance/connect/{$connection}");
 
                 if ($response->successful()) {
+
                     $response = $response->json();
 
                     return (object) [
@@ -147,13 +154,18 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
 
         } catch (\Exception $exception) {
-            throw new \Exception($exception->getMessage());
+            return (object) [
+                'data' => [
+                    'success' => false,
+                    'message' => $exception->getMessage(),
+                ],
+            ];
         }
     }
 
     public function send(array|object $data): array|object
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'data' => $data,
         ]);
 
@@ -162,31 +174,75 @@ class WhatsappProvinder implements MessengerServiceInterface
         $endpoint = match ($data['type']) {
             'text' => 'sendText',
             'audio' => 'sendWhatsAppAudio',
-            'image' => 'sendMedia',
-            'video' => 'sendMedia',
+            'image', 'video',
             'media_audio' => 'sendMedia',
             default => throw new \Exception('Type not found'),
         };
 
-        $response = $this->request->post("{$this->url}/message/{$endpoint}/{$data['connection']}", $payload);
+        try {
+            $connection = $this->connectionRepository->first(column: 'token', value: $data['connection']);
 
-        $connection = $this->connectionRepository->exists(column: 'is_active', value: 0);
+            if (!$connection) {
+                return (object) [
+                    'data' => [
+                        'success' => false,
+                        'message' => 'Não foi possível enviar a mensagem.',
+                    ],
+                ];
+            }
 
-        $createMessage = $this->messageRepository->create([
-            'user_id' => rand(1, 5),
+            if ($connection->is_active === 0) {
+                return (object) [
+                    'data' => [
+                        'success' => false,
+                        'message' => 'Conexão inativa.',
+                    ],
+                ];
+            }
 
-            'is_active' => 0,
-            'payload' => json_encode($response),
-        ]);
+            $response = $this->request->post("{$this->url}/message/{$endpoint}/{$data['connection']}", $payload);
 
-        return (object) [
-            'data' => $response->json() ?? [],
-        ];
+            if ($response->successful()) {
+                $response = $response->json();
+
+                $createMessage = $this->messageRepository->create([
+                    'flow_id' => $connection->flow_id ?? null,
+                    'flow_session_id' => Arr::get($data, 'flow_session_id', null),
+                    'content' => Arr::get($data, 'message', 'Entendi...'),
+                    'type' => Arr::get($data, 'type', 'text'),
+                    'origin' => 'system',
+                    'payload' => json_encode($payload),
+                ]);
+
+                return (object) [
+                    'data' => [
+                        'success' => true,
+                        'message' => 'Mensagem enviada com sucesso.',
+                        'payload' => (object) $createMessage,
+                    ],
+                ];
+            }
+
+            return (object) [
+                'data' => [
+                    'success' => false,
+                    'message' => 'Não foi possível enviar a mensagem.',
+                ],
+            ];
+
+        } catch (\Exception $exception) {
+            return (object) [
+                'data' => [
+                    'success' => false,
+                    'message' => $exception->getMessage(),
+                ],
+            ];
+        }
     }
 
     public function parse($data): array|object
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'data' => $data,
         ]);
 
@@ -230,7 +286,7 @@ class WhatsappProvinder implements MessengerServiceInterface
 
         $message = array_merge($options, $mediaMessage, $textMessage, $audioMessage);
 
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => parse data', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => parse data', [
             'type' => $data['type'],
             'message' => $message,
         ]);
@@ -240,7 +296,7 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function fetch(string|int $connection): array|object
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'connection' => $connection,
         ]);
 
@@ -252,7 +308,7 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     public function status(string|int $connection): array|object
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'connection' => $connection,
         ]);
 
@@ -286,13 +342,18 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
 
         } catch (\Exception $exception) {
-            throw new \Exception($exception->getMessage());
+            return (object) [
+                'data' => [
+                    'success' => false,
+                    'message' => $exception->getMessage(),
+                ],
+            ];
         }
     }
 
     public function disconnect(string|int $connection): array|object
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'connection' => $connection,
         ]);
 
@@ -307,6 +368,7 @@ class WhatsappProvinder implements MessengerServiceInterface
                 if ($response->successful()) {
 
                     $response = $response->json();
+                    $this->connectionRepository->update(column: 'token', value: $connection, data: ['is_active' => 0]);
 
                     return (object) [
                         'data' => [
@@ -326,26 +388,32 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
 
         } catch (\Exception $exception) {
-            throw new \Exception($exception->getMessage());
+            return (object) [
+                'data' => [
+                    'success' => false,
+                    'message' => $exception->getMessage(),
+                ],
+            ];
         }
     }
 
     public function delete(string|int $connection): array|object
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'connection' => $connection,
         ]);
 
         try {
             if (
                 $this->connectionRepository->exists(column: 'token', value: $connection) &&
-                $this->connectionRepository->exists(column: 'is_active', value: 1)
+                $this->connectionRepository->exists(column: 'is_active', value: 0)
             ) {
                 $response = $this->request->delete("{$this->url}/instance/delete/{$connection}");
 
                 if ($response->successful()) {
 
                     $response = $response->json();
+                    $this->connectionRepository->delete(column: 'token', value: $connection);
 
                     return (object) [
                         'data' => [
@@ -365,52 +433,140 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
 
         } catch (\Exception $exception) {
-            throw new \Exception($exception->getMessage());
+            return (object) [
+                'data' => [
+                    'success' => false,
+                    'message' => $exception->getMessage(),
+                ],
+            ];
         }
     }
 
     // Function to handle the webhook
     public function callback(array|object $data): array|object
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'data' => $data,
         ]);
 
-        $event = Arr::get($data, 'data.event', false);
+        $event = Arr::get($data, 'data.event', Arr::get($data, 'event'));
 
-        match ($event) {
+        return match ($event) {
+            'connection.update' => $this->TriggerConnection($data),
             'qrcode.updated' => $this->triggerQrcode($data),
             'messages.upsert' => $this->triggerFlow($data),
-            default => false,
+            default => [
+                'data' => $data,
+            ],
+        };
+    }
+
+    public function TriggerConnection(array|object $data): array|object
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => CONNECTION_UPDATE TRIGGER', [
+            'data' => $data,
+        ]);
+
+        $instance = Arr::get($data, 'instance');
+        $state = Arr::get($data, 'data.state', 'close');
+
+        match ($state) {
+            'open' => $this->connectionRepository->update(column: 'token', value: $instance, data: ['is_active' => 1]),
+            default => $this->connectionRepository->update(column: 'token', value: $instance, data: ['is_active' => 0]),
         };
 
-        return (object) [
-            'data' => $data,
+        return [
+            'data' => [
+                'success' => true,
+                'message' => 'CONNECTION_UPDATE',
+                'payload' => $data,
+            ],
         ];
     }
 
     public function triggerQrcode(array|object $data): array|object
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => QRCODE_UPDATED TRIGGER', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => QRCODE_UPDATED TRIGGER', [
             'data' => $data,
         ]);
-        // atualiza status da conexao is_active com base no callback caso o usuario desconecte pelo telefone.
+
+        $data = (object) Arr::get($data, 'data');
 
         return [
-            'data' => $data,
+            'data' => [
+                'success' => true,
+                'message' => 'QRCODE_UPDATED',
+                'payload' => $data,
+            ],
         ];
     }
 
     public function triggerFlow(array|object $data): array|object
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => MESSAGES_UPSERT', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => MESSAGES_UPSERT', [
             'data' => $data,
         ]);
 
-        // Recebe a mensagem enviada pelo usuario
+        $connection = Arr::get($data, 'instance');
+        $fromConnectionNumber = Arr::get($data, 'data.key.fromMe');
 
-        return [
-            'data' => $data,
-        ];
+        if ($fromConnectionNumber) {
+            return (object) [
+                'data' => [
+                    'success' => false,
+                    'message' => 'Não foi possível enviar a mensagem.',
+                ],
+            ];
+        }
+
+        try {
+            $connection = $this->connectionRepository->first(column: 'token', value: $connection);
+
+            if (!$connection) {
+                return (object) [
+                    'data' => [
+                        'success' => false,
+                        'message' => 'Não foi possivel identificar a conexão.',
+                    ],
+                ];
+            }
+
+            if ($connection->is_active === 0) {
+                return (object) [
+                    'data' => [
+                        'success' => false,
+                        'message' => 'Conexão inativa.',
+                    ],
+                ];
+            }
+
+            // Chama o serviço de fluxo para processar a mensagem e enviar para o cliente
+
+            // Criar uma funçao depois para criar essa mensagem no banco de dados
+            $createMessage = $this->messageRepository->create([
+                'flow_id' => $connection->flow_id ?? null,
+                'flow_session_id' => Arr::get($data, 'flow_session_id', null),
+                'content' => Arr::get($data, 'message', 'Entendi...'),
+                'type' => Arr::get($data, 'type', 'text'),
+                'origin' => 'user',
+                'payload' => json_encode($data),
+            ]);
+
+            return (object) [
+                'data' => [
+                    'success' => true,
+                    'message' => 'Mensagem recebida com sucesso.',
+                    'payload' => (object) $createMessage,
+                ],
+            ];
+
+        } catch (\Exception $exception) {
+            return (object) [
+                'data' => [
+                    'success' => false,
+                    'message' => $exception->getMessage(),
+                ],
+            ];
+        }
     }
 }

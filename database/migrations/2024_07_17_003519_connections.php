@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -14,6 +13,7 @@ return new class extends Migration
         Schema::create('connections', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('flow_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('name')->nullable();
             $table->string('description')->nullable();
             $table->string('connection_key')->unique();
@@ -22,9 +22,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(false);
             $table->string('country')->default('BR');
             $table->json('payload')->nullable();
-
             $table->timestamps();
-
         });
     }
 
