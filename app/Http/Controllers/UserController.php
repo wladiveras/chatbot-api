@@ -6,6 +6,7 @@ use app\Http\Requests\UserRequest;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\Services\User\UserService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
 class UserController extends BaseController
@@ -17,20 +18,29 @@ class UserController extends BaseController
         $this->userService = $userService;
     }
 
-    public function index(): UserCollection
+    public function index(): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start');
 
         try {
             $users = $this->userService->findAllUsers();
+
+            return $this->success(
+                message: 'Usuário atualizado com sucesso.',
+                payload: new UserCollection($users)
+            );
+
         } catch (\Exception $exception) {
-            $this->error(message: $exception->getMessage(), payload: $exception, code: 500);
+            return $this->error(
+                message: $exception->getMessage(),
+                payload: $exception,
+                code: 500
+            );
         }
 
-        return new UserCollection($users);
     }
 
-    public function store(UserRequest $request): UserResource
+    public function store(UserRequest $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'request' => $request,
@@ -38,14 +48,23 @@ class UserController extends BaseController
 
         try {
             $user = $this->userService->createUser($request->validated());
+
+            return $this->success(
+                message: 'Usuário atualizado com sucesso.',
+                payload: new UserResource($user)
+            );
+
         } catch (\Exception $exception) {
-            $this->error(message: $exception->getMessage(), payload: $request, code: 500);
+            return $this->error(
+                message: $exception->getMessage(),
+                payload: $request,
+                code: 500
+            );
         }
 
-        return new UserResource($user);
     }
 
-    public function show(int|string $id): UserResource
+    public function show(int|string $id): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'id' => $id,
@@ -53,14 +72,22 @@ class UserController extends BaseController
 
         try {
             $user = $this->userService->findUser($id);
-        } catch (\Exception $exception) {
-            $this->error(message: $exception->getMessage(), payload: $exception, code: 500);
-        }
 
-        return new UserResource($user);
+            return $this->success(
+                message: 'Usuário atualizado com sucesso.',
+                payload: new UserResource($user)
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                message: $exception->getMessage(),
+                payload: $exception,
+                code: 500
+            );
+        }
     }
 
-    public function update(UserRequest $request, int|string $id): UserResource
+    public function update(UserRequest $request, int|string $id): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'id' => $id,
@@ -69,14 +96,23 @@ class UserController extends BaseController
 
         try {
             $user = $this->userService->updateUser($id, $request->validated());
+
+            return $this->success(
+                message: 'Usuário atualizado com sucesso.',
+                payload: new UserResource($user)
+            );
+
         } catch (\Exception $exception) {
-            $this->error(message: $exception->getMessage(), payload: $request, code: 500);
+            return $this->error(
+                message: $exception->getMessage(),
+                payload: $request,
+                code: 500
+            );
         }
 
-        return new UserResource($user);
     }
 
-    public function destroy(int|string $id): bool
+    public function destroy(int|string $id): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'id' => $id,
@@ -84,10 +120,18 @@ class UserController extends BaseController
 
         try {
             $user = $this->userService->deleteUser($id);
-        } catch (\Exception $exception) {
-            $this->error(message: $exception->getMessage(), payload: $exception, code: 500);
-        }
 
-        return $user;
+            return $this->success(
+                message: 'Usuário deletado com sucesso.',
+                payload: $user
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                message: $exception->getMessage(),
+                payload: $exception,
+                code: 500
+            );
+        }
     }
 }

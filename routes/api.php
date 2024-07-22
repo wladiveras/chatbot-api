@@ -3,6 +3,7 @@
 use App\Http\Controllers\MessengerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -22,25 +23,10 @@ Route::prefix('/user')
 
 Route::prefix('/auth')
     ->group(function () {
-
-        Route::get('/user', function () {
-            $user = auth()->user();
-            return response()->json(['message' => $user->name]);
-        })->middleware(['auth:sanctum']);
-
-        Route::post('/token', function (Request $request) {
-            $token = $request->user()->createToken($request->token_name);
-
-            return ['token' => $token->plainTextToken];
-        });
-
+        Route::post('/token', [AuthController::class, 'auth']);
+        Route::post('/return/token', [AuthController::class, 'token'])->middleware(['auth:sanctum']);
+        Route::post('/user', [AuthController::class, 'user'])->middleware(['auth:sanctum']);
     });
-
-
-
-
-
-
 
 
 Route::prefix('/payment/{gateway}')
