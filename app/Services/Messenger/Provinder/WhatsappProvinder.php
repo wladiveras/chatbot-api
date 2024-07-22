@@ -26,8 +26,6 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     private ConnectionRepository $connectionRepository;
 
-    private $connectionExists;
-
     public function __construct()
     {
         $this->url = Config::get('evolution.url');
@@ -51,7 +49,7 @@ class WhatsappProvinder implements MessengerServiceInterface
         $token = Str::uuid()->toString();
         $number = Arr::get($data, 'connection_key');
         $webhook = "{$this->callback_url}/api/integration/whatsapp/callback";
-        $events = ['QRCODE_UPDATED', 'MESSAGES_UPSERT', 'CONNECTION_UPDATE', 'CALL'];
+        $events = ['MESSAGES_UPSERT', 'CONNECTION_UPDATE', 'CALL'];
         $name = Arr::get($data, 'name', 'Conexão padrão');
         $description = Arr::get($data, 'description', "Nova conexão com o número $number.");
 
@@ -71,43 +69,47 @@ class WhatsappProvinder implements MessengerServiceInterface
         ]);
 
         try {
-            if (!$this->connectionRepository->exists(column: 'connection_key', value: $number)) {
-                $response = $this->request->post("{$this->url}/instance/create", $payload);
-
-                if ($response->successful()) {
-                    $response = $response->json();
-                    $instance = Arr::get($response, 'instance.instanceName');
-                    $qrcodePairingCode = Arr::get($response, 'qrcode.pairingCode');
-                    $qrcodeBase64 = Arr::get($response, 'qrcode.base64');
-
-                    if (!$this->connectionRepository->exists(column: 'token', value: $instance)) {
-
-                        $createConnection = $this->connectionRepository->create([
-                            'user_id' => 1,
-                            'name' => $name,
-                            'description' => $description,
-                            'type' => 'whatsapp',
-                            'connection_key' => $number,
-                            'token' => $instance,
-                            'country' => 'BR',
-                            'is_active' => 0,
-                            'payload' => json_encode($response),
-                        ]);
-
-                        $qrcode = [
-                            'qrcode' => [
-                                'pairingCode' => $qrcodePairingCode,
-                                'base64' => $qrcodeBase64,
-                            ],
-                        ];
-
-                        return $this->response(success: true, message: 'Nova conexão criada com sucesso.', payload: array_merge((array) $createConnection, $qrcode));
-                    }
-                }
+            if ($this->connectionRepository->exists(column: 'connection_key', value: $number)) {
+                return $this->response(success: false, message: 'Já existe uma conexão com esse número.');
             }
 
-            return $this->response(success: false, message: 'Não foi possível criar uma nova conexão.');
+            $response = $this->request->post("{$this->url}/instance/create", $payload);
 
+            if (!$response->successful()) {
+                return $this->response(success: false, message: 'Não foi possível criar uma nova conexão.');
+            }
+
+            $response = $response->json();
+            $instance = Arr::get($response, 'instance.instanceName');
+            $qrcodePairingCode = Arr::get($response, 'qrcode.pairingCode');
+            $qrcodeBase64 = Arr::get($response, 'qrcode.base64');
+
+            if ($this->connectionRepository->exists(column: 'token', value: $instance)) {
+                return $this->response(success: false, message: 'Não foi possível criar uma nova conexão.');
+            }
+
+            $createConnection = $this->connectionRepository->create([
+                'user_id' => 1,
+                'name' => $name,
+                'description' => $description,
+                'type' => 'whatsapp',
+                'connection_key' => $number,
+                'token' => $instance,
+                'country' => 'BR',
+                'is_active' => 0,
+                'payload' => json_encode($response),
+            ]);
+
+            $qrcode = [
+                'qrcode' => [
+                    'pairingCode' => $qrcodePairingCode,
+                    'base64' => $qrcodeBase64,
+                ],
+            ];
+
+            $payload = array_merge((array) $createConnection, $qrcode);
+
+            return $this->response(success: true, message: 'Nova conexão criada com sucesso.', payload: $payload);
         } catch (\Exception $exception) {
             return $this->response(success: false, message: $exception->getMessage());
         }
@@ -120,15 +122,14 @@ class WhatsappProvinder implements MessengerServiceInterface
         ]);
 
         try {
-            if ($this->isConnectionActive(connection: $connection, active: 0)) {
-                $response = $this->request->get("{$this->url}/instance/connect/{$connection}");
+            if (!$this->isConnectionActive(connection: $connection, active: 0)) {
+                return $this->response(success: false, message: 'Não foi possivel retornar essa conexão.');
+            }
 
-                if ($response->successful()) {
+            $response = $this->request->get("{$this->url}/instance/connect/{$connection}");
 
-                    $response = $response->json();
-
-                    return $this->response(success: true, message: 'Conexão retornada com sucesso.', payload: $response);
-                }
+            if ($response->successful()) {
+                return $this->response(success: true, message: 'Conexão retornada com sucesso.', payload: $response->json());
             }
 
             return $this->response(success: false, message: 'Não foi possivel retornar essa conexão.');
@@ -165,9 +166,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             $response = $this->request->post("{$this->url}/message/{$endpoint}/{$data['connection']}", $payload);
 
             if ($response->successful()) {
-                $response = $response->json();
-
-                $createMessage = $this->createMessage(flowId: $connection->flow_id, data: $data, origin: 'system');
+                $createMessage = $this->createMessage(flowId: $connection->flow_id, data: $data, payload: $response->json(), origin: 'system');
 
                 return $this->response(success: true, message: 'Mensagem enviada com sucesso.', payload: $createMessage);
             }
@@ -224,12 +223,12 @@ class WhatsappProvinder implements MessengerServiceInterface
                                 [
                                     'title' => 'row title',
                                     'description' => 'row description',
-                                    'rowId' => '21515020'
-                                ]
+                                    'rowId' => '21515020',
+                                ],
                             ],
-                            'title' => 'Section Title'
-                        ]
-                    ]
+                            'title' => 'Section Title',
+                        ],
+                    ],
                 ],
             ];
         }
@@ -237,31 +236,31 @@ class WhatsappProvinder implements MessengerServiceInterface
         // Post a status
         if ($data['type'] === 'status') {
             $message = [
-                "statusMessage" => [
-                    "type" => "text",
-                    "content" => "Hi, how are you 2today?",
-                    "backgroundColor" => "#008000",
-                    "font" => 1,
-                    "allContacts" => true,
-                    "statusJidList" => [
-                        "5521969098986@s.whatsapp.net"
-                    ]
-                ]
+                'statusMessage' => [
+                    'type' => 'text',
+                    'content' => 'Hi, how are you 2today?',
+                    'backgroundColor' => '#008000',
+                    'font' => 1,
+                    'allContacts' => true,
+                    'statusJidList' => [
+                        '5521969098986@s.whatsapp.net',
+                    ],
+                ],
             ];
         }
 
         // Create a quiz message
         if ($data['type'] === 'pool') {
             $message = [
-                "pollMessage" => [
-                    "name" => "Title",
-                    "selectableCount" => 2,
-                    "values" => [
-                        "option 1",
-                        "option 2",
-                        "option 3"
-                    ]
-                ]
+                'pollMessage' => [
+                    'name' => 'Title',
+                    'selectableCount' => 2,
+                    'values' => [
+                        'option 1',
+                        'option 2',
+                        'option 3',
+                    ],
+                ],
             ];
         }
 
@@ -318,10 +317,7 @@ class WhatsappProvinder implements MessengerServiceInterface
                 $response = $this->request->delete("{$this->url}/instance/connectionState/{$connection}");
 
                 if ($response->successful()) {
-
-                    $response = $response->json();
-
-                    return $this->response(success: true, message: 'Status da conexão retornado com sucesso.', payload: $response);
+                    return $this->response(success: true, message: 'Status da conexão retornado com sucesso.', payload: $response->json());
                 }
             }
 
@@ -344,11 +340,9 @@ class WhatsappProvinder implements MessengerServiceInterface
                 $response = $this->request->delete("{$this->url}/instance/logout/{$connection}");
 
                 if ($response->successful()) {
-
-                    $response = $response->json();
                     $this->connectionRepository->update(column: 'token', value: $connection, data: ['is_active' => 0]);
 
-                    return $this->response(success: true, message: 'Conexão desconectada com sucesso.', payload: $response);
+                    return $this->response(success: true, message: 'Conexão desconectada com sucesso.', payload: $response->json());
                 }
             }
 
@@ -370,10 +364,9 @@ class WhatsappProvinder implements MessengerServiceInterface
                 $response = $this->request->delete("{$this->url}/instance/delete/{$connection}");
 
                 if ($response->successful()) {
-                    $response = $response->json();
                     $this->connectionRepository->delete(column: 'token', value: $connection);
 
-                    return $this->response(success: true, message: 'Conexão desconectada com sucesso.', payload: $response);
+                    return $this->response(success: true, message: 'Conexão desconectada com sucesso.', payload: $response->json());
                 }
             }
 
@@ -449,30 +442,7 @@ class WhatsappProvinder implements MessengerServiceInterface
         }
     }
 
-    private function isConnectionActive(string|int $connection, $active = 0): bool
-    {
-        return $this->connectionRepository->exists(column: 'token', value: $connection) &&
-            $this->connectionRepository->exists(column: 'is_active', value: $active);
-    }
-
-    private function response(bool $success, string $message, mixed $payload = []): object
-    {
-        if ($payload) {
-            $payload = [
-                'payload' => (object) $payload,
-            ];
-        }
-
-        return (object) [
-            'data' => [
-                'success' => $success,
-                'message' => $message,
-                $payload,
-            ],
-        ];
-    }
-
-    private function createMessage(string|int $flowId, $data, $payload = [], $origin = 'system'): array|object
+    private function createMessage(string|int|null $flowId, $data, $payload = [], $origin = 'system'): array|object
     {
         if ($payload) {
             $payload = $data;
@@ -503,4 +473,20 @@ class WhatsappProvinder implements MessengerServiceInterface
         return true;
     }
 
+    private function isConnectionActive(string|int $connection, $active = 0): bool
+    {
+        return $this->connectionRepository->exists(column: 'token', value: $connection) &&
+            $this->connectionRepository->exists(column: 'is_active', value: $active);
+    }
+
+    private function response(bool $success, string $message, mixed $payload = []): object
+    {
+        return (object) [
+            'data' => [
+                'success' => $success,
+                'message' => $message,
+                'payload' => $payload,
+            ],
+        ];
+    }
 }
