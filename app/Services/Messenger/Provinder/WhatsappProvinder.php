@@ -188,6 +188,7 @@ class WhatsappProvinder implements MessengerServiceInterface
         $options = [];
         $message = [];
 
+        // Default options
         if ($data['type'] !== 'status') {
             $options = [
                 'number' => $data['number'],
@@ -198,6 +199,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
         }
 
+        // Media files
         if ($data['type'] === 'video' || $data['type'] === 'image' || $data['type'] === 'media_audio') {
             $message = [
                 'mediaMessage' => [
@@ -208,6 +210,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
         }
 
+        // A list message
         if ($data['type'] === 'list') {
             $message = [
                 'listMessage' => [
@@ -231,6 +234,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
         }
 
+        // Post a status
         if ($data['type'] === 'status') {
             $message = [
                 "statusMessage" => [
@@ -246,6 +250,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
         }
 
+        // Create a quiz message
         if ($data['type'] === 'pool') {
             $message = [
                 "pollMessage" => [
@@ -260,6 +265,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
         }
 
+        // Texto message
         if ($data['type'] === 'text') {
             $message = [
                 'textMessage' => [
@@ -268,6 +274,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
         }
 
+        // Recording audio message
         if ($data['type'] === 'audio') {
             $message = [
                 'audioMessage' => [
@@ -276,6 +283,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
         }
 
+        // Merge data to send
         $message = array_merge($options, $message);
 
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => parse data', [
