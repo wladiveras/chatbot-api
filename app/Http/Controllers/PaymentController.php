@@ -7,7 +7,7 @@ use App\Http\Resources\PaymentResource;
 use App\Services\Payment\PaymentService;
 use Illuminate\Support\Facades\Log;
 
-class PaymentController extends Controller
+class PaymentController extends BaseController
 {
     private PaymentService $paymentService;
 
@@ -18,7 +18,7 @@ class PaymentController extends Controller
 
     public function pay(string $gateway, PaymentRequest $request)
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'request' => $request,
             'gateway' => $gateway,
         ]);
@@ -26,7 +26,7 @@ class PaymentController extends Controller
         try {
             $payment = $this->paymentService->gateway($gateway)->pay($request->validated());
         } catch (\Exception $exception) {
-            $this->error(data: $request, exception: $exception);
+            $this->error(message: $exception->getMessage(), payload: $exception, code: 500);
         }
 
         return new PaymentResource($payment);
@@ -34,7 +34,7 @@ class PaymentController extends Controller
 
     public function checkPayment(string $gateway, int|string $id)
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'id' => $id,
             'gateway' => $gateway,
         ]);
@@ -43,19 +43,10 @@ class PaymentController extends Controller
             $payment = $this->paymentService->gateway($gateway)->checkPayment($id);
 
             return new PaymentResource($payment);
+
         } catch (\Exception $exception) {
-            $this->error(data: [$id, $gateway], exception: $exception);
+            $this->error(message: $exception->getMessage(), payload: $exception, code: 500);
         }
     }
 
-    private function error($data, $exception)
-    {
-        Log::error(__CLASS__.'.'.__FUNCTION__.' => error', [
-            'data' => $data,
-            'exception' => $exception,
-            'message' => $exception->getMessage(),
-        ]);
-
-        abort(500, $exception->getMessage());
-    }
 }

@@ -166,7 +166,13 @@ class WhatsappProvinder implements MessengerServiceInterface
             $response = $this->request->post("{$this->url}/message/{$endpoint}/{$data['connection']}", $payload);
 
             if ($response->successful()) {
-                $createMessage = $this->createMessage(flowId: $connection->flow_id, data: $data, payload: $response->json(), origin: 'system');
+                $createMessage = $this->createMessage(
+                    flowId: $connection->flow_id,
+                    connectionId: $connection->id,
+                    data: $data,
+                    payload: $response->json(),
+                    origin: 'system'
+                );
 
                 return $this->response(success: true, message: 'Mensagem enviada com sucesso.', payload: $createMessage);
             }
@@ -423,17 +429,22 @@ class WhatsappProvinder implements MessengerServiceInterface
         ]);
 
         $connection = Arr::get($data, 'instance');
-        $fromConnectionNumber = Arr::get($data, 'data.key.fromMe');
+        $FromOwner = Arr::get($data, 'data.key.fromMe');
 
-        if ($fromConnectionNumber) {
-            return $this->response(success: false, message: 'Não foi possível disparar o fluxo do mesmo numero de telefone.');
+        if ($FromOwner) {
+            return $this->response(success: false, message: 'Não foi possível disparar o fluxo do mesmo numero de telefone da conexão.');
         }
 
         try {
             $connection = $this->connectionRepository->first(column: 'token', value: $connection);
             $this->connectionExists($connection);
 
-            $createMessage = $this->createMessage(flowId: $connection->flow_id, data: $data, origin: 'user');
+            $createMessage = $this->createMessage(
+                flowId: $connection->flow_id,
+                connectionId: $connection->id,
+                data: $data,
+                origin: 'client'
+            );
 
             return $this->response(success: true, message: 'Fluxo disparado com sucesso.', payload: $createMessage);
 
@@ -442,16 +453,22 @@ class WhatsappProvinder implements MessengerServiceInterface
         }
     }
 
-    private function createMessage(string|int|null $flowId, $data, $payload = [], $origin = 'system'): array|object
+    private function createMessage(string|int|null $flowId, string|int|null $connectionId, $data, $payload = [], $origin = 'system'): array|object
     {
         if ($payload) {
             $payload = $data;
         }
+        if ($data['type'] === 'text') {
+            $message = $data['message'];
+        } else {
+            $message = $data['file_url'];
+        }
 
         $createMessage = $this->messageRepository->create([
             'flow_id' => $flowId ?? null,
+            'connection_id' => $connectionId ?? null,
             'flow_session_id' => Arr::get($data, 'flow_session_id', null),
-            'content' => Arr::get($data, 'message.extendedTextMessage.text', 'Entendi...'),
+            'content' => $message,
             'type' => Arr::get($data, 'type', 'text'),
             'origin' => $origin,
             'payload' => json_encode($payload),
@@ -481,12 +498,14 @@ class WhatsappProvinder implements MessengerServiceInterface
 
     private function response(bool $success, string $message, mixed $payload = []): object
     {
+        if ($success === false) {
+            throw new \Exception($message);
+        }
+
         return (object) [
-            'data' => [
-                'success' => $success,
-                'message' => $message,
-                'payload' => $payload,
-            ],
+            'success' => $success,
+            'message' => $message,
+            'payload' => $payload,
         ];
     }
 }
