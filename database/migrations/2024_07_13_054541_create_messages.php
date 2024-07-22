@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,8 +12,9 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('flow_session_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('flow_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('flow_session_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('connection_id')->nullable()->constrained()->onDelete('cascade');
             $table->text('content');
             $table->string('type')->default('text');
             $table->string('origin')->default('user');

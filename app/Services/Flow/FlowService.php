@@ -2,15 +2,17 @@
 
 namespace App\Services\Flow;
 
-use App\Repositories\Flow\FlowRepositoryInterface;
+use App\Repositories\Flow\FlowRepository;
+use Illuminate\Support\Facades\App;
 
 class FlowService implements FlowServiceInterface
 {
     private $flowRepository;
 
-    public function __construct(FlowRepositoryInterface $flowRepository)
+    public function __construct()
     {
-        $this->flowRepository = $flowRepository;
+
+        $this->flowRepository = App::make(FlowRepository::class);
     }
 
     public function validate(array $data): void

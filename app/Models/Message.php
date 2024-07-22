@@ -14,11 +14,17 @@ class Message extends Model
     protected $fillable = [
         'flow_id',
         'flow_session_id',
+        'connection_id',
         'content',
         'type',
         'origin',
         'payload',
     ];
+
+    public function connection()
+    {
+        return $this->belongsTo(Connection::class);
+    }
 
     public function flow()
     {

@@ -8,7 +8,7 @@ use App\Http\Resources\UserResource;
 use App\Services\User\UserService;
 use Illuminate\Support\Facades\Log;
 
-class UserController extends Controller
+class UserController extends BaseController
 {
     private UserService $userService;
 
@@ -19,12 +19,12 @@ class UserController extends Controller
 
     public function index(): UserCollection
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start');
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start');
 
         try {
             $users = $this->userService->findAllUsers();
         } catch (\Exception $exception) {
-            $this->error(exception: $exception);
+            $this->error(message: $exception->getMessage(), payload: $exception, code: 500);
         }
 
         return new UserCollection($users);
@@ -32,14 +32,14 @@ class UserController extends Controller
 
     public function store(UserRequest $request): UserResource
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'request' => $request,
         ]);
 
         try {
             $user = $this->userService->createUser($request->validated());
         } catch (\Exception $exception) {
-            $this->error(data: $request, exception: $exception);
+            $this->error(message: $exception->getMessage(), payload: $request, code: 500);
         }
 
         return new UserResource($user);
@@ -47,14 +47,14 @@ class UserController extends Controller
 
     public function show(int|string $id): UserResource
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'id' => $id,
         ]);
 
         try {
             $user = $this->userService->findUser($id);
         } catch (\Exception $exception) {
-            $this->error(data: $id, exception: $exception);
+            $this->error(message: $exception->getMessage(), payload: $exception, code: 500);
         }
 
         return new UserResource($user);
@@ -62,7 +62,7 @@ class UserController extends Controller
 
     public function update(UserRequest $request, int|string $id): UserResource
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'id' => $id,
             'request' => $request,
         ]);
@@ -70,7 +70,7 @@ class UserController extends Controller
         try {
             $user = $this->userService->updateUser($id, $request->validated());
         } catch (\Exception $exception) {
-            $this->error(data: $request, exception: $exception);
+            $this->error(message: $exception->getMessage(), payload: $request, code: 500);
         }
 
         return new UserResource($user);
@@ -78,27 +78,16 @@ class UserController extends Controller
 
     public function destroy(int|string $id): bool
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'id' => $id,
         ]);
 
         try {
             $user = $this->userService->deleteUser($id);
         } catch (\Exception $exception) {
-            $this->error(data: $id, exception: $exception);
+            $this->error(message: $exception->getMessage(), payload: $exception, code: 500);
         }
 
         return $user;
-    }
-
-    private function error($data, \Exception $exception)
-    {
-        Log::error(__CLASS__.'.'.__FUNCTION__.' => error', [
-            'data' => $data,
-            'exception' => $exception,
-            'message' => $exception->getMessage(),
-        ]);
-
-        abort(500, $exception->getMessage());
     }
 }
