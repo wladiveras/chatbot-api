@@ -174,8 +174,11 @@ class WhatsappProvinder implements MessengerServiceInterface
         $endpoint = match ($data['type']) {
             'text' => 'sendText',
             'audio' => 'sendWhatsAppAudio',
-            'image', 'video',
+            'image' => 'video',
+            'list' => 'sendList',
             'media_audio' => 'sendMedia',
+            'pool' => 'sendPoll',
+            'status' => 'sendStatus',
             default => throw new \Exception('Type not found'),
         };
 
@@ -254,12 +257,11 @@ class WhatsappProvinder implements MessengerServiceInterface
             ],
         ];
 
-        $mediaMessage = [];
-        $textMessage = [];
-        $audioMessage = [];
+        $message = [];
+
 
         if ($data['type'] === 'video' || $data['type'] === 'image' || $data['type'] === 'media_audio') {
-            $mediaMessage = [
+            $message = [
                 'mediaMessage' => [
                     'mediatype' => $data['type'] === 'media_audio' ? 'audio' : $data['type'],
                     'caption' => $data['caption'],
@@ -268,8 +270,56 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
         }
 
+        if ($data['type'] === 'list') {
+            $message = [
+                'listMessage' => [
+                    'title' => 'Title',
+                    'description' => 'Description',
+                    'buttonText' => 'Button',
+                    'footerText' => 'Footer',
+                    'sections' => [
+                        [
+                            'rows' => [
+                                [
+                                    'title' => 'row title',
+                                    'description' => 'row description',
+                                    'rowId' => '21515020'
+                                ]
+                            ],
+                            'title' => 'Section Title'
+                        ]
+                    ]
+                ],
+            ];
+        }
+
+        if ($data['type'] === 'status') {
+            $message = [
+                "statusMessage" => [
+                    "type" => "text",
+                    "content" => "textooosadad",
+                    "caption" => "wladi",
+                    "backgroundColor" => "#fff"
+                ]
+            ];
+        }
+
+        if ($data['type'] === 'pool') {
+            $message = [
+                "pollMessage" => [
+                    "name" => "Title",
+                    "selectableCount" => 2,
+                    "values" => [
+                        "option 1",
+                        "option 2",
+                        "option 3"
+                    ]
+                ]
+            ];
+        }
+
         if ($data['type'] === 'text') {
-            $textMessage = [
+            $message = [
                 'textMessage' => [
                     'text' => $data['message'],
                 ],
@@ -277,14 +327,14 @@ class WhatsappProvinder implements MessengerServiceInterface
         }
 
         if ($data['type'] === 'audio') {
-            $audioMessage = [
+            $message = [
                 'audioMessage' => [
                     'audio' => $data['file_url'],
                 ],
             ];
         }
 
-        $message = array_merge($options, $mediaMessage, $textMessage, $audioMessage);
+        $message = array_merge($options, $message);
 
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => parse data', [
             'type' => $data['type'],
@@ -442,7 +492,7 @@ class WhatsappProvinder implements MessengerServiceInterface
         }
     }
 
-    // Function to handle the webhook
+
     public function callback(array|object $data): array|object
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
@@ -539,8 +589,6 @@ class WhatsappProvinder implements MessengerServiceInterface
                     ],
                 ];
             }
-
-            // Chama o serviço de fluxo para processar a mensagem e enviar para o cliente
 
             // Criar uma funçao depois para criar essa mensagem no banco de dados
             $createMessage = $this->messageRepository->create([

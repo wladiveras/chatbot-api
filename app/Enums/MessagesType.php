@@ -17,4 +17,8 @@ enum MessagesType: string
     case AUDIO = 'audio';
 
     case LIST = 'list';
+
+    case POOL = 'pool';
+
+    case STATUS = 'status';
 }
