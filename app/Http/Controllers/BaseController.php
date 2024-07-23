@@ -8,19 +8,19 @@ use App\Http\Controllers\Controller as Controller;
 class BaseController extends Controller
 {
 
-    public function success(string|null $response, mixed $payload): JsonResponse
+    public function success(string|null $response, mixed $service): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => success', [
             'success' => true,
             'response' => $response,
-            'payload' => $payload,
+            'service' => $service,
         ]);
 
         $response = [
             'data' => [
                 'success' => true,
                 'response' => $response,
-                'payload' => $payload
+                'service' => $service
             ]
         ];
 
@@ -28,12 +28,12 @@ class BaseController extends Controller
     }
 
 
-    public function error(string $path, string|null $response, $payload, int|null $code = 404): JsonResponse
+    public function error(string $path, string|null $response, $service, string|int|null $code = 404): JsonResponse
     {
         Log::error(__CLASS__ . '.' . __FUNCTION__ . ' => error', [
             'success' => false,
             'response' => $response,
-            'payload' => $payload,
+            'service' => $service,
             'path' => $path,
         ]);
 
@@ -41,7 +41,7 @@ class BaseController extends Controller
             'data' => [
                 'success' => false,
                 'response' => $response,
-                'payload' => $payload
+                'service' => $service
             ],
         ];
 

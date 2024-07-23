@@ -13,7 +13,7 @@ class BaseRepository implements BaseRepositoryInterface
     {
     }
 
-    public function all(): Collection
+    public function all(): array|object
     {
         return $this->model->all();
     }
@@ -23,24 +23,24 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->model->cursorPaginate($limitPerPage);
     }
 
-    public function find(mixed $value, $column = 'id'): ?stdClass
+    public function find(mixed $value, $column = 'id'): array|object
     {
-        return (object) $this->model->where($column, $value)->firstOrFail()->toArray();
+        return (object) $this->model->where($column, $value)->first();
     }
 
-    public function first(mixed $value, $column = 'id'): ?stdClass
+    public function first(mixed $value, $column = 'id'): array|object
     {
-        return (object) $this->model->where($column, $value)->firstOrFail()->toArray();
+        return (object) $this->model->where($column, $value)->first();
     }
 
-    public function create(array $data, $column = 'id'): stdClass
+    public function create(array $data, $column = 'id'): array|object
     {
-        return (object) $this->model->create($data)->toArray();
+        return (object) $this->model->create($data);
     }
 
-    public function update(mixed $value, array $data, $column = 'id'): ?stdClass
+    public function update(mixed $value, array $data, $column = 'id'): array|object
     {
-        return (object) tap($this->model->where($column, $value))->update($data)->firstOrFail()->toArray();
+        return (object) tap($this->model->where($column, $value))->update($data)->first();
     }
 
     public function delete(mixed $value, $column = 'id'): bool

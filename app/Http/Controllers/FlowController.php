@@ -35,7 +35,7 @@ class FlowController extends BaseController
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
-                payload: $data->errors(),
+                service: $data->errors(),
                 code: 400
             );
         }
@@ -45,14 +45,14 @@ class FlowController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                payload: new FlowResource($flowService)
+                service: new FlowResource($flowService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
-                payload: $request->all(),
+                service: $request->all(),
                 code: $exception->getCode()
             );
         }

@@ -28,7 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'success' => false,
                     'message' => 'result not found.',
-                    'payload' => []
+                    'service' => []
                 ], 404);
             }
         });
@@ -40,7 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json([
                 'success' => false,
                 'message' => $exception->getMessage(),
-                'payload' => []
+                'service' => []
             ], 401);
         });
 

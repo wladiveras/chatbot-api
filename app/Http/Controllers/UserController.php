@@ -33,14 +33,14 @@ class UserController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                payload: $users,
+                service: $users,
             );
 
         } catch (\Exception $exception) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
-                payload: $request->all(),
+                service: $request->all(),
                 code: $exception->getCode()
             );
         }
@@ -62,7 +62,7 @@ class UserController extends BaseController
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
-                payload: $data->errors(),
+                service: $data->errors(),
                 code: 400
             );
         }
@@ -72,14 +72,14 @@ class UserController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                payload: new UserResource($user)
+                service: new UserResource($user)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
-                payload: $request->all(),
+                service: $request->all(),
                 code: $exception->getCode()
             );
         }
@@ -97,14 +97,14 @@ class UserController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                payload: new UserResource($user)
+                service: new UserResource($user)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
-                payload: $request->all(),
+                service: $request->all(),
                 code: $exception->getCode()
             );
         }
@@ -126,7 +126,7 @@ class UserController extends BaseController
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
-                payload: $data->errors(),
+                service: $data->errors(),
                 code: 400
             );
         }
@@ -136,14 +136,14 @@ class UserController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                payload: new UserResource($user)
+                service: new UserResource($user)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
-                payload: $request->all(),
+                service: $request->all(),
                 code: $exception->getCode()
             );
         }
@@ -161,14 +161,14 @@ class UserController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                payload: $user
+                service: $user
             );
 
         } catch (\Exception $exception) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
-                payload: $request->all(),
+                service: $request->all(),
                 code: $exception->getCode()
             );
         }

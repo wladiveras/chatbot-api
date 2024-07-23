@@ -10,9 +10,12 @@ use Illuminate\Support\Facades\Route;
 // Auth Service
 Route::prefix('/auth')
     ->group(function () {
-        Route::post('/sign-in', [AuthController::class, 'auth']);
-        Route::get('/user', [AuthController::class, 'authUser'])->middleware(['auth:sanctum']);
-        Route::post('/sign-out', [AuthController::class, 'logout'])->middleware(['auth:sanctum']);
+        Route::post('/sign-in', [AuthController::class, 'login']);
+        Route::post('/redirect/{provider}', [AuthController::class, 'loginWithProvider']);
+        Route::post('/callback/{provider}', [AuthController::class, 'callbackWithProvider']);
+        Route::get('/magic-link/{token}', [AuthController::class, 'magicLink']);
+        Route::get('/user', [AuthController::class, 'user'])->middleware(['auth:sanctum']);
+        Route::delete('/sign-out', [AuthController::class, 'logout'])->middleware(['auth:sanctum']);
         Route::post('/refresh-token', [AuthController::class, 'refreshToken'])->middleware(['auth:sanctum']);
 
     });
