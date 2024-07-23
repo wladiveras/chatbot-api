@@ -2,8 +2,8 @@
 
 namespace App\Repositories\Example;
 
-use App\Repositories\BaseRepository;
-use App\Models\User; // Just an example, maybe Example Models.
+use App\Models\User;
+use App\Repositories\BaseRepository; // Just an example, maybe Example Models.
 
 class ExampleRepository extends BaseRepository implements ExampleRepositoryInterface
 {

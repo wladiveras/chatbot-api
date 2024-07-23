@@ -3,10 +3,9 @@
 namespace App\Services\User;
 
 use App\Repositories\User\UserRepository;
+use App\Services\BaseService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
-
-use App\Services\BaseService;
 
 class UserService extends BaseService implements UserServiceInterface
 {
@@ -19,15 +18,14 @@ class UserService extends BaseService implements UserServiceInterface
 
     public function findAllUsers()
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
-
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $users = $this->userRepository->paginate(10);
 
-            if (!$users) {
+            if (! $users) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Usuários não identificados.',
                     code: 400
                 );
@@ -37,7 +35,7 @@ class UserService extends BaseService implements UserServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -46,14 +44,14 @@ class UserService extends BaseService implements UserServiceInterface
 
     public function findUser(int|string $id)
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $user = $this->userRepository->find($id);
 
-            if (!$user) {
+            if (! $user) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Usuários não identificados..',
                     code: 400
                 );
@@ -63,7 +61,7 @@ class UserService extends BaseService implements UserServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -72,14 +70,14 @@ class UserService extends BaseService implements UserServiceInterface
 
     public function createUser(array $data)
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $newUser = $this->userRepository->create($data);
 
-            if (!$newUser) {
+            if (! $newUser) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não foi possivel criar o usuário.',
                     code: 400
                 );
@@ -89,7 +87,7 @@ class UserService extends BaseService implements UserServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -99,14 +97,14 @@ class UserService extends BaseService implements UserServiceInterface
 
     public function updateUser(int|string $id, array $data)
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $updatedUser = $this->userRepository->update($id, $data);
 
-            if (!$updatedUser) {
+            if (! $updatedUser) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não foi possivel atualizar o usuário.',
                     code: 400
                 );
@@ -116,7 +114,7 @@ class UserService extends BaseService implements UserServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -125,14 +123,14 @@ class UserService extends BaseService implements UserServiceInterface
 
     public function deleteUser(int|string $id)
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $deleteUser = $this->userRepository->delete($id);
 
-            if (!$deleteUser) {
+            if (! $deleteUser) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não foi possivel deletar o usuário.',
                     code: 400
                 );
@@ -142,7 +140,7 @@ class UserService extends BaseService implements UserServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );

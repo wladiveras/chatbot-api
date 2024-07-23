@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -16,7 +15,6 @@ class MagicLinkEmail extends Mailable
     /**
      * Create a new message instance.
      */
-
     public function __construct(private $name, private $magicLink)
     {
         $this->name = $name;
@@ -42,7 +40,7 @@ class MagicLinkEmail extends Mailable
             view: 'mail.magic',
             with: [
                 'name' => $this->name,
-                'link' => $this->magicLink
+                'link' => $this->magicLink,
             ],
         );
     }

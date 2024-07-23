@@ -2,15 +2,11 @@
 
 namespace App\Services\Flow;
 
-
+use App\Repositories\Flow\FlowRepository;
+use App\Services\BaseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
-
-use App\Repositories\Flow\FlowRepository;
-
-use App\Services\BaseService;
-
 
 class FlowService extends BaseService implements FlowServiceInterface
 {
@@ -24,14 +20,14 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     public function validate(array $data): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $createExample = $this->flowRepository->create($data);
 
-            if (!$createExample) {
+            if (! $createExample) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não deu certo.',
                     code: 400
                 );
@@ -44,7 +40,7 @@ class FlowService extends BaseService implements FlowServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -53,14 +49,14 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     public function create(): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $flowFetch = $this->flowRepository->all();
 
-            if (!$flowFetch) {
+            if (! $flowFetch) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não deu certo.',
                     code: 400
                 );
@@ -73,7 +69,7 @@ class FlowService extends BaseService implements FlowServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );

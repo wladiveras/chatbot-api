@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class MagicLink extends Model
 {
     use HasFactory;
+
     protected $table = 'magic_links';
 
     protected $fillable = [

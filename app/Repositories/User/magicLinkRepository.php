@@ -4,8 +4,6 @@ namespace App\Repositories\User;
 
 use App\Models\MagicLink;
 use App\Repositories\BaseRepository;
-use Illuminate\Support\Str;
-
 
 class magicLinkRepository extends BaseRepository implements magicLinkRepositoryInterface
 {

@@ -2,10 +2,6 @@
 
 namespace App\Repositories;
 
-use Illuminate\Contracts\Pagination\CursorPaginator;
-use Illuminate\Database\Eloquent\Collection;
-use stdClass;
-
 interface BaseRepositoryInterface
 {
     public function all(): array|object;

@@ -4,18 +4,14 @@ namespace App\Services\Messenger\Provinder;
 
 use App\Repositories\Connection\ConnectionRepository;
 use App\Repositories\Message\MessageRepository;
-
 use App\Services\BaseService;
 use App\Services\Messenger\MessengerServiceInterface;
-
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-
-
 
 class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 {
@@ -50,7 +46,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function createConnection(array|object $data): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         $instanceName = Str::uuid()->toString();
         $token = Str::uuid()->toString();
@@ -73,7 +69,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         try {
             if ($this->connectionRepository->exists(column: 'connection_key', value: $number)) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Já existe uma conexão com esse número.',
                     code: 400
                 );
@@ -81,9 +77,9 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
             $response = $this->request->post("{$this->url}/instance/create", $payload);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não foi possível criar uma nova conexão.',
                     code: 400
                 );
@@ -96,7 +92,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
             if ($this->connectionRepository->exists(column: 'token', value: $instance)) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não foi possível criar uma nova conexão.',
                     code: 400
                 );
@@ -126,7 +122,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             return $this->success(message: 'Nova conexão criada com sucesso.', payload: $payload);
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $exception->getMessage(),
                 code: 400
             );
@@ -135,12 +131,12 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function connect(int|string $connection): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
-            if (!$this->isConnectionActive(connection: $connection, active: 0)) {
+            if (! $this->isConnectionActive(connection: $connection, active: 0)) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não foi possivel retornar essa conexão.',
                     code: 400
                 );
@@ -153,14 +149,14 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             }
 
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: 'Não foi possivel retornar essa conexão.',
                 code: 400
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $exception->getMessage(),
                 code: 400
             );
@@ -169,7 +165,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function send(array|object $data): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         $payload = $this->parse($data);
 
@@ -204,14 +200,14 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             }
 
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: 'Não foi possível enviar a mensagem.',
                 code: 400
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $exception->getMessage(),
                 code: 400
             );
@@ -220,7 +216,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function parse($data): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         $options = [];
         $message = [];
@@ -323,7 +319,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         // Merge data to send
         $message = array_merge($options, $message);
 
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => parse data', [
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => parse data', [
             'type' => $data['type'],
             'message' => $message,
         ]);
@@ -333,7 +329,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function fetch(string|int $connection): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         // Esse fetch vai trazer todas as conexoes vinculada ao usuario
         return (object) [
@@ -343,7 +339,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function status(string|int $connection): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             if ($this->isConnectionActive(connection: $connection, active: 0)) {
@@ -356,14 +352,14 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             }
 
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: 'Não foi possivel retornar essa conexão.',
                 code: 400
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $exception->getMessage(),
                 code: 400
             );
@@ -372,7 +368,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function disconnect(string|int $connection): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             if ($this->isConnectionActive(connection: $connection, active: 1)) {
@@ -387,14 +383,14 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             }
 
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: 'Não foi possivel desconectar essa conexão.',
                 code: 400
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $exception->getMessage(),
                 code: 400
             );
@@ -403,7 +399,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function delete(string|int $connection): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             if ($this->isConnectionActive(connection: $connection, active: 0)) {
@@ -417,14 +413,14 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             }
 
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: 'Não foi possível desconectar essa conexão.',
                 code: 400
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $exception->getMessage(),
                 code: 400
             );
@@ -433,7 +429,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function callback(array|object $data): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         $event = Arr::get($data, 'data.event', Arr::get($data, 'event'));
 
@@ -448,7 +444,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function triggerConnection(array|object $data): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         $connection = Arr::get($data, 'instance');
         $state = Arr::get($data, 'data.state', 'close');
@@ -464,7 +460,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         }
 
         return $this->error(
-            path: __CLASS__ . '.' . __FUNCTION__,
+            path: __CLASS__.'.'.__FUNCTION__,
             message: 'Conexão não foi possivel atualizar a conexão.',
             code: 400
         );
@@ -472,14 +468,14 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function triggerFlow(array|object $data): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         $connection = Arr::get($data, 'instance');
         $FromOwner = Arr::get($data, 'data.key.fromMe');
 
         if ($FromOwner) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: 'Não foi possível disparar o fluxo do mesmo numero de telefone da conexão.',
                 code: 400
             );
@@ -504,7 +500,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $exception->getMessage(),
                 code: 400
             );
@@ -513,7 +509,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     private function createMessage(string|int|null $flowId, string|int|null $connectionId, $data, $payload = [], $origin = 'system'): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         if ($payload) {
             $payload = $data;
@@ -541,9 +537,9 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     private function connectionExists($connection): array|object|bool
     {
-        if (!$connection) {
+        if (! $connection) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: 'Conexão não identificada.',
                 code: 400
             );
@@ -551,7 +547,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
         if ($connection->is_active === 0) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: 'Conexão está inativa.',
                 code: 400
             );

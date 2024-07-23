@@ -7,6 +7,4 @@ interface FlowServiceInterface
     public function validate(array $data);
 
     public function create();
-
-
 }

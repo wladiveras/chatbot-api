@@ -2,6 +2,4 @@
 
 namespace App\Repositories\User;
 
-interface magicLinkRepositoryInterface
-{
-}
+interface magicLinkRepositoryInterface {}

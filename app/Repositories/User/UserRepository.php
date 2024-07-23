@@ -4,9 +4,8 @@ namespace App\Repositories\User;
 
 use App\Models\User;
 use App\Repositories\BaseRepository;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Str;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
@@ -28,12 +27,13 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
 
     }
 
-    public function refreshToken(): string|null
+    public function refreshToken(): ?string
     {
         $user = auth()->user();
 
         return $user->createToken(Str::uuid()->toString())->plainTextToken;
     }
+
     public function sigUpWithEmail($data): object|array
     {
         return (object) $this->model->create($data)->toArray();
