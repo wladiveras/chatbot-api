@@ -21,9 +21,8 @@ class PaymentController extends BaseController
 
     public function pay(string $gateway, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
-            'gateway' => $gateway,
         ]);
 
         $data = Validator::make($request->all(), [
@@ -60,9 +59,8 @@ class PaymentController extends BaseController
 
     public function checkPayment(string $gateway, int|string $id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
-            'id' => $id,
-            'gateway' => $gateway,
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
         ]);
 
         $data = Validator::make($request->all(), [

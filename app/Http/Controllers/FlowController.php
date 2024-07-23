@@ -23,9 +23,8 @@ class FlowController extends BaseController
 
     public function create(string $flow_id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
-            'provinder' => $flow_id,
         ]);
 
         $data = Validator::make($request->all(), [

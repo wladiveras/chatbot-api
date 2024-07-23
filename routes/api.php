@@ -10,9 +10,11 @@ use Illuminate\Support\Facades\Route;
 // Auth Service
 Route::prefix('/auth')
     ->group(function () {
-        Route::get('/user', [AuthController::class, 'user'])->middleware(['auth:sanctum']);
         Route::post('/sign-in', [AuthController::class, 'auth']);
-        Route::post('/refresh-token', [AuthController::class, 'token'])->middleware(['auth:sanctum']);
+        Route::get('/user', [AuthController::class, 'authUser'])->middleware(['auth:sanctum']);
+        Route::post('/sign-out', [AuthController::class, 'logout'])->middleware(['auth:sanctum']);
+        Route::post('/refresh-token', [AuthController::class, 'refreshToken'])->middleware(['auth:sanctum']);
+
     });
 
 // User Service

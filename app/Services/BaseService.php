@@ -24,7 +24,7 @@ class BaseService implements BaseServiceInterface
     public function success(string $message, mixed $payload = []): object|array
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => success', [
-            'success' => false,
+            'success' => true,
             'message' => $message,
             'payload' => $payload,
         ]);

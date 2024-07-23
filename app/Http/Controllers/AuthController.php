@@ -21,6 +21,10 @@ class AuthController extends BaseController
 
     public function auth(Request $request): JsonResponse
     {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
+        ]);
+
         $data = Validator::make($request->all(), [
             'email' => 'email|required',
         ]);
@@ -63,8 +67,12 @@ class AuthController extends BaseController
         }
     }
 
-    public function user(Request $request): JsonResponse
+    public function authUser(Request $request): JsonResponse
     {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
+        ]);
+
         try {
             $user = auth()->user();
 
@@ -82,18 +90,36 @@ class AuthController extends BaseController
             );
         }
     }
-    public function token(Request $request): JsonResponse
+    public function refreshToken(Request $request): JsonResponse
     {
-        $user = $request->user();
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
+        ]);
 
-        return $this->success(
-            response: Carbon::now()->toDateTimeString(),
-            payload: $user->createToken(Str::uuid()->toString())->plainTextToken
-        );
+        try {
+            $user = auth()->user();
+
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                payload: $user->createToken(Str::uuid()->toString())->plainTextToken
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
+                payload: $request->all(),
+                code: $exception->getCode()
+            );
+        }
     }
 
     public function logout(Request $request): JsonResponse
     {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
+        ]);
+
         try {
             $request->user()->currentAccessToken()->delete();
 

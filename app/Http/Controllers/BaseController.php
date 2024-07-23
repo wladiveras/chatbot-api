@@ -11,7 +11,7 @@ class BaseController extends Controller
     public function success(string|null $response, mixed $payload): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => success', [
-            'success' => false,
+            'success' => true,
             'response' => $response,
             'payload' => $payload,
         ]);
