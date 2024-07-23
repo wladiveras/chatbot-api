@@ -14,5 +14,4 @@ interface UserServiceInterface
 
     public function deleteUser(int|string $id);
 
-    private function response(bool $success, string $message, mixed $payload = []): object;
 }

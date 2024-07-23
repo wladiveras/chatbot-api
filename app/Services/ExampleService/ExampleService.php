@@ -1,33 +1,32 @@
 <?php
 
-namespace App\Services\Flow;
+namespace App\Services\ExampleService;
 
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 
-use App\Repositories\Flow\FlowRepository;
+use App\Repositories\Example\ExampleRepository;
 
 use App\Services\BaseService;
 
 
-class FlowService extends BaseService implements FlowServiceInterface
+class ExampleService extends BaseService implements ExampleServiceInterface
 {
-    private $flowRepository;
+    private $exampleRepository;
 
     public function __construct()
     {
-
-        $this->flowRepository = App::make(FlowRepository::class);
+        $this->exampleRepository = App::make(ExampleRepository::class);
     }
 
-    public function validate(array $data): JsonResponse
+    public function functionExample(array $data): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-            $createExample = $this->flowRepository->create($data);
+            $createExample = $this->exampleRepository->create($data);
 
             if (!$createExample) {
                 return $this->error(message: 'Não deu certo.', code: 400);
@@ -43,25 +42,24 @@ class FlowService extends BaseService implements FlowServiceInterface
         }
     }
 
-    public function create(): JsonResponse
+    public function functionExample2($id): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-            $flowFetch = $this->flowRepository->all();
+            $fetchExample = $this->exampleRepository->first(column: 'id', value: $id);
 
-            if (!$flowFetch) {
+            if (!$fetchExample) {
                 return $this->error(message: 'Não deu certo.', code: 400);
             }
 
             return $this->success(
                 message: 'Tudo certo, vamos continuar.',
-                payload: $flowFetch
+                payload: $fetchExample
             );
 
         } catch (\Exception $e) {
             return $this->error(message: $e->getMessage(), code: $e->getCode());
         }
-
     }
 }

@@ -8,5 +8,5 @@ interface FlowServiceInterface
 
     public function create();
 
-    private function response(bool $success, string $message, mixed $payload = []): object;
+
 }
