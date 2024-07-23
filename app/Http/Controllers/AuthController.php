@@ -6,8 +6,9 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
-
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use Validator;
 
 class AuthController extends BaseController
 {
@@ -19,12 +20,22 @@ class AuthController extends BaseController
 
     public function auth(Request $request): JsonResponse
     {
-        $request->validate([
-            'email' => 'required|email',
+        $data = Validator::make($request->all(), [
+            'email' => 'email|required',
         ]);
 
+        if ($data->fails()) {
+            return $this->error(
+                message: 'Error de validação de dados.',
+                payload: $data->errors(),
+                code: 400
+            );
+        }
+
+        $data = $data->validated();
+
         try {
-            $user = User::where('email', $request->email)->first();
+            $user = User::where('email', $data['email'])->first();
 
             if (!$user) {
                 return $this->error(
@@ -36,7 +47,7 @@ class AuthController extends BaseController
 
             return $this->success(
                 message: 'Token gerado com sucesso para o usuário.',
-                payload: $user->createToken($request->email)->plainTextToken
+                payload: $user->createToken(Str::uuid()->toString())->plainTextToken
             );
 
         } catch (\Exception $exception) {
@@ -56,6 +67,34 @@ class AuthController extends BaseController
             return $this->success(
                 message: 'Usuário retornado com sucesso',
                 payload: $user
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                message: $exception->getMessage(),
+                payload: $request->all(),
+                code: $exception->getCode()
+            );
+        }
+    }
+    public function token(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        return $this->success(
+            message: 'Token atualizado com sucesso.',
+            payload: $user->createToken(Str::uuid()->toString())->plainTextToken
+        );
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        try {
+            $request->user()->currentAccessToken()->delete();
+
+            return $this->success(
+                message: 'Usuário desconectado com sucesso',
+                payload: []
             );
 
         } catch (\Exception $exception) {

@@ -10,7 +10,7 @@ class PaymentService
     {
         return match ($gateway) {
             'braip' => new BraipGateway,
-            default => throw new \InvalidArgumentException('Invalid payment gateway'),
+            default => throw new \InvalidArgumentException('Invalid payment gateway selected.', 404),
         };
     }
 }

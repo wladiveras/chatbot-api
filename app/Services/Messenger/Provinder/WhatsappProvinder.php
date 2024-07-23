@@ -502,7 +502,7 @@ class WhatsappProvinder implements MessengerServiceInterface
     private function response(bool $success, string $message, mixed $payload = []): object
     {
         if ($success === false) {
-            throw new \Exception($message, 400);
+            throw new \Exception($message, 400); // Bad Request
         }
 
         return (object) [

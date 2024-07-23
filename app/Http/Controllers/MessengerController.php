@@ -38,7 +38,7 @@ class MessengerController extends BaseController
         if ($data->fails()) {
             return $this->error(
                 message: 'Error de validação de dados.',
-                payload: $request->errors(),
+                payload: $data->errors(),
                 code: 400
             );
         }
@@ -163,7 +163,7 @@ class MessengerController extends BaseController
             'provider' => $provider,
         ]);
 
-        $request = Validator::make($request->all(), [
+        $data = Validator::make($request->all(), [
             'type' => [Rule::enum(MessagesType::class)],
             'message' => 'string',
             'connection' => 'string|required',
@@ -173,16 +173,16 @@ class MessengerController extends BaseController
             'file_url' => 'string',
         ]);
 
-        if ($request->fails()) {
+        if ($data->fails()) {
             return $this->error(
                 message: 'Error de validação de dados.',
-                payload: $request->errors(),
+                payload: $data->errors(),
                 code: 400
             );
         }
 
         try {
-            $messengerService = $this->messengerService->integration($provider)->send($request->validated());
+            $messengerService = $this->messengerService->integration($provider)->send($data->validated());
 
             return $this->success(
                 message: 'Mensagem enviada com sucesso.',

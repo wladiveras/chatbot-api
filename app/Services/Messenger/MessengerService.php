@@ -10,7 +10,7 @@ class MessengerService
     {
         return match ($provinder) {
             'whatsapp' => new WhatsappProvinder,
-            default => throw new \InvalidArgumentException('Invalid integration service'),
+            default => throw new \InvalidArgumentException('Invalid integration service.', 404),
         };
     }
 }

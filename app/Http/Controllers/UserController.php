@@ -7,7 +7,7 @@ use App\Http\Resources\UserResource;
 use App\Services\User\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Validation\Rule;
 use App\Enums\UserStatus;
@@ -40,7 +40,6 @@ class UserController extends BaseController
                 code: $exception->getCode()
             );
         }
-
     }
 
     public function store(Request $request): JsonResponse
@@ -49,22 +48,22 @@ class UserController extends BaseController
             'request' => $request,
         ]);
 
-        $request = Validator::make($request->all(), [
+        $data = Validator::make($request->all(), [
             'name' => 'nullable|string|required|max:100|min:3',
             'email' => 'nullable|string|email|max:254',
             'status' => ['nullable', Rule::enum(UserStatus::class)],
         ]);
 
-        if ($request->fails()) {
+        if ($data->fails()) {
             return $this->error(
                 message: 'Error de validação de dados.',
-                payload: $request->errors(),
+                payload: $data->errors(),
                 code: 400
             );
         }
 
         try {
-            $user = $this->userService->createUser($request->validated());
+            $user = $this->userService->createUser($data->validated());
 
             return $this->success(
                 message: 'Usuário atualizado com sucesso.',
@@ -111,8 +110,22 @@ class UserController extends BaseController
             'request' => $request,
         ]);
 
+        $data = Validator::make($request->all(), [
+            'name' => 'nullable|string|required|max:100|min:3',
+            'email' => 'nullable|string|email|max:254',
+            'status' => ['nullable', Rule::enum(UserStatus::class)],
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                message: 'Error de validação de dados.',
+                payload: $data->errors(),
+                code: 400
+            );
+        }
+
         try {
-            $user = $this->userService->updateUser($id, $request->validated());
+            $user = $this->userService->updateUser($id, $data->validated());
 
             return $this->success(
                 message: 'Usuário atualizado com sucesso.',

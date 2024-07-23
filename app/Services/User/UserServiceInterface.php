@@ -13,4 +13,6 @@ interface UserServiceInterface
     public function updateUser(int|string $id, array $data);
 
     public function deleteUser(int|string $id);
+
+    private function response(bool $success, string $message, mixed $payload = []): object;
 }

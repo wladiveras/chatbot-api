@@ -27,20 +27,20 @@ class FlowController extends BaseController
             'provinder' => $flow_id,
         ]);
 
-        $request = Validator::make($request->all(), [
+        $data = Validator::make($request->all(), [
             'data' => 'array',
         ]);
 
-        if ($request->fails()) {
+        if ($data->fails()) {
             return $this->error(
                 message: 'Error de validação de dados.',
-                payload: $request->errors(),
+                payload: $data->errors(),
                 code: 400
             );
         }
 
         try {
-            $flowService = $this->flowService->validate($request->validated())->create();
+            $flowService = $this->flowService->validate($data->validated())->create();
 
             return $this->success(
                 message: 'Fluxo criado com sucesso.',

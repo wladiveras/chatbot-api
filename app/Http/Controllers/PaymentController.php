@@ -7,6 +7,7 @@ use App\Services\Payment\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Validator;
 
 class PaymentController extends BaseController
 {
@@ -24,8 +25,21 @@ class PaymentController extends BaseController
             'gateway' => $gateway,
         ]);
 
+        $data = Validator::make($request->all(), [
+            'id' => 'string|max:255',
+            'name' => 'string',
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                message: 'Error de validação de dados.',
+                payload: $data->errors(),
+                code: 400
+            );
+        }
+
         try {
-            $payment = $this->paymentService->gateway($gateway)->pay($request->validated());
+            $payment = $this->paymentService->gateway($gateway)->pay($data->validated());
 
             return $this->success(
                 message: 'Pedido aberto com sucesso.',
@@ -47,6 +61,19 @@ class PaymentController extends BaseController
             'id' => $id,
             'gateway' => $gateway,
         ]);
+
+        $data = Validator::make($request->all(), [
+            'id' => 'string|max:255',
+            'name' => 'string',
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                message: 'Error de validação de dados.',
+                payload: $data->errors(),
+                code: 400
+            );
+        }
 
         try {
             $payment = $this->paymentService->gateway($gateway)->checkPayment($id);

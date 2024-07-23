@@ -37,4 +37,18 @@ class FlowService implements FlowServiceInterface
             'data' => $this->flowRepository->all(),
         ];
     }
+
+    private function response(bool $success, string $message, mixed $payload = []): object
+    {
+
+        if ($success === false) {
+            throw new \Exception($message, 502); // bad gateway
+        }
+
+        return (object) [
+            'success' => $success,
+            'message' => $message,
+            'payload' => $payload,
+        ];
+    }
 }

@@ -21,4 +21,6 @@ interface MessengerServiceInterface
     public function callback(array|object $data): array|object;
 
     public function parse(array|object $data): array|object;
+
+    private function response(bool $success, string $message, mixed $payload = []): object;
 }

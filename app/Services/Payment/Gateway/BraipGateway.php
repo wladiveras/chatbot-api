@@ -10,19 +10,39 @@ class BraipGateway implements PaymentServiceInterface
 {
     public function pay(array|object $data): array|object
     {
-        return (object) [
-            'id' => null,
-            'gateway' => 'braip',
-            'status' => $data,
-        ];
+        $paid = false;
+
+        if (!$paid) {
+            return $this->response(success: false, message: 'Não foi possível redirecionar.', );
+        }
+
+        return $this->response(success: true, message: 'Redirecionado para pagamento.');
+
     }
 
     public function checkPayment(int|string $id): array|object
     {
+        $paid = true;
+
+        if (!$paid) {
+            return $this->response(success: false, message: 'Pagamento recusado.');
+        }
+
+        return $this->response(success: true, message: 'Pagamento confirmado, produto adquirido.');
+
+    }
+
+    private function response(bool $success, string $message, mixed $payload = []): object
+    {
+
+        if ($success === false) {
+            throw new \Exception($message, 502); // bad gateway
+        }
+
         return (object) [
-            'id' => $id,
-            'gateway' => 'braip',
-            'status' => 'paid',
+            'success' => $success,
+            'message' => $message,
+            'payload' => $payload,
         ];
     }
 }

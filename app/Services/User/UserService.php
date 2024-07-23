@@ -38,4 +38,18 @@ class UserService implements UserServiceInterface
     {
         return $this->userRepository->delete($id);
     }
+
+    private function response(bool $success, string $message, mixed $payload = []): object
+    {
+
+        if ($success === false) {
+            throw new \Exception($message, 502); // bad gateway
+        }
+
+        return (object) [
+            'success' => $success,
+            'message' => $message,
+            'payload' => $payload,
+        ];
+    }
 }
