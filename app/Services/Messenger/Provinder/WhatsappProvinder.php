@@ -205,7 +205,7 @@ class WhatsappProvinder implements MessengerServiceInterface
         }
 
         // Media files
-        if ($data['type'] === 'video' || $data['type'] === 'image' || $data['type'] === 'media_audio') {
+        if (in_array($data['type'], ['video', 'image', 'media_audio'])) {
             $message = [
                 'mediaMessage' => [
                     'mediatype' => $data['type'] === 'media_audio' ? 'audio' : $data['type'],
@@ -270,7 +270,7 @@ class WhatsappProvinder implements MessengerServiceInterface
             ];
         }
 
-        // Texto message
+        // Text message
         if ($data['type'] === 'text') {
             $message = [
                 'textMessage' => [
@@ -443,7 +443,8 @@ class WhatsappProvinder implements MessengerServiceInterface
                 flowId: $connection->flow_id,
                 connectionId: $connection->id,
                 data: $data,
-                origin: 'client'
+                origin: 'client',
+                payload: $data,
             );
 
             return $this->response(success: true, message: 'Fluxo disparado com sucesso.', payload: $createMessage);
@@ -458,18 +459,20 @@ class WhatsappProvinder implements MessengerServiceInterface
         if ($payload) {
             $payload = $data;
         }
-        if ($data['type'] === 'text') {
-            $message = $data['message'];
-        } else {
-            $message = $data['file_url'];
-        }
+
+        $type = Arr::get($data, 'type', 'text');
+
+        $message = match ($origin) {
+            'client' => Arr::get($data, 'data.message.extendedTextMessage.text', Arr::get($data, 'data.message.conversation', 'Entendi...')),
+            default => ($type === 'text') ? $data['message'] : $data['file_url'],
+        };
 
         $createMessage = $this->messageRepository->create([
-            'flow_id' => $flowId ?? null,
-            'connection_id' => $connectionId ?? null,
+            'flow_id' => $flowId,
+            'connection_id' => $connectionId,
             'flow_session_id' => Arr::get($data, 'flow_session_id', null),
             'content' => $message,
-            'type' => Arr::get($data, 'type', 'text'),
+            'type' => $type,
             'origin' => $origin,
             'payload' => json_encode($payload),
         ]);
@@ -499,7 +502,7 @@ class WhatsappProvinder implements MessengerServiceInterface
     private function response(bool $success, string $message, mixed $payload = []): object
     {
         if ($success === false) {
-            throw new \Exception($message);
+            throw new \Exception($message, 400);
         }
 
         return (object) [

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\PaymentRequest;
 use App\Http\Resources\PaymentResource;
 use App\Services\Payment\PaymentService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 class PaymentController extends BaseController
 {
@@ -16,7 +17,7 @@ class PaymentController extends BaseController
         $this->paymentService = $paymentService;
     }
 
-    public function pay(string $gateway, PaymentRequest $request)
+    public function pay(string $gateway, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'request' => $request,
@@ -25,14 +26,22 @@ class PaymentController extends BaseController
 
         try {
             $payment = $this->paymentService->gateway($gateway)->pay($request->validated());
-        } catch (\Exception $exception) {
-            $this->error(message: $exception->getMessage(), payload: $exception, code: 500);
-        }
 
-        return new PaymentResource($payment);
+            return $this->success(
+                message: 'Pedido aberto com sucesso.',
+                payload: new PaymentResource($payment)
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                message: $exception->getMessage(),
+                payload: $request->all(),
+                code: $exception->getCode()
+            );
+        }
     }
 
-    public function checkPayment(string $gateway, int|string $id)
+    public function checkPayment(string $gateway, int|string $id, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'id' => $id,
@@ -42,10 +51,17 @@ class PaymentController extends BaseController
         try {
             $payment = $this->paymentService->gateway($gateway)->checkPayment($id);
 
-            return new PaymentResource($payment);
+            return $this->success(
+                message: 'Pedido verificado com sucesso.',
+                payload: new PaymentResource($payment)
+            );
 
         } catch (\Exception $exception) {
-            $this->error(message: $exception->getMessage(), payload: $exception, code: 500);
+            return $this->error(
+                message: $exception->getMessage(),
+                payload: $request->all(),
+                code: $exception->getCode()
+            );
         }
     }
 

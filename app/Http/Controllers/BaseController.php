@@ -1,18 +1,14 @@
 <?php
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller as Controller;
 
 class BaseController extends Controller
 {
-    /**
-     * success response method.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function response($message, $payload)
+
+    public function success(string|null $message, mixed $payload): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => response', [
             'success' => false,
@@ -31,12 +27,8 @@ class BaseController extends Controller
         return response()->json($response, 200);
     }
 
-    /**
-     * return error response.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function error($message, $payload, $code = 404)
+
+    public function error(string|null $message, $payload, int|null $code = 404): JsonResponse
     {
         Log::error(__CLASS__ . '.' . __FUNCTION__ . ' => error', [
             'success' => false,
