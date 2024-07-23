@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Validator;
 use Illuminate\Validation\Rule;
 use App\Enums\MessagesType;
+use Carbon\Carbon;
 
 
 class MessengerController extends BaseController
@@ -24,9 +25,8 @@ class MessengerController extends BaseController
 
     public function createConnection(string $provinder, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
-            'provinder' => $provinder,
         ]);
 
         $data = Validator::make($request->all(), [
@@ -37,23 +37,25 @@ class MessengerController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                message: 'Error de validação de dados.',
-                payload: $request->errors(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                payload: $data->errors(),
                 code: 400
             );
         }
 
         try {
-            $messengerService = $this->messengerService->integration($provinder)->createConnection($data->validated());
+            $messengerService = $this->messengerService->integration($provinder)->createConnection($data->validate());
 
             return $this->success(
-                message: 'Conexão Criada com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: $messengerService
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -62,22 +64,22 @@ class MessengerController extends BaseController
 
     public function connect(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
-            'connection' => $connection,
-            'provinder' => $provinder,
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
         ]);
 
         try {
             $messengerService = $this->messengerService->integration($provinder)->connect($connection);
 
             return $this->success(
-                message: 'Conexão retornada com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new MessengerResource($messengerService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -86,22 +88,22 @@ class MessengerController extends BaseController
 
     public function status(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
-            'connection' => $connection,
-            'provinder' => $provinder,
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
         ]);
 
         try {
             $messengerService = $this->messengerService->integration($provinder)->status($connection);
 
             return $this->success(
-                message: 'Status da conexão retornado com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new MessengerResource($messengerService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -110,22 +112,22 @@ class MessengerController extends BaseController
 
     public function disconnect(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
-            'connection' => $connection,
-            'provinder' => $provinder,
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
         ]);
 
         try {
             $messengerService = $this->messengerService->integration($provinder)->disconnect($connection);
 
             return $this->success(
-                message: 'Conexão desconectada com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new MessengerResource($messengerService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -134,22 +136,22 @@ class MessengerController extends BaseController
 
     public function delete(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
-            'connection' => $connection,
-            'provinder' => $provinder,
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
         ]);
 
         try {
             $messengerService = $this->messengerService->integration($provinder)->delete($connection);
 
             return $this->success(
-                message: 'Conexão deletada com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new MessengerResource($messengerService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -158,12 +160,11 @@ class MessengerController extends BaseController
 
     public function sendMessage(string $provider, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
-            'provider' => $provider,
         ]);
 
-        $request = Validator::make($request->all(), [
+        $data = Validator::make($request->all(), [
             'type' => [Rule::enum(MessagesType::class)],
             'message' => 'string',
             'connection' => 'string|required',
@@ -173,25 +174,27 @@ class MessengerController extends BaseController
             'file_url' => 'string',
         ]);
 
-        if ($request->fails()) {
+        if ($data->fails()) {
             return $this->error(
-                message: 'Error de validação de dados.',
-                payload: $request->errors(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                payload: $data->errors(),
                 code: 400
             );
         }
 
         try {
-            $messengerService = $this->messengerService->integration($provider)->send($request->validated());
+            $messengerService = $this->messengerService->integration($provider)->send($data->validate());
 
             return $this->success(
-                message: 'Mensagem enviada com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new MessengerResource($messengerService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -200,22 +203,22 @@ class MessengerController extends BaseController
 
     public function callback(string $provider, Request $request)
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
-            'provider' => $provider,
         ]);
 
         try {
             $messengerService = $this->messengerService->integration($provider)->callback($request->all());
 
             return $this->success(
-                message: 'Callback recebido com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: $messengerService
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );

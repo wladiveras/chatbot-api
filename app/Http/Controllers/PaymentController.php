@@ -7,6 +7,8 @@ use App\Services\Payment\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Validator;
+use Carbon\Carbon;
 
 class PaymentController extends BaseController
 {
@@ -19,22 +21,36 @@ class PaymentController extends BaseController
 
     public function pay(string $gateway, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
-            'gateway' => $gateway,
         ]);
 
+        $data = Validator::make($request->all(), [
+            'id' => 'string|max:255',
+            'name' => 'string',
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                payload: $data->errors(),
+                code: 400
+            );
+        }
+
         try {
-            $payment = $this->paymentService->gateway($gateway)->pay($request->validated());
+            $payment = $this->paymentService->gateway($gateway)->pay($data->validate());
 
             return $this->success(
-                message: 'Pedido aberto com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new PaymentResource($payment)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -43,22 +59,36 @@ class PaymentController extends BaseController
 
     public function checkPayment(string $gateway, int|string $id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
-            'id' => $id,
-            'gateway' => $gateway,
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
         ]);
+
+        $data = Validator::make($request->all(), [
+            'id' => 'string|max:255',
+            'name' => 'string',
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                payload: $data->errors(),
+                code: 400
+            );
+        }
 
         try {
             $payment = $this->paymentService->gateway($gateway)->checkPayment($id);
 
             return $this->success(
-                message: 'Pedido verificado com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new PaymentResource($payment)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );

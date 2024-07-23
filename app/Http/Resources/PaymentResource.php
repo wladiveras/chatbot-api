@@ -17,9 +17,9 @@ class PaymentResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id ?? null,
-            'gateway' => $this->gateway,
-            'status' => $this->status,
+            'success' => $this->success,
+            'message' => $this->message,
+            'payload' => $this->payload,
         ];
     }
 }

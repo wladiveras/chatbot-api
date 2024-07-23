@@ -10,13 +10,13 @@ interface BaseRepositoryInterface
 {
     public function all(): Collection;
 
-    public function paginate(int $limitPerPage): CursorPaginator;
+    public function paginate(int $limitPerPage): array|object;
 
-    public function find(string $column, mixed $value): ?stdClass;
+    public function find(mixed $value, $column = 'id'): ?stdClass;
 
-    public function create(array $data): stdClass;
+    public function create(array $data, $column = 'id'): stdClass;
 
-    public function update(string $column, mixed $value, array $data): ?stdClass;
+    public function update(mixed $value, array $data, $column = 'id'): ?stdClass;
 
-    public function delete(string $column, mixed $value): bool;
+    public function delete(mixed $value, $column = 'id'): bool;
 }

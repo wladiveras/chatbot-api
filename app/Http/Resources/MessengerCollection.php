@@ -5,12 +5,12 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class IntegrationCollection extends ResourceCollection
+class MessengerCollection extends ResourceCollection
 {
     public function toArray(Request $request): array
     {
         return [
-            $this->collection,
+            'messages' => $this->collection,
         ];
     }
 }

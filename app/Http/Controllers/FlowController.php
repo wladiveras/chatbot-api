@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class FlowController extends BaseController
 {
@@ -22,34 +23,35 @@ class FlowController extends BaseController
 
     public function create(string $flow_id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
-            'provinder' => $flow_id,
         ]);
 
-        $request = Validator::make($request->all(), [
+        $data = Validator::make($request->all(), [
             'data' => 'array',
         ]);
 
-        if ($request->fails()) {
+        if ($data->fails()) {
             return $this->error(
-                message: 'Error de validação de dados.',
-                payload: $request->errors(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                payload: $data->errors(),
                 code: 400
             );
         }
 
         try {
-            $flowService = $this->flowService->validate($request->validated())->create();
+            $flowService = $this->flowService->validate($data->validate())->create();
 
             return $this->success(
-                message: 'Fluxo criado com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new FlowResource($flowService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );

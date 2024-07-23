@@ -7,10 +7,11 @@ use App\Http\Resources\UserResource;
 use App\Services\User\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Validation\Rule;
 use App\Enums\UserStatus;
+use Carbon\Carbon;
 
 class UserController extends BaseController
 {
@@ -23,57 +24,61 @@ class UserController extends BaseController
 
     public function index(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start');
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
+        ]);
 
         try {
             $users = $this->userService->findAllUsers();
 
             return $this->success(
-                message: 'Usuário atualizado com sucesso.',
-                payload: new UserCollection($users)
+                response: Carbon::now()->toDateTimeString(),
+                payload: $users,
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
         }
-
     }
 
     public function store(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
-        $request = Validator::make($request->all(), [
+        $data = Validator::make($request->all(), [
             'name' => 'nullable|string|required|max:100|min:3',
             'email' => 'nullable|string|email|max:254',
             'status' => ['nullable', Rule::enum(UserStatus::class)],
         ]);
 
-        if ($request->fails()) {
+        if ($data->fails()) {
             return $this->error(
-                message: 'Error de validação de dados.',
-                payload: $request->errors(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                payload: $data->errors(),
                 code: 400
             );
         }
 
         try {
-            $user = $this->userService->createUser($request->validated());
+            $user = $this->userService->createUser($data->validate());
 
             return $this->success(
-                message: 'Usuário atualizado com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new UserResource($user)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -83,21 +88,22 @@ class UserController extends BaseController
 
     public function show(int|string $id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
-            'id' => $id,
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
         ]);
 
         try {
             $user = $this->userService->findUser($id);
 
             return $this->success(
-                message: 'Usuário atualizado com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new UserResource($user)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -106,22 +112,37 @@ class UserController extends BaseController
 
     public function update(Request $request, int|string $id): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
-            'id' => $id,
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
+        $data = Validator::make($request->all(), [
+            'name' => 'nullable|string|required|max:100|min:3',
+            'email' => 'nullable|string|email|max:254',
+            'status' => ['nullable', Rule::enum(UserStatus::class)],
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                payload: $data->errors(),
+                code: 400
+            );
+        }
+
         try {
-            $user = $this->userService->updateUser($id, $request->validated());
+            $user = $this->userService->updateUser($id, $data->validate());
 
             return $this->success(
-                message: 'Usuário atualizado com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new UserResource($user)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -131,21 +152,22 @@ class UserController extends BaseController
 
     public function destroy(int|string $id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
-            'id' => $id,
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
         ]);
 
         try {
             $user = $this->userService->deleteUser($id);
 
             return $this->success(
-                message: 'Usuário deletado com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: $user
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
