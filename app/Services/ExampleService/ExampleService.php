@@ -29,7 +29,11 @@ class ExampleService extends BaseService implements ExampleServiceInterface
             $createExample = $this->exampleRepository->create($data);
 
             if (!$createExample) {
-                return $this->error(message: 'Não deu certo.', code: 400);
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não deu certo.',
+                    code: 400
+                );
             }
 
             return $this->success(
@@ -38,7 +42,11 @@ class ExampleService extends BaseService implements ExampleServiceInterface
             );
 
         } catch (\Exception $e) {
-            return $this->error(message: $e->getMessage(), code: $e->getCode());
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
     }
 
@@ -50,7 +58,11 @@ class ExampleService extends BaseService implements ExampleServiceInterface
             $fetchExample = $this->exampleRepository->first(column: 'id', value: $id);
 
             if (!$fetchExample) {
-                return $this->error(message: 'Não deu certo.', code: 400);
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não deu certo.',
+                    code: 400
+                );
             }
 
             return $this->success(
@@ -59,7 +71,11 @@ class ExampleService extends BaseService implements ExampleServiceInterface
             );
 
         } catch (\Exception $e) {
-            return $this->error(message: $e->getMessage(), code: $e->getCode());
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
     }
 }

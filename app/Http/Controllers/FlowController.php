@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class FlowController extends BaseController
 {
@@ -33,23 +34,25 @@ class FlowController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                message: 'Error de validação de dados.',
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
                 payload: $data->errors(),
                 code: 400
             );
         }
 
         try {
-            $flowService = $this->flowService->validate($data->validated())->create();
+            $flowService = $this->flowService->validate($data->validate())->create();
 
             return $this->success(
-                message: 'Fluxo criado com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new FlowResource($flowService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );

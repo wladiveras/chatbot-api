@@ -9,44 +9,46 @@ use stdClass;
 
 class BaseRepository implements BaseRepositoryInterface
 {
-    public function __construct(protected Model $model) {}
+    public function __construct(protected Model $model)
+    {
+    }
 
     public function all(): Collection
     {
         return $this->model->all();
     }
 
-    public function paginate(int $limitPerPage): CursorPaginator
+    public function paginate(int $limitPerPage): array|object
     {
         return $this->model->cursorPaginate($limitPerPage);
     }
 
-    public function find(string $column, mixed $value): ?stdClass
+    public function find(mixed $value, $column = 'id'): ?stdClass
     {
         return (object) $this->model->where($column, $value)->firstOrFail()->toArray();
     }
 
-    public function first($column, mixed $value): ?stdClass
+    public function first(mixed $value, $column = 'id'): ?stdClass
     {
         return (object) $this->model->where($column, $value)->firstOrFail()->toArray();
     }
 
-    public function create(array $data): stdClass
+    public function create(array $data, $column = 'id'): stdClass
     {
         return (object) $this->model->create($data)->toArray();
     }
 
-    public function update(string $column, mixed $value, array $data): ?stdClass
+    public function update(mixed $value, array $data, $column = 'id'): ?stdClass
     {
         return (object) tap($this->model->where($column, $value))->update($data)->firstOrFail()->toArray();
     }
 
-    public function delete(string $column, mixed $value): bool
+    public function delete(mixed $value, $column = 'id'): bool
     {
         return $this->model->where($column, $value)->delete();
     }
 
-    public function exists($column, mixed $value): bool
+    public function exists(mixed $value, $column = 'id'): bool
     {
 
         return (bool) $this->model->where($column, $value)->exists();

@@ -30,7 +30,11 @@ class FlowService extends BaseService implements FlowServiceInterface
             $createExample = $this->flowRepository->create($data);
 
             if (!$createExample) {
-                return $this->error(message: 'Não deu certo.', code: 400);
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não deu certo.',
+                    code: 400
+                );
             }
 
             return $this->success(
@@ -39,7 +43,11 @@ class FlowService extends BaseService implements FlowServiceInterface
             );
 
         } catch (\Exception $e) {
-            return $this->error(message: $e->getMessage(), code: $e->getCode());
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
     }
 
@@ -51,7 +59,11 @@ class FlowService extends BaseService implements FlowServiceInterface
             $flowFetch = $this->flowRepository->all();
 
             if (!$flowFetch) {
-                return $this->error(message: 'Não deu certo.', code: 400);
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não deu certo.',
+                    code: 400
+                );
             }
 
             return $this->success(
@@ -60,7 +72,11 @@ class FlowService extends BaseService implements FlowServiceInterface
             );
 
         } catch (\Exception $e) {
-            return $this->error(message: $e->getMessage(), code: $e->getCode());
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
 
     }

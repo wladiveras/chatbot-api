@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Validator;
 use Illuminate\Validation\Rule;
 use App\Enums\MessagesType;
+use Carbon\Carbon;
 
 
 class MessengerController extends BaseController
@@ -37,23 +38,25 @@ class MessengerController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                message: 'Error de validação de dados.',
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
                 payload: $data->errors(),
                 code: 400
             );
         }
 
         try {
-            $messengerService = $this->messengerService->integration($provinder)->createConnection($data->validated());
+            $messengerService = $this->messengerService->integration($provinder)->createConnection($data->validate());
 
             return $this->success(
-                message: 'Conexão Criada com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: $messengerService
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -71,13 +74,14 @@ class MessengerController extends BaseController
             $messengerService = $this->messengerService->integration($provinder)->connect($connection);
 
             return $this->success(
-                message: 'Conexão retornada com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new MessengerResource($messengerService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -95,13 +99,14 @@ class MessengerController extends BaseController
             $messengerService = $this->messengerService->integration($provinder)->status($connection);
 
             return $this->success(
-                message: 'Status da conexão retornado com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new MessengerResource($messengerService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -119,13 +124,14 @@ class MessengerController extends BaseController
             $messengerService = $this->messengerService->integration($provinder)->disconnect($connection);
 
             return $this->success(
-                message: 'Conexão desconectada com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new MessengerResource($messengerService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -143,13 +149,14 @@ class MessengerController extends BaseController
             $messengerService = $this->messengerService->integration($provinder)->delete($connection);
 
             return $this->success(
-                message: 'Conexão deletada com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new MessengerResource($messengerService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -175,23 +182,25 @@ class MessengerController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                message: 'Error de validação de dados.',
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
                 payload: $data->errors(),
                 code: 400
             );
         }
 
         try {
-            $messengerService = $this->messengerService->integration($provider)->send($data->validated());
+            $messengerService = $this->messengerService->integration($provider)->send($data->validate());
 
             return $this->success(
-                message: 'Mensagem enviada com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new MessengerResource($messengerService)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -209,13 +218,14 @@ class MessengerController extends BaseController
             $messengerService = $this->messengerService->integration($provider)->callback($request->all());
 
             return $this->success(
-                message: 'Callback recebido com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: $messengerService
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );

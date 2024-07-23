@@ -21,17 +21,26 @@ class UserService extends BaseService implements UserServiceInterface
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
+
         try {
             $users = $this->userRepository->paginate(10);
 
             if (!$users) {
-                return $this->error(message: 'Usuários não identificados.', code: 400);
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Usuários não identificados.',
+                    code: 400
+                );
             }
 
-            return $this->success(message: 'Usuário retornado com sucesso.');
+            return $this->success(message: 'Usuário retornado com sucesso.', payload: $users);
 
         } catch (\Exception $e) {
-            return $this->error(message: $e->getMessage(), code: $e->getCode());
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
     }
 
@@ -43,13 +52,21 @@ class UserService extends BaseService implements UserServiceInterface
             $user = $this->userRepository->find($id);
 
             if (!$user) {
-                return $this->error(message: 'Usuários não identificados..', code: 400);
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Usuários não identificados..',
+                    code: 400
+                );
             }
 
             return $this->success(message: 'Usuário retornado com sucesso.');
 
         } catch (\Exception $e) {
-            return $this->error(message: $e->getMessage(), code: $e->getCode());
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
     }
 
@@ -61,13 +78,21 @@ class UserService extends BaseService implements UserServiceInterface
             $newUser = $this->userRepository->create($data);
 
             if (!$newUser) {
-                return $this->error(message: 'Não foi possivel criar o usuário.', code: 400);
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não foi possivel criar o usuário.',
+                    code: 400
+                );
             }
 
             return $this->success(message: 'Usuário criado com sucesso.');
 
         } catch (\Exception $e) {
-            return $this->error(message: $e->getMessage(), code: $e->getCode());
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
 
     }
@@ -80,13 +105,21 @@ class UserService extends BaseService implements UserServiceInterface
             $updatedUser = $this->userRepository->update($id, $data);
 
             if (!$updatedUser) {
-                return $this->error(message: 'Não foi possivel atualizar o usuário.', code: 400);
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não foi possivel atualizar o usuário.',
+                    code: 400
+                );
             }
 
             return $this->success(message: 'Usuário atualizado com sucesso.');
 
         } catch (\Exception $e) {
-            return $this->error(message: $e->getMessage(), code: $e->getCode());
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
     }
 
@@ -98,13 +131,21 @@ class UserService extends BaseService implements UserServiceInterface
             $deleteUser = $this->userRepository->delete($id);
 
             if (!$deleteUser) {
-                return $this->error(message: 'Não foi possivel deletar o usuário.', code: 400);
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não foi possivel deletar o usuário.',
+                    code: 400
+                );
             }
 
             return $this->success(message: 'Usuário deletado com sucesso.');
 
         } catch (\Exception $e) {
-            return $this->error(message: $e->getMessage(), code: $e->getCode());
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
     }
 }

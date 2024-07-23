@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Validator;
+use Carbon\Carbon;
 
 class AuthController extends BaseController
 {
@@ -26,33 +27,36 @@ class AuthController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                message: 'Error de validação de dados.',
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
                 payload: $data->errors(),
                 code: 400
             );
         }
 
-        $data = $data->validated();
+        $data = $data->validate();
 
         try {
             $user = User::where('email', $data['email'])->first();
 
             if (!$user) {
                 return $this->error(
-                    message: 'Usuário não identificado.',
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    response: Carbon::now()->toDateTimeString(),
                     payload: $user,
                     code: 401
                 );
             }
 
             return $this->success(
-                message: 'Token gerado com sucesso para o usuário.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: $user->createToken(Str::uuid()->toString())->plainTextToken
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -65,13 +69,14 @@ class AuthController extends BaseController
             $user = auth()->user();
 
             return $this->success(
-                message: 'Usuário retornado com sucesso',
+                response: Carbon::now()->toDateTimeString(),
                 payload: $user
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -82,7 +87,7 @@ class AuthController extends BaseController
         $user = $request->user();
 
         return $this->success(
-            message: 'Token atualizado com sucesso.',
+            response: Carbon::now()->toDateTimeString(),
             payload: $user->createToken(Str::uuid()->toString())->plainTextToken
         );
     }
@@ -93,13 +98,14 @@ class AuthController extends BaseController
             $request->user()->currentAccessToken()->delete();
 
             return $this->success(
-                message: 'Usuário desconectado com sucesso',
+                response: Carbon::now()->toDateTimeString(),
                 payload: []
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );

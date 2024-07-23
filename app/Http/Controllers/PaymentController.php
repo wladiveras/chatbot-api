@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Validator;
+use Carbon\Carbon;
 
 class PaymentController extends BaseController
 {
@@ -32,23 +33,25 @@ class PaymentController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                message: 'Error de validação de dados.',
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
                 payload: $data->errors(),
                 code: 400
             );
         }
 
         try {
-            $payment = $this->paymentService->gateway($gateway)->pay($data->validated());
+            $payment = $this->paymentService->gateway($gateway)->pay($data->validate());
 
             return $this->success(
-                message: 'Pedido aberto com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new PaymentResource($payment)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );
@@ -69,7 +72,8 @@ class PaymentController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                message: 'Error de validação de dados.',
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
                 payload: $data->errors(),
                 code: 400
             );
@@ -79,13 +83,14 @@ class PaymentController extends BaseController
             $payment = $this->paymentService->gateway($gateway)->checkPayment($id);
 
             return $this->success(
-                message: 'Pedido verificado com sucesso.',
+                response: Carbon::now()->toDateTimeString(),
                 payload: new PaymentResource($payment)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $exception->getMessage(),
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
                 payload: $request->all(),
                 code: $exception->getCode()
             );

@@ -30,13 +30,21 @@ class BraipGateway extends BaseService implements PaymentServiceInterface
             $orderCreate = $this->orderRepository->create($data);
 
             if (!$orderCreate) {
-                return $this->error(message: 'Não foi possível redirecionar.', code: 502);
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não foi possível redirecionar.',
+                    code: 502
+                );
             }
 
             return $this->success(message: 'Redirecionado para pagamento.');
 
         } catch (\Exception $e) {
-            return $this->error(message: $e->getMessage(), code: $e->getCode());
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
     }
 
@@ -48,13 +56,21 @@ class BraipGateway extends BaseService implements PaymentServiceInterface
             $orderCreate = $this->orderRepository->first(column: 'id', value: $id);
 
             if (!$orderCreate) {
-                return $this->error(message: 'pagamento não confirmado.', code: 502);
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'pagamento não confirmado.',
+                    code: 502
+                );
             }
 
             return $this->success(message: 'Pagamento confirmado.');
 
         } catch (\Exception $e) {
-            return $this->error(message: $e->getMessage(), code: $e->getCode());
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
         }
     }
 }
