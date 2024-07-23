@@ -35,13 +35,13 @@ class PaymentController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $exception,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
     }
 
-    public function checkPayment(string $gateway, int|string $id): JsonResponse
+    public function checkPayment(string $gateway, int|string $id, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'id' => $id,
@@ -59,8 +59,8 @@ class PaymentController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $exception,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
     }

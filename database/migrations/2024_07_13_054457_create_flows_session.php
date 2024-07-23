@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -19,6 +18,7 @@ return new class extends Migration
             $table->foreignId('connection_id')->constrained()->onDelete('cascade');
             $table->string('session_key')->nullable();
             $table->integer('step')->default(1);
+            $table->integer('is_running')->default(0);
             $table->string('country')->default('BR');
             $table->timestamp('last_active')->useCurrent();
             $table->timestamp('session_start')->useCurrent();

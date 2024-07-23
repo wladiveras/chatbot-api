@@ -49,9 +49,9 @@ class FlowController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                message: $request,
-                payload: $exception,
-                code: 500
+                message: $exception->getMessage(),
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
     }

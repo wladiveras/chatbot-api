@@ -42,19 +42,28 @@ class AuthController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $exception,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
     }
 
     public function user(Request $request): JsonResponse
     {
-        $user = auth()->user();
+        try {
+            $user = auth()->user();
 
-        return $this->success(
-            message: 'Usuário retornado com sucesso',
-            payload: $user
-        );
+            return $this->success(
+                message: 'Usuário retornado com sucesso',
+                payload: $user
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                message: $exception->getMessage(),
+                payload: $request->all(),
+                code: $exception->getCode()
+            );
+        }
     }
 }

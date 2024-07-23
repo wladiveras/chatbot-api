@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller as Controller;
 class BaseController extends Controller
 {
 
-    public function success($message, $payload): JsonResponse
+    public function success(string|null $message, mixed $payload): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => response', [
             'success' => false,
@@ -28,7 +28,7 @@ class BaseController extends Controller
     }
 
 
-    public function error($message, $payload, $code = 404): JsonResponse
+    public function error(string|null $message, $payload, int|null $code = 404): JsonResponse
     {
         Log::error(__CLASS__ . '.' . __FUNCTION__ . ' => error', [
             'success' => false,

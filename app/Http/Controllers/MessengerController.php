@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 
-
 use App\Http\Resources\MessengerResource;
 use App\Services\Messenger\MessengerService;
 use Illuminate\Http\JsonResponse;
@@ -30,13 +29,13 @@ class MessengerController extends BaseController
             'provinder' => $provinder,
         ]);
 
-        $request = Validator::make($request->all(), [
+        $data = Validator::make($request->all(), [
             'name' => 'string|max:255',
             'description' => 'string',
             'connection_key' => 'string|unique:connections|max:255',
         ]);
 
-        if ($request->fails()) {
+        if ($data->fails()) {
             return $this->error(
                 message: 'Error de validação de dados.',
                 payload: $request->errors(),
@@ -45,7 +44,7 @@ class MessengerController extends BaseController
         }
 
         try {
-            $messengerService = $this->messengerService->integration($provinder)->createConnection($request->validated());
+            $messengerService = $this->messengerService->integration($provinder)->createConnection($data->validated());
 
             return $this->success(
                 message: 'Conexão Criada com sucesso.',
@@ -55,13 +54,13 @@ class MessengerController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $request,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
     }
 
-    public function connect(string $provinder, int|string $connection): JsonResponse
+    public function connect(string $provinder, int|string $connection, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'connection' => $connection,
@@ -79,13 +78,13 @@ class MessengerController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $exception,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
     }
 
-    public function status(string $provinder, int|string $connection): JsonResponse
+    public function status(string $provinder, int|string $connection, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'connection' => $connection,
@@ -103,13 +102,13 @@ class MessengerController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $exception,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
     }
 
-    public function disconnect(string $provinder, int|string $connection): JsonResponse
+    public function disconnect(string $provinder, int|string $connection, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'connection' => $connection,
@@ -127,13 +126,13 @@ class MessengerController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $exception,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
     }
 
-    public function delete(string $provinder, int|string $connection): JsonResponse
+    public function delete(string $provinder, int|string $connection, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'connection' => $connection,
@@ -151,8 +150,8 @@ class MessengerController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $exception,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
     }
@@ -191,11 +190,15 @@ class MessengerController extends BaseController
             );
 
         } catch (\Exception $exception) {
-            return $this->error(message: $exception->getMessage(), payload: $request, code: 500);
+            return $this->error(
+                message: $exception->getMessage(),
+                payload: $request->all(),
+                code: $exception->getCode()
+            );
         }
     }
 
-    public function callback(string $provider, Request $request): JsonResponse
+    public function callback(string $provider, Request $request)
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'request' => $request,
@@ -213,8 +216,8 @@ class MessengerController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $request,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
     }

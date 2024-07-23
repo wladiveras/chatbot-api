@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use app\Http\Requests\UserRequest;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\Services\User\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Request;
+use Validator;
+use Illuminate\Validation\Rule;
+use App\Enums\UserStatus;
 
 class UserController extends BaseController
 {
@@ -18,7 +21,7 @@ class UserController extends BaseController
         $this->userService = $userService;
     }
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start');
 
@@ -33,18 +36,32 @@ class UserController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $exception,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
 
     }
 
-    public function store(UserRequest $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'request' => $request,
         ]);
+
+        $request = Validator::make($request->all(), [
+            'name' => 'nullable|string|required|max:100|min:3',
+            'email' => 'nullable|string|email|max:254',
+            'status' => ['nullable', Rule::enum(UserStatus::class)],
+        ]);
+
+        if ($request->fails()) {
+            return $this->error(
+                message: 'Error de validação de dados.',
+                payload: $request->errors(),
+                code: 400
+            );
+        }
 
         try {
             $user = $this->userService->createUser($request->validated());
@@ -57,14 +74,14 @@ class UserController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $request,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
 
     }
 
-    public function show(int|string $id): JsonResponse
+    public function show(int|string $id, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'id' => $id,
@@ -81,13 +98,13 @@ class UserController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $exception,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
     }
 
-    public function update(UserRequest $request, int|string $id): JsonResponse
+    public function update(Request $request, int|string $id): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'id' => $id,
@@ -105,14 +122,14 @@ class UserController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $request,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
 
     }
 
-    public function destroy(int|string $id): JsonResponse
+    public function destroy(int|string $id, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => start', [
             'id' => $id,
@@ -129,8 +146,8 @@ class UserController extends BaseController
         } catch (\Exception $exception) {
             return $this->error(
                 message: $exception->getMessage(),
-                payload: $exception,
-                code: 500
+                payload: $request->all(),
+                code: $exception->getCode()
             );
         }
     }

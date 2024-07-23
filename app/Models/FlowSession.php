@@ -17,6 +17,7 @@ class FlowSession extends Model
         'session_key',
         'country',
         'step',
+        'is_running',
         'last_active',
         'session_start',
         'session_end',
