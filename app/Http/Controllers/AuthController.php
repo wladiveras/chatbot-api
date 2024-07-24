@@ -20,7 +20,7 @@ class AuthController extends BaseController
 
     public function login(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -30,7 +30,7 @@ class AuthController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
                 service: $data->errors(),
                 code: 400
@@ -40,9 +40,9 @@ class AuthController extends BaseController
         try {
             $user = $this->authService->signIn($data->validate());
 
-            if (! $user) {
+            if (!$user) {
                 return $this->error(
-                    path: __CLASS__.'.'.__FUNCTION__,
+                    path: __CLASS__ . '.' . __FUNCTION__,
                     response: Carbon::now()->toDateTimeString(),
                     service: $request,
                     code: 401
@@ -56,7 +56,7 @@ class AuthController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -66,7 +66,7 @@ class AuthController extends BaseController
 
     public function magicLink(string $token, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -80,7 +80,31 @@ class AuthController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
+        }
+    }
+
+    public function redirectToProvider(string $provider, Request $request): JsonResponse
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
+        ]);
+
+        try {
+            $user = $this->authService->redirectToProvider($provider);
+
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: $user
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -90,12 +114,12 @@ class AuthController extends BaseController
 
     public function callbackWithProvider(string $provider, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
         try {
-            $user = $this->authService->loginWithProvider($provider);
+            $user = $this->authService->callbackWithProvider($provider, $request);
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
@@ -104,31 +128,7 @@ class AuthController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
-            );
-        }
-    }
-
-    public function loginWithProvider(string $provider, Request $request): JsonResponse
-    {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
-            'request' => $request,
-        ]);
-
-        try {
-            $user = $this->authService->loginWithProvider($provider);
-
-            return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $user
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -138,7 +138,7 @@ class AuthController extends BaseController
 
     public function user(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -152,7 +152,7 @@ class AuthController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -162,7 +162,7 @@ class AuthController extends BaseController
 
     public function logout(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -176,7 +176,7 @@ class AuthController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -186,7 +186,7 @@ class AuthController extends BaseController
 
     public function refreshToken(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -200,7 +200,7 @@ class AuthController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()

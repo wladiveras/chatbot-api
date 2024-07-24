@@ -53,8 +53,6 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         $number = Arr::get($data, 'connection_key');
         $webhook = "{$this->callback_url}/api/integration/whatsapp/callback";
         $events = ['MESSAGES_UPSERT', 'CONNECTION_UPDATE', 'CALL'];
-        $name = Arr::get($data, 'name', 'Conexão padrão');
-        $description = Arr::get($data, 'description', "Nova conexão com o número $number.");
 
         $payload = [
             'instanceName' => $instanceName,
@@ -86,6 +84,10 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             }
 
             $response = $response->json();
+
+            $name = Arr::get($data, 'name', 'Conexão padrão');
+            $description = Arr::get($data, 'description', "Nova conexão com o número $number.");
+
             $instance = Arr::get($response, 'instance.instanceName');
             $qrcodePairingCode = Arr::get($response, 'qrcode.pairingCode');
             $qrcodeBase64 = Arr::get($response, 'qrcode.base64');
@@ -93,7 +95,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             if ($this->connectionRepository->exists(column: 'token', value: $instance)) {
                 return $this->error(
                     path: __CLASS__.'.'.__FUNCTION__,
-                    message: 'Não foi possível criar uma nova conexão.',
+                    message: 'A conexão já existe, não foi possível criar uma nova.',
                     code: 400
                 );
             }
@@ -112,12 +114,13 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
             $qrcode = [
                 'qrcode' => [
+                    'token' => $instance,
                     'pairingCode' => $qrcodePairingCode,
                     'base64' => $qrcodeBase64,
                 ],
             ];
 
-            $payload = array_merge((array) $createConnection, $qrcode);
+            $payload = (object) array_merge((array) $createConnection, $qrcode);
 
             return $this->success(message: 'Nova conexão criada com sucesso.', payload: $payload);
         } catch (\Exception $exception) {
@@ -526,6 +529,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             'flow_id' => $flowId,
             'connection_id' => $connectionId,
             'flow_session_id' => Arr::get($data, 'flow_session_id', null),
+            'name' => Arr::get($data, 'data.pushName', $origin),
             'content' => $message,
             'type' => $type,
             'origin' => $origin,

@@ -18,17 +18,9 @@ return new class extends Migration {
             $table->string('avatar')->nullable();
             $table->boolean('is_active')->default(0)->nullable();
 
-            $table->string('github_id')->nullable();
-            $table->string('github_token')->nullable();
-            $table->string('github_refresh_token')->nullable();
-
-            $table->string('google_id')->nullable();
-            $table->string('google_token')->nullable();
-            $table->string('google_refresh_token')->nullable();
-
             $table->string('x_id')->nullable();
-            $table->string('x_token')->nullable();
-            $table->string('x_refresh_token')->nullable();
+            $table->string('apple_id')->nullable();
+            $table->string('google_id')->nullable();
 
             $table->timestamp('email_verified_at')->nullable();
 

@@ -4,7 +4,6 @@ namespace App\Repositories\User;
 
 use App\Models\User;
 use App\Repositories\BaseRepository;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
@@ -34,14 +33,38 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         return $user->createToken(Str::uuid()->toString())->plainTextToken;
     }
 
-    public function sigUpWithEmail($data): object|array
+    public function signUpWithEmail($data): object|array
     {
         return (object) $this->model->create($data)->toArray();
     }
 
-    public function getToken($token): object|array
+    public function signUpWithProvider($provider, $data): object|array
     {
-        return (object) DB::table('personal_access_tokens')->where('token', $token)->first();
+        $provider = match ($provider) {
+            'twitter' => 'x_id',
+            'google' => 'google_id',
+            'facebook' => 'facebook_id',
+            default => null,
+        };
+
+        if ($provider === null) {
+            return [];
+        }
+
+        $id = $data->getId() ?? null;
+        $name = $data->getName() ?? $data->getNickname();
+        $avatar = $data->getAvatar() ?? null;
+        $email = $data->getEmail() ?? null;
+
+        $user = $this->model->updateOrCreate([
+            $provider => $id,
+        ], [
+            'name' => $name,
+            'email' => $email,
+            'avatar' => $avatar,
+        ]);
+
+        return $user;
     }
 
     public function logout(): array|bool
