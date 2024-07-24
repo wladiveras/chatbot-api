@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\Route;
 // Auth Service
 Route::prefix('/auth')
     ->group(function () {
+        Route::get('/redirect/{provider}', [AuthController::class, 'redirectToProvider']);
 
         // Sanctum login with Magic Link passwordless
         Route::post('/sign-in', [AuthController::class, 'login']);
-        Route::get('/magic-link/{token}', [AuthController::class, 'magicLink']);
+        Route::post('/magic-link/{token}', [AuthController::class, 'magicLink']);
         Route::get('/user', [AuthController::class, 'user'])->middleware(['auth:sanctum']);
         Route::delete('/sign-out', [AuthController::class, 'logout'])->middleware(['auth:sanctum']);
         Route::post('/refresh-token', [AuthController::class, 'refreshToken'])->middleware(['auth:sanctum']);

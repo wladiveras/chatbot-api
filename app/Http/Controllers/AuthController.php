@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Validator;
 
 class AuthController extends BaseController
@@ -88,28 +89,14 @@ class AuthController extends BaseController
         }
     }
 
-    public function redirectToProvider(string $provider, Request $request): JsonResponse
+    public function redirectToProvider(string $provider, Request $request): RedirectResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
-        try {
-            $user = $this->authService->redirectToProvider($provider);
+        return $this->authService->redirectToProvider($provider);
 
-            return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $user
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
-            );
-        }
     }
 
     public function callbackWithProvider(string $provider, Request $request): JsonResponse

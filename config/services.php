@@ -31,7 +31,6 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI')
     ],
 
-
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],

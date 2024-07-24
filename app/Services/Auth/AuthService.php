@@ -7,12 +7,14 @@ use App\Repositories\User\magicLinkRepository;
 use App\Repositories\User\UserRepository;
 use App\Services\BaseService;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use stdClass;
 
@@ -60,7 +62,7 @@ class AuthService extends BaseService implements AuthServiceInterface
                 'active' => 0,
             ]);
 
-            $magicLink = Config::get('app.url') . "/api/auth/magic-link/$token";
+            $magicLink = Config::get('app.front_url') . "/magic-link/$token";
 
             Mail::to($user->email)->send(new MagicLinkEmail($user->name, $magicLink));
 
@@ -78,13 +80,13 @@ class AuthService extends BaseService implements AuthServiceInterface
         }
     }
 
-    public function redirectToProvider($provider): array|object
+    public function redirectToProvider($provider): RedirectResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         $this->availableProviders($provider);
 
-        return Socialite::driver($provider)->redirect();
+        return Socialite::driver($provider)->stateless()->redirect();
     }
 
 
@@ -107,7 +109,7 @@ class AuthService extends BaseService implements AuthServiceInterface
         $this->availableProviders($provider);
 
         try {
-            $user = Socialite::driver($provider)->user();
+            $user = Socialite::driver($provider)->stateless()->user();
 
             if ($user) {
                 $user = $this->userRepository->signUpWithProvider($provider, $user);
@@ -121,9 +123,11 @@ class AuthService extends BaseService implements AuthServiceInterface
                 );
             }
 
+            $token = $user->createToken(env('APP_NAME'))->accessToken;
+
             return $this->success(
                 message: 'Bem vindo, Login realizado com sucesso.',
-                payload: []
+                payload: $token
             );
 
         } catch (\Exception $e) {

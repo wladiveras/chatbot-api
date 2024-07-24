@@ -9,20 +9,22 @@
 
     <style>
         p {
-            font-size: 12px;
+            font-size: 14px;
         }
 
-        .signature {
-            font-style: italic;
+        .link {
+            font-style: bold;
         }
     </style>
 </head>
 
 <body>
     <div>
-        <p>Hey {{ $name }},</p>
+        <p>Olá {{ $name }},</p>
         <p>Bem vindo(a) ao Marinabot, chatbot de automação de marketing e auto atendimento. 😉 </p>
-        <p class="signature">clique aqui para entrar no sistema: {{ $link }}</p>
+        <p class="link">
+            clique aqui para entrar no sistema: <a href="{{ $link }}">{{ $link }}</a>.
+        </p>
     </div>
 </body>
 
