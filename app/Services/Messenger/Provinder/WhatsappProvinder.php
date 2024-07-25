@@ -5,6 +5,7 @@ namespace App\Services\Messenger\Provinder;
 use App\Repositories\Connection\ConnectionRepository;
 use App\Repositories\Message\MessageRepository;
 use App\Services\BaseService;
+use App\Services\Flow\FlowService;
 use App\Services\Messenger\MessengerServiceInterface;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
@@ -23,6 +24,8 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     private mixed $callback_url;
 
+    private FlowService $flowService;
+
     private MessageRepository $messageRepository;
 
     private ConnectionRepository $connectionRepository;
@@ -32,6 +35,8 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         $this->url = Config::get('evolution.url');
         $this->key = Config::get('evolution.key');
         $this->callback_url = Config::get('app.url');
+
+        $this->flowService = App::make(FlowService::class);
 
         $this->messageRepository = App::make(MessageRepository::class);
         $this->connectionRepository = App::make(ConnectionRepository::class);
@@ -241,7 +246,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
                 'mediaMessage' => [
                     'mediatype' => $data['type'] === 'media_audio' ? 'audio' : $data['type'],
                     'caption' => $data['caption'],
-                    'media' => $data['file_url'],
+                    'media' => $data['value'],
                 ],
             ];
         }
@@ -305,7 +310,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         if ($data['type'] === 'text') {
             $message = [
                 'textMessage' => [
-                    'text' => $data['message'],
+                    'text' => $data['value'],
                 ],
             ];
         }
@@ -314,7 +319,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         if ($data['type'] === 'audio') {
             $message = [
                 'audioMessage' => [
-                    'audio' => $data['file_url'],
+                    'audio' => $data['value'],
                 ],
             ];
         }
@@ -476,25 +481,23 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         $connection = Arr::get($data, 'instance');
         $FromOwner = Arr::get($data, 'data.key.fromMe');
 
-        if ($FromOwner) {
-            return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                message: 'Não foi possível disparar o fluxo do mesmo numero de telefone da conexão.',
-                code: 400
-            );
-        }
-
         try {
             $connection = $this->connectionRepository->first(column: 'token', value: $connection);
             $this->connectionExists($connection);
+
+            $origin = $FromOwner ? 'owner' : 'client';
 
             $createMessage = $this->createMessage(
                 flowId: $connection->flow_id,
                 connectionId: $connection->id,
                 data: $data,
-                origin: 'client',
+                origin: $origin,
                 payload: $data,
             );
+
+            if (! $FromOwner) {
+                $this->flowService->connection($connection)->session($data)->trigger();
+            }
 
             return $this->success(
                 message: 'Fluxo disparado com sucesso.',
@@ -519,10 +522,12 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         }
 
         $type = Arr::get($data, 'type', 'text');
+        $text = Arr::get($data, 'data.message.extendedTextMessage.text', Arr::get($data, 'data.message.conversation', 'Entendi...'));
 
         $message = match ($origin) {
-            'client' => Arr::get($data, 'data.message.extendedTextMessage.text', Arr::get($data, 'data.message.conversation', 'Entendi...')),
-            default => ($type === 'text') ? $data['message'] : $data['file_url'],
+            'client' => $text,
+            'owner' => $text,
+            default => $data['value'],
         };
 
         $createMessage = $this->messageRepository->create([

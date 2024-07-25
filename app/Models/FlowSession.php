@@ -9,7 +9,7 @@ class FlowSession extends Model
 {
     use HasFactory;
 
-    protected $table = 'flows_sessions';
+    protected $table = 'flow_sessions';
 
     protected $fillable = [
         'flow_id',

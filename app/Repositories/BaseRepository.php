@@ -6,9 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class BaseRepository implements BaseRepositoryInterface
 {
-    public function __construct(protected Model $model)
-    {
-    }
+    public function __construct(protected Model $model) {}
 
     public function all(): array|object
     {

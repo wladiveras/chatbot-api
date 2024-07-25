@@ -164,12 +164,11 @@ class MessengerController extends BaseController
 
         $data = Validator::make($request->all(), [
             'type' => [Rule::enum(MessagesType::class)],
-            'message' => 'string',
+            'value' => 'string',
             'connection' => 'string|required',
             'number' => 'string|required',
             'delay' => 'integer',
             'caption' => 'string',
-            'file_url' => 'string',
         ]);
 
         if ($data->fails()) {
