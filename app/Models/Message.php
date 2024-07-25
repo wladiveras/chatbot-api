@@ -15,6 +15,7 @@ class Message extends Model
         'flow_id',
         'flow_session_id',
         'connection_id',
+        'name',
         'content',
         'type',
         'origin',

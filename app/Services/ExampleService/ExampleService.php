@@ -2,15 +2,11 @@
 
 namespace App\Services\ExampleService;
 
-
+use App\Repositories\Example\ExampleRepository;
+use App\Services\BaseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
-
-use App\Repositories\Example\ExampleRepository;
-
-use App\Services\BaseService;
-
 
 class ExampleService extends BaseService implements ExampleServiceInterface
 {
@@ -23,14 +19,14 @@ class ExampleService extends BaseService implements ExampleServiceInterface
 
     public function functionExample(array $data): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $createExample = $this->exampleRepository->create($data);
 
-            if (!$createExample) {
+            if (! $createExample) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não deu certo.',
                     code: 400
                 );
@@ -43,7 +39,7 @@ class ExampleService extends BaseService implements ExampleServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -52,14 +48,14 @@ class ExampleService extends BaseService implements ExampleServiceInterface
 
     public function functionExample2($id): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $fetchExample = $this->exampleRepository->first(column: 'id', value: $id);
 
-            if (!$fetchExample) {
+            if (! $fetchExample) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não deu certo.',
                     code: 400
                 );
@@ -72,7 +68,7 @@ class ExampleService extends BaseService implements ExampleServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );

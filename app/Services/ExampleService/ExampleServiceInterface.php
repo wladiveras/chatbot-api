@@ -8,7 +8,5 @@ interface ExampleServiceInterface
 {
     public function functionExample(array $data): JsonResponse;
 
-    public function functionExample2(int|null $id): JsonResponse;
-
-
+    public function functionExample2(?int $id): JsonResponse;
 }

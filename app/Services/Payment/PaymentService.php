@@ -9,7 +9,7 @@ class PaymentService
 {
     public static function gateway(string $gateway): PaymentServiceInterface
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         return match ($gateway) {
             'braip' => new BraipGateway,

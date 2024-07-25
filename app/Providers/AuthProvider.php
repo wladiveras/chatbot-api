@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Event;
 
 class AuthProvider extends ServiceProvider
 {
@@ -19,6 +20,10 @@ class AuthProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
+        Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
+            $event->extendSocialite('apple', \SocialiteProviders\Apple\Provider::class);
+            $event->extendSocialite('google', \SocialiteProviders\Google\Provider::class);
+            $event->extendSocialite('twitter', \SocialiteProviders\Twitter\Provider::class);
+        });
     }
 }

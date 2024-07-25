@@ -1,20 +1,27 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FlowController;
 use App\Http\Controllers\MessengerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\AuthController;
-
 use Illuminate\Support\Facades\Route;
 
 // Auth Service
 Route::prefix('/auth')
     ->group(function () {
-        Route::post('/sign-in', [AuthController::class, 'auth']);
-        Route::get('/user', [AuthController::class, 'authUser'])->middleware(['auth:sanctum']);
-        Route::post('/sign-out', [AuthController::class, 'logout'])->middleware(['auth:sanctum']);
+        Route::get('/redirect/{provider}', [AuthController::class, 'redirectToProvider']);
+
+        // Sanctum login with Magic Link passwordless
+        Route::post('/sign-in', [AuthController::class, 'login']);
+        Route::post('/magic-link/{token}', [AuthController::class, 'magicLink']);
+        Route::get('/user', [AuthController::class, 'user'])->middleware(['auth:sanctum']);
+        Route::delete('/sign-out', [AuthController::class, 'logout'])->middleware(['auth:sanctum']);
         Route::post('/refresh-token', [AuthController::class, 'refreshToken'])->middleware(['auth:sanctum']);
 
+        // Socialite Login
+        Route::get('/redirect/{provider}', [AuthController::class, 'redirectToProvider']);
+        Route::get('/callback/{provider}', [AuthController::class, 'callbackWithProvider']);
     });
 
 // User Service
@@ -26,6 +33,13 @@ Route::prefix('/user')
         Route::post('/', [UserController::class, 'store']);
         Route::put('/{id}', [UserController::class, 'update']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
+    });
+
+Route::prefix('/flow')
+    ->middleware(['auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [FlowController::class, 'index']);
+        Route::post('/', [FlowController::class, 'create']);
     });
 
 // Payment Gateway service
@@ -41,7 +55,7 @@ Route::prefix('/integration/{integration}')
     ->middleware(['auth:sanctum'])
     ->group(function () {
         Route::post('/create-connection', [MessengerController::class, 'createConnection']);
-        Route::delete('/{connection}/status', [MessengerController::class, 'status']);
+        Route::post('/{connection}/status', [MessengerController::class, 'status']);
         Route::get('/{connection}/connect', [MessengerController::class, 'connect']);
         Route::delete('/{connection}/delete', [MessengerController::class, 'delete']);
         Route::delete('/{connection}/disconnect', [MessengerController::class, 'disconnect']);

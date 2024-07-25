@@ -1,13 +1,13 @@
 <?php
 
+use App\Http\Middleware\ForceJsonRequestHeader;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Sentry\Laravel\Integration;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Illuminate\Auth\AuthenticationException;
-use App\Http\Middleware\ForceJsonRequestHeader;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -28,7 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'success' => false,
                     'message' => 'result not found.',
-                    'payload' => []
+                    'service' => [],
                 ], 404);
             }
         });
@@ -40,7 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json([
                 'success' => false,
                 'message' => $exception->getMessage(),
-                'payload' => []
+                'service' => [],
             ], 401);
         });
 

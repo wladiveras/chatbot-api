@@ -5,20 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Flow extends Model
+class MagicLink extends Model
 {
     use HasFactory;
 
-    protected $table = 'flows';
+    protected $table = 'magic_links';
 
     protected $fillable = [
         'user_id',
-        'name',
-        'description',
-        'payload',
-        'commands',
-        'is_active',
-        'is_public',
+        'token',
+        'active',
     ];
 
     public function user()
