@@ -4,9 +4,8 @@ namespace App\Repositories\Flow;
 
 use App\Models\Flow;
 use App\Repositories\BaseRepository;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
-use stdClass;
+use Illuminate\Support\Facades\Auth;
 
 class FlowRepository extends BaseRepository implements FlowRepositoryInterface
 {
