@@ -16,6 +16,7 @@ class Flow extends Model
         'name',
         'description',
         'payload',
+        'commands',
         'is_active',
         'is_public',
     ];

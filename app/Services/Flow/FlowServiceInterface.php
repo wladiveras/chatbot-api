@@ -4,7 +4,7 @@ namespace App\Services\Flow;
 
 interface FlowServiceInterface
 {
-    public function validate(array $data);
+    public function parse(array $data);
 
-    public function create();
+    public function create(array $data);
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FlowController;
 use App\Http\Controllers\MessengerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
@@ -32,6 +33,13 @@ Route::prefix('/user')
         Route::post('/', [UserController::class, 'store']);
         Route::put('/{id}', [UserController::class, 'update']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
+    });
+
+Route::prefix('/flow')
+    ->middleware(['auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [FlowController::class, 'index']);
+        Route::post('/', [FlowController::class, 'create']);
     });
 
 // Payment Gateway service

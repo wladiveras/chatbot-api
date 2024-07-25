@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class BaseRepository implements BaseRepositoryInterface
 {
-    public function __construct(protected Model $model) {}
+    public function __construct(protected Model $model)
+    {
+    }
 
     public function all(): array|object
     {
@@ -20,27 +22,27 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function find(mixed $value, $column = 'id'): array|object
     {
-        return (object) $this->model->where($column, $value)->first();
+        return $this->model->where($column, $value)->first();
     }
 
     public function first(mixed $value, $column = 'id'): array|object
     {
-        return (object) $this->model->where($column, $value)->first();
+        return $this->model->where($column, $value)->first();
     }
 
-    public function create(array $data, $column = 'id'): array|object
+    public function create(array $data): array|object
     {
-        return (object) $this->model->create($data);
+        return $this->model->create($data);
     }
 
     public function update(mixed $value, array $data, $column = 'id'): array|object
     {
-        return (object) tap($this->model->where($column, $value))->update($data)->first();
+        return tap($this->model->where($column, $value))->update($data)->first();
     }
 
     public function delete(mixed $value, $column = 'id'): bool
     {
-        return $this->model->where($column, $value)->delete();
+        return (bool) $this->model->where($column, $value)->delete();
     }
 
     public function exists(mixed $value, $column = 'id'): bool
