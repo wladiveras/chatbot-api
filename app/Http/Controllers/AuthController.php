@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\Auth\AuthService;
+use App\Services\Auth\SupabaseAuthService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,10 +14,28 @@ use Validator;
 class AuthController extends BaseController
 {
     private AuthService $authService;
+    protected $supabaseAuthService;
 
-    public function __construct(AuthService $authService)
+    public function __construct(AuthService $authService, SupabaseAuthService $supabaseAuthService)
     {
         $this->authService = $authService;
+        $this->supabaseAuthService = $supabaseAuthService;
+    }
+
+    public function loginSupabase(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        $response = $this->supabaseAuthService->login($request->email, $request->password);
+
+        if (isset($response['error'])) {
+            return response()->json(['error' => $response['error']['message']], 401);
+        }
+
+        return response()->json(['data' => $response]);
     }
 
     public function login(Request $request): JsonResponse

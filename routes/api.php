@@ -22,6 +22,9 @@ Route::prefix('/auth')
         // Socialite Login
         Route::get('/redirect/{provider}', [AuthController::class, 'redirectToProvider']);
         Route::get('/callback/{provider}', [AuthController::class, 'callbackWithProvider']);
+
+        // Supabase Login
+        Route::post('/supabase-sign-in', [AuthController::class, 'loginSupabase']);
     });
 
 // User Service
