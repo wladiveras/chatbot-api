@@ -15,4 +15,7 @@ environments:
             - 'php artisan event:cache'
         deploy:
             - 'php artisan migrate --force'
+        network:
+          ports:
+            - 8080:8080
 
