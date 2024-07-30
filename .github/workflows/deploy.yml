@@ -13,7 +13,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run Docker Container
+      - name: Create Evolution Container
         run: |
           docker run -d \
             --name evolution-api \
@@ -42,16 +42,5 @@ jobs:
           VAPOR_API_TEAM: ${{ secrets.VAPOR_TEAM_ID }}
           VAPOR_API_TOKEN: ${{ secrets.VAPOR_API_TOKEN }}
 
-      - name: Deploy Environment
-        run: vapor deploy production
-        env:
-          VAPOR_API_TOKEN: ${{ secrets.VAPOR_API_TOKEN }}
-
-      - name: Create Sentry Release
-        uses: getsentry/action-release@v1
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-        with:
-          environment: production
+      - name: Check Docker Logs
+        run: docker logs evolution-api
