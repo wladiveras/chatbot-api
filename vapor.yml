@@ -18,3 +18,5 @@ environments:
         network:
           ports:
             - 8080:8080
+        ssl:
+          certificate_arn: arn:aws:acm:us-east-1:975049890705:certificate/8664adc0-e174-4320-9f2a-94bd560320bc
