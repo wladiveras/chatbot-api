@@ -23,6 +23,9 @@ jobs:
             -v evolution_instances:/evolution/instances \
             atendai/evolution-api
 
+      - name: Check Docker Logs
+        run: docker logs evolution-api
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -41,6 +44,3 @@ jobs:
         env:
           VAPOR_API_TEAM: ${{ secrets.VAPOR_TEAM_ID }}
           VAPOR_API_TOKEN: ${{ secrets.VAPOR_API_TOKEN }}
-
-      - name: Check Docker Logs
-        run: docker logs evolution-api
