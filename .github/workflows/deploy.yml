@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [ production ]
+    branches: [production]
 
 jobs:
   deploy:
@@ -12,6 +12,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Run Docker Container
+        run: |
+          docker run -d \
+            --name evolution-api \
+            -p 8080:8080 \
+            -e AUTHENTICATION_API_KEY=${{ secrets.EVOLUTION_SECRET }} \
+            -v evolution_store:/evolution/store \
+            -v evolution_instances:/evolution/instances \
+            atendai/evolution-api
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -31,7 +41,7 @@ jobs:
         env:
           VAPOR_API_TEAM: ${{ secrets.VAPOR_TEAM_ID }}
           VAPOR_API_TOKEN: ${{ secrets.VAPOR_API_TOKEN }}
-          
+
       - name: Deploy Environment
         run: vapor deploy production
         env:
