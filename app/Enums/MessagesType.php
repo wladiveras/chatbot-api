@@ -8,8 +8,6 @@ enum MessagesType: string
 
     case IMAGE = 'image';
 
-    case STICKER = 'sticker';
-
     case VIDEO = 'video';
 
     case MEDIA_AUDIO = 'media_audio';
@@ -17,4 +15,8 @@ enum MessagesType: string
     case AUDIO = 'audio';
 
     case LIST = 'list';
+
+    case POOL = 'pool';
+
+    case STATUS = 'status';
 }

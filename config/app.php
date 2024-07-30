@@ -53,6 +53,7 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+    'front_url' => env('APP_FRONT_URL', 'http://localhost:3000'),
 
     /*
     |--------------------------------------------------------------------------
@@ -66,6 +67,7 @@ return [
     */
 
     'timezone' => env('APP_TIMEZONE', 'UTC'),
+    'schedule_timezone' => env('APP_SCHEDULE_TIMEZONE', 'UTC'),
 
     /*
     |--------------------------------------------------------------------------

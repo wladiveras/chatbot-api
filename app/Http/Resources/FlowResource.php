@@ -17,7 +17,9 @@ class FlowResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'data' => $this->data ?? [],
+            'success' => $this->success,
+            'message' => $this->message,
+            'payload' => $this->payload,
         ];
     }
 }

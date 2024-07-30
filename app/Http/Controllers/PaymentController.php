@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\PaymentRequest;
 use App\Http\Resources\PaymentResource;
 use App\Services\Payment\PaymentService;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Validator;
 
-class PaymentController extends Controller
+class PaymentController extends BaseController
 {
     private PaymentService $paymentService;
 
@@ -16,46 +19,79 @@ class PaymentController extends Controller
         $this->paymentService = $paymentService;
     }
 
-    public function pay(string $gateway, PaymentRequest $request)
+    public function pay(string $gateway, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
             'request' => $request,
-            'gateway' => $gateway,
         ]);
 
-        try {
-            $payment = $this->paymentService->gateway($gateway)->pay($request->validated());
-        } catch (\Exception $exception) {
-            $this->error(data: $request, exception: $exception);
+        $data = Validator::make($request->all(), [
+            'id' => 'string|max:255',
+            'name' => 'string',
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                service: $data->errors(),
+                code: 400
+            );
         }
 
-        return new PaymentResource($payment);
+        try {
+            $payment = $this->paymentService->gateway($gateway)->pay($data->validate());
+
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: new PaymentResource($payment)
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
+        }
     }
 
-    public function checkPayment(string $gateway, int|string $id)
+    public function checkPayment(string $gateway, int|string $id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
-            'id' => $id,
-            'gateway' => $gateway,
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+            'request' => $request,
         ]);
+
+        $data = Validator::make($request->all(), [
+            'id' => 'string|max:255',
+            'name' => 'string',
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                service: $data->errors(),
+                code: 400
+            );
+        }
 
         try {
             $payment = $this->paymentService->gateway($gateway)->checkPayment($id);
 
-            return new PaymentResource($payment);
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: new PaymentResource($payment)
+            );
+
         } catch (\Exception $exception) {
-            $this->error(data: [$id, $gateway], exception: $exception);
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
         }
-    }
-
-    private function error($data, $exception)
-    {
-        Log::error(__CLASS__.'.'.__FUNCTION__.' => error', [
-            'data' => $data,
-            'exception' => $exception,
-            'message' => $exception->getMessage(),
-        ]);
-
-        abort(500, $exception->getMessage());
     }
 }

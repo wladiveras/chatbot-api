@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -14,8 +13,11 @@ return new class extends Migration
         Schema::create('flows', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->index();
-            $table->string('name');
-            $table->json('payload');
+            $table->string('name')->nullable();
+            $table->string('description')->nullable();
+            $table->json('node')->nullable();
+            $table->json('edge')->nullable();
+            $table->json('commands');
             $table->boolean('is_active')->default(true);
             $table->boolean('is_public')->default(false);
             $table->timestamps();

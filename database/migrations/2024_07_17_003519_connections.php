@@ -14,10 +14,15 @@ return new class extends Migration
         Schema::create('connections', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('name')->unique();
+            $table->foreignId('flow_id')->nullable()->constrained()->onDelete('cascade');
+            $table->string('name')->nullable();
+            $table->string('description')->nullable();
             $table->string('connection_key')->unique();
-            $table->boolean('is_active')->default(false);
             $table->string('token')->unique();
+            $table->string('type')->default('whatsapp');
+            $table->boolean('is_active')->default(false);
+            $table->string('country')->default('BR');
+            $table->json('payload')->nullable();
             $table->timestamps();
         });
     }

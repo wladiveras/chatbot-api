@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('connections_has_flows', function (Blueprint $table) {
+        Schema::create('connection_settings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('flow_id')->constrained()->onDelete('cascade');
             $table->foreignId('connection_id')->constrained()->onDelete('cascade');
+            $table->string('name')->nullable();
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('connections_has_flows');
+        Schema::dropIfExists('connection_settings');
     }
 };

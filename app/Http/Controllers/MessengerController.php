@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateConnectionRequest;
-use App\Http\Requests\MessengerRequest;
+use App\Enums\MessagesType;
 use App\Http\Resources\MessengerResource;
 use App\Services\Messenger\MessengerService;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use Validator;
 
-class MessengerController extends Controller
+class MessengerController extends BaseController
 {
     private MessengerService $messengerService;
 
@@ -18,127 +21,204 @@ class MessengerController extends Controller
         $this->messengerService = $messengerService;
     }
 
-    public function createConnection(string $provinder, CreateConnectionRequest $request)
+    public function createConnection(string $provinder, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
             'request' => $request,
-            'provinder' => $provinder,
         ]);
 
-        try {
-            $messengerService = $this->messengerService->integration($provinder)->createConnection($request->validated());
-        } catch (\Exception $exception) {
-            $this->error(data: $request, exception: $exception);
+        $data = Validator::make($request->all(), [
+            'name' => 'string|max:255',
+            'description' => 'string',
+            'connection_key' => 'string|unique:connections|max:255',
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                service: $data->errors(),
+                code: 400
+            );
         }
 
-        return new MessengerResource($messengerService);
+        try {
+            $messengerService = $this->messengerService->integration($provinder)->createConnection($data->validate());
+
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: $messengerService
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
+        }
     }
 
-    public function connect(string $provinder, int|string $connection)
+    public function connect(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
-            'connection' => $connection,
-            'provinder' => $provinder,
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+            'request' => $request,
         ]);
 
         try {
             $messengerService = $this->messengerService->integration($provinder)->connect($connection);
 
-            return new MessengerResource($messengerService);
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: new MessengerResource($messengerService)
+            );
+
         } catch (\Exception $exception) {
-            $this->error(data: [$connection, $provinder], exception: $exception);
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
         }
     }
 
-    public function status(string $provinder, int|string $connection)
+    public function status(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
-            'connection' => $connection,
-            'provinder' => $provinder,
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+            'request' => $request,
         ]);
 
         try {
             $messengerService = $this->messengerService->integration($provinder)->status($connection);
 
-            return new MessengerResource($messengerService);
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: new MessengerResource($messengerService)
+            );
+
         } catch (\Exception $exception) {
-            $this->error(data: [$connection, $provinder], exception: $exception);
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
         }
     }
 
-    public function disconnect(string $provinder, int|string $connection)
+    public function disconnect(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
-            'connection' => $connection,
-            'provinder' => $provinder,
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+            'request' => $request,
         ]);
 
         try {
             $messengerService = $this->messengerService->integration($provinder)->disconnect($connection);
 
-            return new MessengerResource($messengerService);
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: new MessengerResource($messengerService)
+            );
+
         } catch (\Exception $exception) {
-            $this->error(data: [$connection, $provinder], exception: $exception);
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
         }
     }
 
-    public function delete(string $provinder, int|string $connection)
+    public function delete(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
-            'connection' => $connection,
-            'provinder' => $provinder,
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+            'request' => $request,
         ]);
 
         try {
             $messengerService = $this->messengerService->integration($provinder)->delete($connection);
 
-            return new MessengerResource($messengerService);
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: new MessengerResource($messengerService)
+            );
+
         } catch (\Exception $exception) {
-            $this->error(data: [$connection, $provinder], exception: $exception);
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
         }
     }
 
-    public function sendMessage(string $provider, MessengerRequest $request)
+    public function sendMessage(string $provider, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
             'request' => $request,
-            'provider' => $provider,
         ]);
 
-        // Aqui vai definir qual vai ser o tipo de mensagem a ser enviada e chamar sua função expecifica.
-        try {
-            $messengerService = $this->messengerService->integration($provider)->send($request->validated());
-        } catch (\Exception $exception) {
-            $this->error(data: $request, exception: $exception);
+        $data = Validator::make($request->all(), [
+            'type' => [Rule::enum(MessagesType::class)],
+            'value' => 'string',
+            'connection' => 'string|required',
+            'number' => 'string|required',
+            'delay' => 'integer',
+            'caption' => 'string',
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                service: $data->errors(),
+                code: 400
+            );
         }
 
-        return new MessengerResource($messengerService);
+        try {
+            $messengerService = $this->messengerService->integration($provider)->send($data->validate());
+
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: new MessengerResource($messengerService)
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
+        }
     }
 
     public function callback(string $provider, Request $request)
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
             'request' => $request,
-            'provider' => $provider,
         ]);
 
         try {
             $messengerService = $this->messengerService->integration($provider)->callback($request->all());
+
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: $messengerService
+            );
+
         } catch (\Exception $exception) {
-            $this->error(data: $request, exception: $exception);
+            return $this->error(
+                path: __CLASS__.'.'.__FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
         }
-
-        return (object) $messengerService;
-    }
-
-    private function error($data, $exception)
-    {
-        Log::error(__CLASS__.'.'.__FUNCTION__.' => error', [
-            'message' => $exception->getMessage(),
-            'data' => $data,
-            'exception' => $exception,
-        ]);
-
-        abort(500, $exception->getMessage());
     }
 }

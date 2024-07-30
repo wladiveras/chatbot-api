@@ -14,7 +14,10 @@ class Flow extends Model
     protected $fillable = [
         'user_id',
         'name',
-        'payload',
+        'description',
+        'node',
+        'edge',
+        'commands',
         'is_active',
         'is_public',
     ];

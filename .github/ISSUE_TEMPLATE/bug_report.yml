@@ -32,13 +32,4 @@ body:
         4. Veja o erro
     validations:
       required: true
-  - type: checkboxes
-    id: version
-    attributes:
-      label: Versões afetadas
-      description: Por favor, selecione as versões que você sabe que são afetadas pelo bug.
-      options:
-        - label: Versão 1.0
-          required: false
-        - label: Versão 2.0
-          required: false
+

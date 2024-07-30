@@ -2,11 +2,6 @@
 
 namespace App\Providers;
 
-
-use Illuminate\Support\ServiceProvider;
-
-use App\Repositories\User\UserRepository;
-use App\Repositories\User\UserRepositoryInterface;
 use App\Repositories\Client\ClientRepository;
 use App\Repositories\Client\ClientRepositoryInterface;
 use App\Repositories\Connection\ConnectionRepository;
@@ -15,23 +10,25 @@ use App\Repositories\ConnectionFlow\ConnectionFlowRepository;
 use App\Repositories\ConnectionFlow\ConnectionFlowRepositoryInterface;
 use App\Repositories\ConnectionSetting\ConnectionSettingRepository;
 use App\Repositories\ConnectionSetting\ConnectionSettingRepositoryInterface;
-use App\Repositories\Currency\CurrencyRepositoryInterface;
 use App\Repositories\Currency\CurrencyRepository;
-use App\Repositories\Flow\FlowRepositoryInterface;
+use App\Repositories\Currency\CurrencyRepositoryInterface;
 use App\Repositories\Flow\FlowRepository;
-use App\Repositories\Lead\LeadRepositoryInterface;
+use App\Repositories\Flow\FlowRepositoryInterface;
 use App\Repositories\Lead\LeadRepository;
-use App\Repositories\Message\MessageRepositoryInterface;
+use App\Repositories\Lead\LeadRepositoryInterface;
 use App\Repositories\Message\MessageRepository;
-use App\Repositories\Order\OrderRepositoryInterface;
+use App\Repositories\Message\MessageRepositoryInterface;
 use App\Repositories\Order\OrderRepository;
-use App\Repositories\PaymentRequest\PaymentRequestRepositoryInterface;
+use App\Repositories\Order\OrderRepositoryInterface;
 use App\Repositories\PaymentRequest\PaymentRequestRepository;
-use App\Repositories\Product\ProductRepositoryInterface;
+use App\Repositories\PaymentRequest\PaymentRequestRepositoryInterface;
 use App\Repositories\Product\ProductRepository;
-use App\Repositories\Setting\SettingRepositoryInterface;
+use App\Repositories\Product\ProductRepositoryInterface;
 use App\Repositories\Setting\SettingRepository;
-
+use App\Repositories\Setting\SettingRepositoryInterface;
+use App\Repositories\User\UserRepository;
+use App\Repositories\User\UserRepositoryInterface;
+use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
 {

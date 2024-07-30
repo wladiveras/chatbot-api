@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\ForceJsonRequestHeader;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,15 +19,29 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->statefulApi();
+        $middleware->append(ForceJsonRequestHeader::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
 
         $exceptions->render(function (NotFoundHttpException $notFoundHttpException, Request $request) {
             if ($request->is('api/*') || $request->is('api')) {
                 return response()->json([
+                    'success' => false,
                     'message' => 'result not found.',
+                    'service' => [],
                 ], 404);
             }
+        });
+
+        $exceptions->stopIgnoring(AuthenticationException::class);
+
+        $exceptions->render(function (AuthenticationException $exception, Request $request) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $exception->getMessage(),
+                'service' => [],
+            ], 401);
         });
 
         $exceptions->shouldRenderJsonWhen(function (Request $request) {

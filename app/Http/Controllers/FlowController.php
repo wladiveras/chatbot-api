@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\FlowRequest;
 use App\Http\Resources\FlowResource;
 use App\Services\Flow\FlowService;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Validator;
 
-class FlowController extends Controller
+class FlowController extends BaseController
 {
     private FlowService $flowService;
 
@@ -16,30 +19,68 @@ class FlowController extends Controller
         $this->flowService = $flowService;
     }
 
-    public function create(string $flow_id, FlowRequest $request)
+    public function index(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => start', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
-            'provinder' => $flow_id,
         ]);
 
         try {
-            $flowService = $this->flowService->validate($request->validated())->create();
-        } catch (\Exception $exception) {
-            $this->error(data: $request, exception: $exception);
-        }
+            $flowService = $this->flowService->userFlows();
 
-        return new FlowResource($flowService);
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: new FlowResource($flowService)
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
+        }
     }
 
-    private function error($data, $exception)
+    public function create(Request $request): JsonResponse
     {
-        Log::error(__CLASS__.'.'.__FUNCTION__.' => error', [
-            'message' => $exception->getMessage(),
-            'data' => $data,
-            'exception' => $exception,
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
         ]);
 
-        abort(500, $exception->getMessage());
+        $data = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'description' => 'required|string',
+            'node' => 'required',
+            'edge' => 'required',
+            'commands' => 'required',
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                service: $data->errors(),
+                code: 400
+            );
+        }
+
+        try {
+            $flowService = $this->flowService->create($data->validate());
+
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: new FlowResource($flowService)
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
+        }
     }
 }

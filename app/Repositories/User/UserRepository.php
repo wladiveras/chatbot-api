@@ -4,9 +4,7 @@ namespace App\Repositories\User;
 
 use App\Models\User;
 use App\Repositories\BaseRepository;
-use Illuminate\Contracts\Pagination\CursorPaginator;
-use Illuminate\Database\Eloquent\Collection;
-use stdClass;
+use Illuminate\Support\Str;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
@@ -15,33 +13,64 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         parent::__construct($model);
     }
 
-    public function all(): Collection
+    public function auth(): object|array
     {
-        return $this->model->all();
+        $user = auth()->user();
+
+        return $user;
     }
 
-    public function paginate(int $limitPerPage): CursorPaginator
+    public function signIn(string $email): object|array|null
     {
-        return $this->model->cursorPaginate($limitPerPage);
+        return $this->model->where('email', $email)->first();
+
     }
 
-    public function find(int|string $id): ?stdClass
+    public function refreshToken(): ?string
     {
-        return (object) $this->model->findOrFail($id)->toArray();
+        $user = auth()->user();
+
+        return $user->createToken(Str::uuid()->toString())->plainTextToken;
     }
 
-    public function update(string|int $id, array $data): ?stdClass
-    {
-        return (object) tap($this->model->findOrFail($id))->update($data)->toArray();
-    }
-
-    public function create(array $data): stdClass
+    public function signUpWithEmail($data): object|array
     {
         return (object) $this->model->create($data)->toArray();
     }
 
-    public function delete(int|string $id): bool
+    public function signUpWithProvider($provider, $data): object|array
     {
-        return $this->model->findOrFail($id)->delete();
+        $provider = match ($provider) {
+            'twitter' => 'x_id',
+            'google' => 'google_id',
+            'facebook' => 'facebook_id',
+            default => null,
+        };
+
+        if ($provider === null) {
+            return [];
+        }
+
+        $id = $data->getId() ?? null;
+        $name = $data->getName() ?? $data->getNickname();
+        $avatar = $data->getAvatar() ?? null;
+        $email = $data->getEmail() ?? null;
+
+        $user = $this->model->updateOrCreate([
+            $provider => $id,
+        ], [
+            'name' => $name,
+            'email' => $email,
+            'avatar' => $avatar,
+        ]);
+
+        return $user;
+    }
+
+    public function logout(): array|bool
+    {
+        $user = auth()->user();
+
+        return $user->currentAccessToken()->delete();
     }
 }

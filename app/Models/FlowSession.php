@@ -8,12 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class FlowSession extends Model
 {
     use HasFactory;
-    protected $table = 'flows_sessions';
+
+    protected $table = 'flow_sessions';
+
     protected $fillable = [
-        'user_id',
         'flow_id',
         'connection_id',
         'session_key',
+        'country',
+        'step',
+        'is_running',
+        'last_active',
         'session_start',
         'session_end',
     ];
