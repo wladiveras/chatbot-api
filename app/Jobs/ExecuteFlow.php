@@ -155,12 +155,13 @@ class ExecuteFlow implements ShouldQueue
                 flow_session_id: $this->payload['session']->id,
                 key: $placeholder
             );
+
             if ($sessionMeta) {
                 $sessionMetas[$placeholder] = $sessionMeta->value;
             }
-        }
 
-        return $sessionMetas;
+            return $sessionMetas;
+        }
     }
 
     protected function replacePlaceholders($messageText, $sessionMetas)
