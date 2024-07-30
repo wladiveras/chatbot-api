@@ -27,7 +27,7 @@ class MagicLinkEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[MARINABOT] Entrar agora na sua conta.',
+            subject: '[MARINABOT] Junte-se ao maior bot com fluxo automatizado do mercado.',
         );
     }
 
