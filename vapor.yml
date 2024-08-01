@@ -3,7 +3,6 @@ name: marinabot-api
 environments:
     production:
         domain:
-          - marinabot.com.br
           - api.marinabot.com.br
 
         database: marinabot-db-production
