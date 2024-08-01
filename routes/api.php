@@ -43,7 +43,6 @@ Route::prefix('/flow')
         Route::get('/{code}', [FlowController::class, 'show']);
     });
 
-
 // Payment Gateway service
 Route::prefix('/payment/{gateway}')
     ->middleware(['auth:sanctum'])
