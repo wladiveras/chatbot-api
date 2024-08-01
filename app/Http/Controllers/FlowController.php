@@ -43,6 +43,31 @@ class FlowController extends BaseController
         }
     }
 
+    public function show(Request $request, int $id): JsonResponse
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
+        ]);
+
+        try {
+            $flowService = $this->flowService->fetchFlow($id);
+
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: new FlowResource($flowService)
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
+        }
+    }
+
+
     public function create(Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [

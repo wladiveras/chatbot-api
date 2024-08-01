@@ -109,6 +109,36 @@ class FlowService extends BaseService implements FlowServiceInterface
         }
     }
 
+    public function fetchFlow($flow_id): ?stdClass
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+
+        try {
+
+            $flow = $this->flowRepository->first($flow_id);
+
+            if (!$flow) {
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não deu certo, não foi possivel trazer o fluxo.',
+                    code: 400
+                );
+            }
+
+            return $this->success(
+                message: 'Tudo certo, os fluxo foi retornado.',
+                payload: $flow
+            );
+
+        } catch (\Exception $e) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
+        }
+    }
+
     public function create(array $data): ?stdClass
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');

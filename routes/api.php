@@ -40,6 +40,7 @@ Route::prefix('/flow')
     ->group(function () {
         Route::get('/', [FlowController::class, 'index']);
         Route::post('/', [FlowController::class, 'create']);
+        Route::get('/{code}', [FlowController::class, 'show']);
     });
 
 // Payment Gateway service
