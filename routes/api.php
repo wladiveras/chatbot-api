@@ -7,6 +7,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+
 // Auth Service
 Route::prefix('/auth')
     ->group(function () {
