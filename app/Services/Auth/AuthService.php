@@ -140,8 +140,12 @@ class AuthService extends BaseService implements AuthServiceInterface
     public function magicLink($token): ?stdClass
     {
         try {
+
             $magicLink = $this->magicLinkRepository->first(column: 'token', value: $token);
+
             $user = $this->userRepository->find($magicLink->user_id);
+
+
 
             if (!$user || !$magicLink) {
                 return $this->error(

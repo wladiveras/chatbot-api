@@ -21,7 +21,7 @@ return [
             'SANCTUM_STATEFUL_DOMAINS',
             sprintf(
                 '%s%s',
-                'laravel.test,localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
+                'api.marinabot.com.br,marinabot.com.br,laravel.test,localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
                 Sanctum::currentApplicationUrlWithPort()
             )
         )
