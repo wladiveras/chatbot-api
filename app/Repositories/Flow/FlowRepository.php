@@ -21,7 +21,7 @@ class FlowRepository extends BaseRepository implements FlowRepositoryInterface
         return $this->model->where('user_id', $user->id)->get();
     }
 
-    public function getUserFlow($id): ?Collection
+    public function getUserFlow($id): ?Flow
     {
         $user = Auth::user();
 
