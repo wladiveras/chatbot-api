@@ -85,7 +85,7 @@ class FlowService extends BaseService implements FlowServiceInterface
 
         try {
 
-            $flows = (object) $this->flowRepository->getUserFlow();
+            $flows = (object) $this->flowRepository->getUserFlows();
 
             if (!$flows) {
                 return $this->error(
