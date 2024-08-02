@@ -14,10 +14,17 @@ class FlowRepository extends BaseRepository implements FlowRepositoryInterface
         parent::__construct($model);
     }
 
-    public function userFlows(): ?Collection
+    public function getUserFlows(): ?Collection
     {
         $user = Auth::user();
 
         return $this->model->where('user_id', $user->id)->get();
+    }
+
+    public function getUserFlow($id): ?Flow
+    {
+        $user = Auth::user();
+
+        return $this->model->where('user_id', $user->id)->where('id', $id)->first();
     }
 }
