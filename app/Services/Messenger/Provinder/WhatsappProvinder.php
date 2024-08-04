@@ -355,10 +355,11 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
                 if ($response->successful()) {
                     $response = $response->json();
                     $number = Arr::get($response, 'wuid', null);
+                    $user = auth()->user();
 
                     $payload = [
                         'connection_key' => $number ? explode('@', $number)[0] : null,
-                        'user_id' => auth()->id(),
+                        'user_id' => $user->id,
                         'connection_id' => $connection->id,
                         'name' => Arr::get($response, 'name', null),
                         'number_exists' => Arr::get($response, 'numberExists', null),

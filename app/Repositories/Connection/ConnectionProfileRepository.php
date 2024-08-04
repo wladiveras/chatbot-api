@@ -16,8 +16,7 @@ class ConnectionProfileRepository extends BaseRepository implements ConnectionRe
 
     public function getUserConnections(): ?Collection
     {
-        $user = Auth::user();
-
+        $user = auth()->user();
         return $this->model->where('user_id', $user->id)->get();
     }
 
