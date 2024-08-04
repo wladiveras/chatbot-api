@@ -3,11 +3,10 @@
 namespace App\Services\Messenger;
 
 use App\Repositories\Connection\ConnectionRepository;
-use App\Services\Messenger\Provinder\WhatsappProvinder;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\App;
 use App\Services\BaseService;
+use App\Services\Messenger\Provinder\WhatsappProvinder;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use stdClass;
 
 class MessengerService extends BaseService
@@ -21,7 +20,7 @@ class MessengerService extends BaseService
 
     public static function integration(string $provinder): MessengerServiceInterface
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         return match ($provinder) {
             'whatsapp' => new WhatsappProvinder,
@@ -31,15 +30,15 @@ class MessengerService extends BaseService
 
     public function fetchConnections(): ?stdClass
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
 
             $connections = $this->connectionRepository->getUserConnections();
 
-            if (!$connections) {
+            if (! $connections) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não deu certo, não foi possivel trazer as conexões.',
                     code: 400
                 );
@@ -52,7 +51,7 @@ class MessengerService extends BaseService
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -61,15 +60,15 @@ class MessengerService extends BaseService
 
     public function fetchConnection($id): ?stdClass
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
 
             $connections = $this->connectionRepository->getUserConnection($id);
 
-            if (!$connections) {
+            if (! $connections) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não deu certo, não foi possivel trazer as conexões.',
                     code: 400
                 );
@@ -82,7 +81,7 @@ class MessengerService extends BaseService
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );

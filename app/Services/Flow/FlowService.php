@@ -2,21 +2,17 @@
 
 namespace App\Services\Flow;
 
-use App\Models\Flow;
-use App\Models\FlowSession;
-
 use App\Jobs\ExecuteFlow;
 use App\Jobs\RunningFlow;
-
+use App\Models\Flow;
+use App\Models\FlowSession;
 use App\Repositories\Flow\FlowRepository;
 use App\Repositories\FlowSession\FlowSessionRepository;
-
 use App\Services\BaseService;
 use App\Services\Messenger\MessengerService;
-
+use Illuminate\Bus\Batch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
-use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Bus;
@@ -52,14 +48,14 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     public function parse(array $data): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $createFlow = $this->flowRepository->create($data);
 
-            if (!$createFlow) {
+            if (! $createFlow) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não deu certo.',
                     code: 400
                 );
@@ -72,7 +68,7 @@ class FlowService extends BaseService implements FlowServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -81,15 +77,15 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     public function userFlows(): ?stdClass
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
 
             $flows = (object) $this->flowRepository->getUserFlows();
 
-            if (!$flows) {
+            if (! $flows) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não deu certo, não foi possivel trazer os fluxos.',
                     code: 400
                 );
@@ -102,7 +98,7 @@ class FlowService extends BaseService implements FlowServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -111,15 +107,15 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     public function fetchFlow($flow_id): ?stdClass
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
 
             $flow = $this->flowRepository->getUserFlow($flow_id);
 
-            if (!$flow) {
+            if (! $flow) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não deu certo, não foi possivel trazer o fluxo.',
                     code: 400
                 );
@@ -132,7 +128,7 @@ class FlowService extends BaseService implements FlowServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -141,16 +137,16 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     public function create(array $data): ?stdClass
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $user = Auth::user();
             $payload = $this->createPayload($data, $user->id);
             $flow = $this->createFlow($payload);
 
-            if (!$flow) {
+            if (! $flow) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não deu certo, não foi possível criar um fluxo.',
                     code: 400
                 );
@@ -163,7 +159,7 @@ class FlowService extends BaseService implements FlowServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -206,6 +202,7 @@ class FlowService extends BaseService implements FlowServiceInterface
     private function extractSessionKey($data): string
     {
         $session_key = Arr::get($data, 'data.key.remoteJid');
+
         return Str::before($session_key, '@');
     }
 
@@ -218,10 +215,9 @@ class FlowService extends BaseService implements FlowServiceInterface
         );
     }
 
-
     public function trigger()
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $flow = $this->getFlow();
@@ -231,14 +227,14 @@ class FlowService extends BaseService implements FlowServiceInterface
             $this->total_steps = $commands->count();
             $nextCommands = $this->getNextCommands($commands, $step);
 
-            if (!$this->session->is_running) {
+            if (! $this->session->is_running) {
                 $jobs = $this->createJobs($nextCommands, $text, $step);
 
-                if (!empty($jobs)) {
+                if (! empty($jobs)) {
                     Bus::chain($jobs)
                         ->catch(function (Batch $batch, \Throwable $e) {
                             return $this->error(
-                                path: __CLASS__ . '.' . __FUNCTION__,
+                                path: __CLASS__.'.'.__FUNCTION__,
                                 message: $e->getMessage(),
                                 code: 500
                             );
@@ -249,7 +245,7 @@ class FlowService extends BaseService implements FlowServiceInterface
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $exception->getMessage(),
                 code: 400
             );
@@ -312,7 +308,7 @@ class FlowService extends BaseService implements FlowServiceInterface
                 'session' => $this->session,
                 'text' => $text,
                 'command' => $command,
-                'steps' => $this->total_steps
+                'steps' => $this->total_steps,
             ]);
         }
 
