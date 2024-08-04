@@ -2,16 +2,15 @@
 
 namespace App\Jobs;
 
-
 use App\Repositories\FlowSession\FlowSessionRepository;
+use Carbon\Carbon;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Bus\Batchable;
 use Illuminate\Support\Facades\App;
-use Carbon\Carbon;
 
 class RunningFlow implements ShouldQueue
 {
@@ -35,8 +34,7 @@ class RunningFlow implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param mixed $session
-     * @param bool $isRunning
+     * @param  mixed  $session
      */
     public function __construct($session, bool $isRunning)
     {
@@ -68,8 +66,6 @@ class RunningFlow implements ShouldQueue
 
     /**
      * Determine the time at which the job should timeout.
-     *
-     * @return Carbon
      */
     public function retryUntil(): Carbon
     {
@@ -78,8 +74,6 @@ class RunningFlow implements ShouldQueue
 
     /**
      * Determine the number of times the job may be attempted.
-     *
-     * @return int
      */
     public function tries(): int
     {

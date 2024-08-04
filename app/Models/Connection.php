@@ -45,4 +45,9 @@ class Connection extends Model
     {
         return $this->hasOne(ConnectionSetting::class);
     }
+
+    public function connectionProfile()
+    {
+        return $this->hasOne(ConnectionProfile::class);
+    }
 }

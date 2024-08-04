@@ -21,7 +21,7 @@ class FlowController extends BaseController
 
     public function index(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
             'request' => $request,
         ]);
 
@@ -35,7 +35,7 @@ class FlowController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -45,7 +45,7 @@ class FlowController extends BaseController
 
     public function show(Request $request, int $id): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
             'request' => $request,
         ]);
 
@@ -59,7 +59,7 @@ class FlowController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -67,10 +67,9 @@ class FlowController extends BaseController
         }
     }
 
-
     public function create(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
             'request' => $request,
         ]);
 
@@ -84,7 +83,7 @@ class FlowController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
                 service: $data->errors(),
                 code: 400
@@ -101,7 +100,7 @@ class FlowController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()

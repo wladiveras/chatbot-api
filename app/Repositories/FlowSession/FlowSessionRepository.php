@@ -4,13 +4,8 @@ namespace App\Repositories\FlowSession;
 
 use App\Models\FlowSession;
 use App\Models\FlowSessionMetas;
-
 use App\Repositories\BaseRepository;
-
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Log;
 
 class FlowSessionRepository extends BaseRepository implements FlowSessionRepositoryInterface
 {
@@ -26,7 +21,7 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
     {
         $flowSession = $this->findSession($flow_id, $connection_id, $session_key);
 
-        if (!$flowSession) {
+        if (! $flowSession) {
             $flowSession = $this->createSession($flow_id, $connection_id, $session_key);
         }
 
@@ -93,5 +88,4 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
         $flowSession->last_active = now();
         $flowSession->save();
     }
-
 }

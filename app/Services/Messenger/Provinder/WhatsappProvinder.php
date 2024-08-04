@@ -2,6 +2,7 @@
 
 namespace App\Services\Messenger\Provinder;
 
+use App\Repositories\Connection\ConnectionProfileRepository;
 use App\Repositories\Connection\ConnectionRepository;
 use App\Repositories\Message\MessageRepository;
 use App\Services\BaseService;
@@ -30,6 +31,8 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     private ConnectionRepository $connectionRepository;
 
+    private ConnectionProfileRepository $connectionProfileRepository;
+
     public function __construct()
     {
         $this->url = Config::get('evolution.url');
@@ -40,6 +43,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
         $this->messageRepository = App::make(MessageRepository::class);
         $this->connectionRepository = App::make(ConnectionRepository::class);
+        $this->connectionProfileRepository = App::make(ConnectionProfileRepository::class);
 
         $this->request = Http::withHeaders([
             'apikey' => $this->key,
@@ -346,8 +350,29 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
                     'number' => $data['number'],
                 ]);
 
+                $connection = $this->connectionRepository->first(column: 'token', value: $connection);
+
                 if ($response->successful()) {
-                    return $this->success(message: 'Perfil retornado com sucesso.', payload: $response->json());
+                    $response = $response->json();
+                    $number = Arr::get($response, 'wuid', null);
+
+                    $payload = [
+                        'connection_key' => $number ? explode('@', $number)[0] : null,
+                        'user_id' => auth()->id(),
+                        'connection_id' => $connection->id,
+                        'name' => Arr::get($response, 'name', null),
+                        'number_exists' => Arr::get($response, 'numberExists', null),
+                        'picture' => Arr::get($response, 'picture', null),
+                        'is_business' => Arr::get($response, 'isBusiness', null),
+                        'email' => Arr::get($response, 'email', null),
+                        'description' => Arr::get($response, 'description', null),
+                        'website' => Arr::get($response, 'website', null),
+                    ];
+
+
+                    $this->connectionProfileRepository->createOrUpdateProfile($payload);
+
+                    return $this->success(message: 'Perfil retornado com sucesso.', payload: $response);
                 }
             }
 

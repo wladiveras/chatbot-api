@@ -7,8 +7,6 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-
-
 // Auth Service
 Route::prefix('/auth')
     ->group(function () {
@@ -44,7 +42,6 @@ Route::prefix('/flow')
         Route::post('/', [FlowController::class, 'create']);
         Route::get('/{code}', [FlowController::class, 'show']);
     });
-
 
 // Payment Gateway service
 Route::prefix('/payment/{gateway}')
