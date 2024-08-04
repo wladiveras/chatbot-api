@@ -458,14 +458,12 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-            if ($this->isConnectionActive(connection: $connection, active: 0)) {
-                $response = $this->request->delete("{$this->url}/instance/delete/{$connection}");
+            $response = $this->request->delete("{$this->url}/instance/delete/{$connection}");
 
-                if ($response->successful()) {
-                    $this->connectionRepository->delete(column: 'token', value: $connection);
+            if ($response->successful()) {
+                $this->connectionRepository->delete(column: 'token', value: $connection);
 
-                    return $this->success(message: 'Conexão desconectada com sucesso.', payload: $response->json());
-                }
+                return $this->success(message: 'Conexão desconectada com sucesso.', payload: $response->json());
             }
 
             return $this->error(
