@@ -46,7 +46,7 @@ return [
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
-            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL'))['host']),
         ],
 
         'ses' => [
@@ -109,8 +109,12 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => env('MAIL_FROM_ADDRESS', null),
+        'name' => env('MAIL_FROM_NAME', null),
+    ],
+
+    'contact' => [
+        'address' => env('MAIL_CONTACT_ADDRESS', null),
     ],
 
 ];

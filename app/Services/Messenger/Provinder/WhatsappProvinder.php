@@ -335,14 +335,35 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         return $message;
     }
 
-    public function fetch(string|int $connection): array|object
+    public function getConnectionProfile(string|int $connection, $data): array|object
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
-        // Esse fetch vai trazer todas as conexoes vinculada ao usuario
-        return (object) [
-            'connection' => $connection,
-        ];
+        try {
+            if ($this->isConnectionActive(connection: $connection, active: 1)) {
+
+                $response = $this->request->post("{$this->url}/chat/fetchProfile/{$connection}", [
+                    'number' => $data['number'],
+                ]);
+
+                if ($response->successful()) {
+                    return $this->success(message: 'Perfil retornado com sucesso.', payload: $response->json());
+                }
+            }
+
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: 'Não foi possivel retornar essa conexão.',
+                code: 400
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $exception->getMessage(),
+                code: 400
+            );
+        }
     }
 
     public function status(string|int $connection): array|object
@@ -379,6 +400,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
+
             if ($this->isConnectionActive(connection: $connection, active: 1)) {
 
                 $response = $this->request->delete("{$this->url}/instance/logout/{$connection}");
