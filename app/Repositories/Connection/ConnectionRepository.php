@@ -16,15 +16,13 @@ class ConnectionRepository extends BaseRepository implements ConnectionRepositor
 
     public function getUserConnections(): ?Collection
     {
-        $user = Auth::user();
-
+        $user = auth()->user();
         return $this->model->where('user_id', $user->id)->with(['connectionProfile'])->get();
     }
 
     public function getUserConnection(int $id): ?Connection
     {
-        $user = Auth::user();
-
+        $user = auth()->user();
         return $this->model->where('user_id', $user->id)->where('id', $id)->first();
     }
 }
