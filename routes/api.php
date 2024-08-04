@@ -63,11 +63,12 @@ Route::prefix('/integration/{integration}')
     ->middleware(['auth:sanctum'])
     ->group(function () {
         Route::post('/create-connection', [MessengerController::class, 'createConnection']);
-        Route::post('/{connection}/status', [MessengerController::class, 'status']);
+        Route::post('/send-message', [MessengerController::class, 'sendMessage']);
         Route::get('/{connection}/connect', [MessengerController::class, 'connect']);
+        Route::post('/{connection}/status', [MessengerController::class, 'status']);
+        Route::post('/{connection}/profile', [MessengerController::class, 'profile']);
         Route::delete('/{connection}/delete', [MessengerController::class, 'delete']);
         Route::delete('/{connection}/disconnect', [MessengerController::class, 'disconnect']);
-        Route::post('/send-message', [MessengerController::class, 'sendMessage']);
     });
 
 Route::post('/integration/{integration}/callback', [MessengerController::class, 'callback']);

@@ -131,6 +131,42 @@ class MessengerController extends BaseController
         }
     }
 
+    public function profile(string $provinder, int|string $connection, Request $request): JsonResponse
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
+        ]);
+
+        $data = Validator::make($request->all(), [
+            'number' => 'integer|required',
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                service: $data->errors(),
+                code: 400
+            );
+        }
+
+        try {
+            $messengerService = $this->messengerService->integration($provinder)->getConnectionProfile($connection, $data->validate());
+
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: new MessengerResource($messengerService)
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
+        }
+    }
     public function status(string $provinder, int|string $connection, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [

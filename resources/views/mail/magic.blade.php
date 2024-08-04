@@ -20,7 +20,7 @@
 
 <body>
     <div>
-        <p>Olá {{ $name }},</p>
+        <p>Olá,</p>
         <p>Bem vindo(a) ao Marinabot, chatbot de automação de marketing e auto atendimento. 😉 </p>
         <p class="link">
             clique aqui para entrar no sistema: <a href="{{ $link }}">{{ $link }}</a>.
