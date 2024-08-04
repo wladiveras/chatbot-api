@@ -109,8 +109,10 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
                 );
             }
 
+            $user = auth()->user();
+
             $createConnection = $this->connectionRepository->create([
-                'user_id' => 1,
+                'user_id' => $user->id,
                 'name' => $name,
                 'description' => $description,
                 'type' => 'whatsapp',
@@ -369,7 +371,6 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
                         'description' => Arr::get($response, 'description', null),
                         'website' => Arr::get($response, 'website', null),
                     ];
-
 
                     $this->connectionProfileRepository->createOrUpdateProfile($payload);
 

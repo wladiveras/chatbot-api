@@ -5,7 +5,6 @@ namespace App\Repositories\Connection;
 use App\Models\Connection;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 
 class ConnectionRepository extends BaseRepository implements ConnectionRepositoryInterface
 {
@@ -17,12 +16,14 @@ class ConnectionRepository extends BaseRepository implements ConnectionRepositor
     public function getUserConnections(): ?Collection
     {
         $user = auth()->user();
+
         return $this->model->where('user_id', $user->id)->with(['connectionProfile'])->get();
     }
 
     public function getUserConnection(int $id): ?Connection
     {
         $user = auth()->user();
+
         return $this->model->where('user_id', $user->id)->where('id', $id)->first();
     }
 }
