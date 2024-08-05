@@ -39,7 +39,8 @@ Route::prefix('/flow')
     ->middleware(['auth:sanctum'])
     ->group(function () {
         Route::get('/', [FlowController::class, 'index']);
-        Route::post('/', [FlowController::class, 'create']);
+        Route::post('/', [FlowController::class, 'store']);
+        Route::put('/{id}', [FlowController::class, 'update']);
         Route::get('/{code}', [FlowController::class, 'show']);
     });
 
