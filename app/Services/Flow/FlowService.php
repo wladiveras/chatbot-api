@@ -104,6 +104,33 @@ class FlowService extends BaseService implements FlowServiceInterface
         }
     }
 
+    public function delete(string|int $id): array|object
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+
+        try {
+
+            $deleteFlow = $this->flowRepository->delete($id);
+
+            if ($deleteFlow) {
+                return $this->success(message: 'Fluxo deletado com sucesso.', payload: $deleteFlow);
+            }
+
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: 'Não foi possível deletar esse fluxo.',
+                code: 400
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $exception->getMessage(),
+                code: 400
+            );
+        }
+    }
+
     public function fetchFlow($flow_id): ?stdClass
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');

@@ -153,7 +153,7 @@ class MessengerController extends BaseController
         }
 
         try {
-            $messengerService = $this->messengerService->integration($provinder)->updateSelectFlow($connection_id, $data->validate());
+            $messengerService = $this->messengerService->updateSelectFlow($connection_id, $data->validate());
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
