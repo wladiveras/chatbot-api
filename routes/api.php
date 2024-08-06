@@ -54,7 +54,6 @@ Route::prefix('/payment/{gateway}')
     });
 
 // Connection Service
-
 Route::get('/connections', [MessengerController::class, 'index'])->middleware(['auth:sanctum']);
 Route::get('/connection/{id}', [MessengerController::class, 'show'])->middleware(['auth:sanctum']);
 
