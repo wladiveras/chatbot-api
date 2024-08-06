@@ -61,7 +61,7 @@ Route::prefix('/integration/{integration}')
     ->middleware(['auth:sanctum'])
     ->group(function () {
         Route::post('/create-connection', [MessengerController::class, 'createConnection']);
-        Route::post('/change-flow/{flow_id}', [MessengerController::class, 'selectFlow']);
+        Route::put('/select-flow/{connection_id}', [MessengerController::class, 'selectFlow']);
         Route::post('/send-message', [MessengerController::class, 'sendMessage']);
         Route::get('/{connection}/connect', [MessengerController::class, 'connect']);
         Route::post('/{connection}/status', [MessengerController::class, 'status']);

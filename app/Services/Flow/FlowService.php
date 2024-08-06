@@ -204,7 +204,6 @@ class FlowService extends BaseService implements FlowServiceInterface
             'description' => $data['description'],
             'node' => json_encode($data['node']),
             'edge' => json_encode($data['edge']),
-            'commands' => json_encode($data['commands']),
         ];
     }
 

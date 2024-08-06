@@ -87,4 +87,33 @@ class MessengerService extends BaseService
             );
         }
     }
+
+    public function updateSelectFlow($connection_id, $data): ?stdClass
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+
+        try {
+            $connection = $this->connectionRepository->updateSelectFlow($connection_id, $data);
+
+            if (!$connection) {
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não deu certo, não foi selecionar o fluxo novo.',
+                    code: 400
+                );
+            }
+
+            return $this->success(
+                message: 'Tudo certo, o fluxo foi alterado com sucesso.',
+                payload: $connection
+            );
+
+        } catch (\Exception $e) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
+        }
+    }
 }
