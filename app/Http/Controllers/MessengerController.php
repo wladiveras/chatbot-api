@@ -23,7 +23,7 @@ class MessengerController extends BaseController
 
     public function index(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -37,7 +37,7 @@ class MessengerController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -47,7 +47,7 @@ class MessengerController extends BaseController
 
     public function show(int|string $id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -61,7 +61,7 @@ class MessengerController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -71,7 +71,7 @@ class MessengerController extends BaseController
 
     public function createConnection(string $provinder, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -83,7 +83,7 @@ class MessengerController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
                 service: $data->errors(),
                 code: 400
@@ -100,7 +100,7 @@ class MessengerController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -110,7 +110,7 @@ class MessengerController extends BaseController
 
     public function connect(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -124,7 +124,45 @@ class MessengerController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: $exception->getMessage(),
+                service: $request->all(),
+                code: $exception->getCode()
+            );
+        }
+    }
+    public function selectFlow(string $provinder, int|string $connection_id, Request $request): JsonResponse
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+            'request' => $request,
+        ]);
+
+        $data = Validator::make($request->all(), [
+            'name' => 'string|max:255',
+            'description' => 'string',
+            'flow_id' => 'integer|required',
+        ]);
+
+        if ($data->fails()) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                response: Carbon::now()->toDateTimeString(),
+                service: $data->errors(),
+                code: 400
+            );
+        }
+
+        try {
+            $messengerService = $this->messengerService->integration($provinder)->updateSelectFlow($connection_id, $data->validate());
+
+            return $this->success(
+                response: Carbon::now()->toDateTimeString(),
+                service: new MessengerResource($messengerService)
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -134,7 +172,7 @@ class MessengerController extends BaseController
 
     public function profile(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -144,7 +182,7 @@ class MessengerController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
                 service: $data->errors(),
                 code: 400
@@ -161,7 +199,7 @@ class MessengerController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -171,7 +209,7 @@ class MessengerController extends BaseController
 
     public function status(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -185,7 +223,7 @@ class MessengerController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -195,7 +233,7 @@ class MessengerController extends BaseController
 
     public function disconnect(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -209,7 +247,7 @@ class MessengerController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -219,7 +257,7 @@ class MessengerController extends BaseController
 
     public function delete(string $provinder, int|string $connection, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -233,7 +271,7 @@ class MessengerController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -243,7 +281,7 @@ class MessengerController extends BaseController
 
     public function sendMessage(string $provider, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -258,7 +296,7 @@ class MessengerController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
                 service: $data->errors(),
                 code: 400
@@ -275,7 +313,7 @@ class MessengerController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -285,7 +323,7 @@ class MessengerController extends BaseController
 
     public function callback(string $provider, Request $request)
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -299,7 +337,7 @@ class MessengerController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()

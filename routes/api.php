@@ -39,7 +39,8 @@ Route::prefix('/flow')
     ->middleware(['auth:sanctum'])
     ->group(function () {
         Route::get('/', [FlowController::class, 'index']);
-        Route::post('/', [FlowController::class, 'create']);
+        Route::post('/', [FlowController::class, 'store']);
+        Route::put('/{id}', [FlowController::class, 'update']);
         Route::get('/{code}', [FlowController::class, 'show']);
     });
 
@@ -60,6 +61,7 @@ Route::prefix('/integration/{integration}')
     ->middleware(['auth:sanctum'])
     ->group(function () {
         Route::post('/create-connection', [MessengerController::class, 'createConnection']);
+        Route::put('/select-flow/{connection_id}', [MessengerController::class, 'selectFlow']);
         Route::post('/send-message', [MessengerController::class, 'sendMessage']);
         Route::get('/{connection}/connect', [MessengerController::class, 'connect']);
         Route::post('/{connection}/status', [MessengerController::class, 'status']);

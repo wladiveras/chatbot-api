@@ -26,4 +26,16 @@ class ConnectionRepository extends BaseRepository implements ConnectionRepositor
 
         return $this->model->where('user_id', $user->id)->where('id', $id)->first();
     }
+
+    public function updateSelectFlow($connection_id, $data): ?bool
+    {
+        $user = auth()->user();
+
+        return $this->model
+            ->where('id', $connection_id)
+            ->where('user_id', $user->id)
+            ->update([
+                'flow_id' => $data['flow_id'],
+            ]);
+    }
 }

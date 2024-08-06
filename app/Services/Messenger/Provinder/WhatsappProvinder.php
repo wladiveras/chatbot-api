@@ -234,13 +234,14 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
         $options = [];
         $message = [];
+        $delay = $data['delay'] ? ($data['delay'] * 1000) : 1000;
 
         // Default options
         if ($data['type'] !== 'status') {
             $options = [
                 'number' => $data['number'],
                 'options' => [
-                    'delay' => $data['delay'] ?? 1200,
+                    'delay' => $delay,
                     'presence' => $data['type'] === 'audio' ? 'recording' : 'composing',
                 ],
             ];

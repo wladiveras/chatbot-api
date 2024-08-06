@@ -20,7 +20,7 @@ class MessengerService extends BaseService
 
     public static function integration(string $provinder): MessengerServiceInterface
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         return match ($provinder) {
             'whatsapp' => new WhatsappProvinder,
@@ -30,15 +30,15 @@ class MessengerService extends BaseService
 
     public function fetchConnections(): ?stdClass
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
 
             $connections = $this->connectionRepository->getUserConnections();
 
-            if (! $connections) {
+            if (!$connections) {
                 return $this->error(
-                    path: __CLASS__.'.'.__FUNCTION__,
+                    path: __CLASS__ . '.' . __FUNCTION__,
                     message: 'Não deu certo, não foi possivel trazer as conexões.',
                     code: 400
                 );
@@ -51,7 +51,7 @@ class MessengerService extends BaseService
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -60,15 +60,15 @@ class MessengerService extends BaseService
 
     public function fetchConnection($id): ?stdClass
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
 
             $connections = $this->connectionRepository->getUserConnection($id);
 
-            if (! $connections) {
+            if (!$connections) {
                 return $this->error(
-                    path: __CLASS__.'.'.__FUNCTION__,
+                    path: __CLASS__ . '.' . __FUNCTION__,
                     message: 'Não deu certo, não foi possivel trazer as conexões.',
                     code: 400
                 );
@@ -81,7 +81,36 @@ class MessengerService extends BaseService
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
+        }
+    }
+
+    public function updateSelectFlow($connection_id, $data): ?stdClass
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+
+        try {
+            $connection = $this->connectionRepository->updateSelectFlow($connection_id, $data);
+
+            if (!$connection) {
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não deu certo, não foi selecionar o fluxo novo.',
+                    code: 400
+                );
+            }
+
+            return $this->success(
+                message: 'Tudo certo, o fluxo foi alterado com sucesso.',
+                payload: $connection
+            );
+
+        } catch (\Exception $e) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
