@@ -26,4 +26,9 @@ class Flow extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function commands()
+    {
+        return $this->hasMany(FlowCommand::class);
+    }
 }

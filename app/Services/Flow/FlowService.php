@@ -210,7 +210,7 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     private function createFlow(array $payload): ?Flow
     {
-        return $this->flowRepository->create($payload);
+        return $this->flowRepository->createFlowWithCommands($payload);
     }
 
     private function updateFlow(int $id, array $payload): ?Flow
