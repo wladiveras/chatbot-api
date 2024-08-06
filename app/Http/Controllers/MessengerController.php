@@ -131,6 +131,7 @@ class MessengerController extends BaseController
             );
         }
     }
+
     public function selectFlow(string $provinder, int|string $connection_id, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
@@ -153,7 +154,7 @@ class MessengerController extends BaseController
         }
 
         try {
-            $messengerService = $this->messengerService->integration($provinder)->updateSelectFlow($connection_id, $data->validate());
+            $messengerService = $this->messengerService->updateSelectFlow($connection_id, $data->validate());
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
