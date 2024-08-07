@@ -7,6 +7,7 @@ environments:
           - api.marinabot.com.br
         database: marinabot-db-production
         cache: marinabot-cache-production
+        storage: marinabot-bucket-production
         memory: 1024
         cli-memory: 1024
         runtime: 'php-8.3:al2'
@@ -24,6 +25,7 @@ environments:
           - staging.marinabot.com.br
         database: marinabot-db-staging
         cache: marinabot-cache-staging
+        storage: marinabot-bucket-staging
         memory: 1024
         cli-memory: 1024
         runtime: 'php-8.3:al2'
