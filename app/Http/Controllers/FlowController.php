@@ -108,7 +108,7 @@ class FlowController extends BaseController
         }
     }
 
-    public function delete(int $id, Request $request): JsonResponse
+    public function delete(int|string $id, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,

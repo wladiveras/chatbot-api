@@ -4,8 +4,11 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FlowController;
 use App\Http\Controllers\MessengerController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+
+
 
 // Auth Service
 Route::prefix('/auth')
@@ -23,6 +26,9 @@ Route::prefix('/auth')
         Route::get('/redirect/{provider}', [AuthController::class, 'redirectToProvider']);
         Route::get('/callback/{provider}', [AuthController::class, 'callbackWithProvider']);
     });
+
+// Upload Service
+Route::post('/upload', [UploadController::class, 'upload'])->middleware(['auth:sanctum']);
 
 // User Service
 Route::prefix('/user')
