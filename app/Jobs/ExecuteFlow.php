@@ -28,6 +28,8 @@ class ExecuteFlow implements ShouldQueue
     /**
      * Create a new job instance.
      */
+    public $tries = 1;
+    public $maxExceptions = 1;
     public function __construct($payload)
     {
 
@@ -43,27 +45,23 @@ class ExecuteFlow implements ShouldQueue
         $this->flowSessionRepository = App::make(FlowSessionRepository::class);
     }
 
-    public function retryUntil(): Carbon
-    {
-        return Carbon::now()->addMinutes(10);
-    }
-
-    public function tries(): int
-    {
-        return 0;
-    }
 
     /**
      * Execute the job.
      */
     public function handle(): void
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         $action = Arr::get($this->payload['command'], 'action', null);
         $data = $this->prepareData();
 
         $this->executeCommand($action, $data);
+    }
+
+    public function failed(\Exception $exception)
+    {
+        Log::error('Job de fluxo falhou: ' . $exception->getMessage());
     }
 
     /**
@@ -105,7 +103,7 @@ class ExecuteFlow implements ShouldQueue
     // Commands
     protected function commandDelay($command)
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         sleep(Arr::get($command, 'command.value', 1));
 
@@ -114,7 +112,7 @@ class ExecuteFlow implements ShouldQueue
 
     protected function commandMessage($command)
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         $messageText = Arr::get($command, 'command.value', null);
         $placeholders = $this->extractPlaceholders($messageText);
@@ -174,7 +172,7 @@ class ExecuteFlow implements ShouldQueue
 
     protected function commandInput($command)
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         $this->flowSessionRepository->setSessionMeta(
             flow_session_id: $this->payload['session']->id,

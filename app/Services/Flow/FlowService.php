@@ -232,6 +232,7 @@ class FlowService extends BaseService implements FlowServiceInterface
             'description' => $data['description'],
             'node' => json_encode($data['node']),
             'edge' => json_encode($data['edge']),
+            'commands' => json_encode($data['commands']),
         ];
     }
 
@@ -295,11 +296,7 @@ class FlowService extends BaseService implements FlowServiceInterface
                 if (!empty($jobs)) {
                     Bus::chain($jobs)
                         ->catch(function (Batch $batch, \Throwable $e) {
-                            return $this->error(
-                                path: __CLASS__ . '.' . __FUNCTION__,
-                                message: $e->getMessage(),
-                                code: 500
-                            );
+                            Log::error('Batch failed: ' . $e->getMessage());
                         })
                         ->dispatch();
                 }

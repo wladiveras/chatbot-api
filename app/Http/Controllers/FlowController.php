@@ -78,6 +78,7 @@ class FlowController extends BaseController
             'description' => 'required|string',
             'node' => 'required|array',
             'edge' => 'required|array',
+            'commands' => 'required|array',
         ]);
 
         if ($data->fails()) {
@@ -141,6 +142,7 @@ class FlowController extends BaseController
             'description' => 'string',
             'node' => 'array',
             'edge' => 'array',
+            'commands' => 'array',
         ]);
 
         if ($data->fails()) {
