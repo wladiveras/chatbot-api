@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string('description')->nullable();
             $table->json('node')->nullable();
             $table->json('edge')->nullable();
-            $table->json('commands');
+            $table->json('commands')->nullable();
             $table->boolean('is_active')->default(true);
             $table->boolean('is_public')->default(false);
             $table->timestamps();

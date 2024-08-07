@@ -4,28 +4,32 @@ namespace App\Jobs;
 
 use App\Repositories\FlowSession\FlowSessionRepository;
 use App\Services\Messenger\MessengerService;
+use Carbon\Carbon;
+use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
-use Illuminate\Bus\Batchable;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class ExecuteFlow implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $payload;
+
     protected $messengerService;
+
     protected $flowSessionRepository;
 
     /**
      * Create a new job instance.
      */
+    public $tries = 1;
+    public $maxExceptions = 1;
     public function __construct($payload)
     {
 
@@ -41,15 +45,7 @@ class ExecuteFlow implements ShouldQueue
         $this->flowSessionRepository = App::make(FlowSessionRepository::class);
     }
 
-    public function retryUntil(): Carbon
-    {
-        return Carbon::now()->addMinutes(10);
-    }
 
-    public function tries(): int
-    {
-        return 0;
-    }
     /**
      * Execute the job.
      */
@@ -63,10 +59,13 @@ class ExecuteFlow implements ShouldQueue
         $this->executeCommand($action, $data);
     }
 
+    public function failed(\Exception $exception)
+    {
+        Log::error('Job de fluxo falhou: ' . $exception->getMessage());
+    }
+
     /**
      * Prepare the data for command execution.
-     *
-     * @return array
      */
     protected function prepareData(): array
     {
@@ -80,9 +79,6 @@ class ExecuteFlow implements ShouldQueue
 
     /**
      * Execute the command based on the action.
-     *
-     * @param string|null $action
-     * @param array $data
      */
     protected function executeCommand(?string $action, array $data): void
     {
@@ -143,6 +139,7 @@ class ExecuteFlow implements ShouldQueue
     protected function extractPlaceholders($messageText)
     {
         preg_match_all('/\{(\w+)\}/', $messageText, $matches);
+
         return $matches[1];
     }
 
@@ -168,6 +165,7 @@ class ExecuteFlow implements ShouldQueue
     {
         return preg_replace_callback('/\{(\w+)\}/', function ($matches) use ($sessionMetas) {
             $key = $matches[1];
+
             return Arr::get($sessionMetas, $key, $matches[0]);
         }, $messageText);
     }

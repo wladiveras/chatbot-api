@@ -18,12 +18,12 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->model->cursorPaginate($limitPerPage);
     }
 
-    public function find(mixed $value, $column = 'id'): array|object
+    public function find(mixed $value, $column = 'id'): array|object|null
     {
         return $this->model->where($column, $value)->first();
     }
 
-    public function first(mixed $value, $column = 'id'): array|object
+    public function first(mixed $value, $column = 'id'): array|object|null
     {
         return $this->model->where($column, $value)->first();
     }
@@ -33,7 +33,7 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->model->create($data);
     }
 
-    public function update(mixed $value, array $data, $column = 'id'): array|object
+    public function update(mixed $value, array $data, $column = 'id'): array|object|null
     {
         return tap($this->model->where($column, $value))->update($data)->first();
     }

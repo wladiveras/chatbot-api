@@ -2,23 +2,18 @@
 
 namespace App\Services\Flow;
 
-use App\Models\Flow;
-use App\Models\FlowSession;
-
 use App\Jobs\ExecuteFlow;
 use App\Jobs\RunningFlow;
-
+use App\Models\Flow;
+use App\Models\FlowSession;
 use App\Repositories\Flow\FlowRepository;
 use App\Repositories\FlowSession\FlowSessionRepository;
-
 use App\Services\BaseService;
 use App\Services\Messenger\MessengerService;
-
+use Illuminate\Bus\Batch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
-use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -85,7 +80,7 @@ class FlowService extends BaseService implements FlowServiceInterface
 
         try {
 
-            $flows = (object) $this->flowRepository->userFlows();
+            $flows = (object) $this->flowRepository->getUserFlows();
 
             if (!$flows) {
                 return $this->error(
@@ -109,12 +104,70 @@ class FlowService extends BaseService implements FlowServiceInterface
         }
     }
 
+    public function delete(string|int $id): array|object
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+
+        try {
+
+            $deleteFlow = $this->flowRepository->delete($id);
+
+
+            if ($deleteFlow) {
+                return $this->success(message: 'Fluxo deletado com sucesso.', payload: $deleteFlow);
+            }
+
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: 'Não foi possível deletar esse fluxo.',
+                code: 400
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $exception->getMessage(),
+                code: 400
+            );
+        }
+    }
+
+    public function fetchFlow($flow_id): ?stdClass
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+
+        try {
+
+            $flow = $this->flowRepository->getUserFlow($flow_id);
+
+            if (!$flow) {
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não deu certo, não foi possivel trazer o fluxo.',
+                    code: 400
+                );
+            }
+
+            return $this->success(
+                message: 'Tudo certo, os fluxo foi retornado.',
+                payload: $flow
+            );
+
+        } catch (\Exception $e) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
+        }
+    }
+
     public function create(array $data): ?stdClass
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-            $user = Auth::user();
+            $user = auth()->user();
             $payload = $this->createPayload($data, $user->id);
             $flow = $this->createFlow($payload);
 
@@ -128,6 +181,37 @@ class FlowService extends BaseService implements FlowServiceInterface
 
             return $this->success(
                 message: 'Tudo certo, seu fluxo foi criado.',
+                payload: $flow
+            );
+
+        } catch (\Exception $e) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $e->getMessage(),
+                code: $e->getCode()
+            );
+        }
+    }
+
+    public function update(int $id, array $data): ?stdClass
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+
+        try {
+            $user = auth()->user();
+            $payload = $this->createPayload($data, $user->id);
+            $flow = $this->updateFlow($id, $payload);
+
+            if (!$flow) {
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não deu certo, não foi possível atualizar o fluxo.',
+                    code: 400
+                );
+            }
+
+            return $this->success(
+                message: 'Tudo certo, seu fluxo foi atualizado.',
                 payload: $flow
             );
 
@@ -157,6 +241,11 @@ class FlowService extends BaseService implements FlowServiceInterface
         return $this->flowRepository->create($payload);
     }
 
+    private function updateFlow(int $id, array $payload): ?Flow
+    {
+        return $this->flowRepository->update($id, $payload);
+    }
+
     public function connection($connection): self
     {
         $this->connection = $connection;
@@ -176,6 +265,7 @@ class FlowService extends BaseService implements FlowServiceInterface
     private function extractSessionKey($data): string
     {
         $session_key = Arr::get($data, 'data.key.remoteJid');
+
         return Str::before($session_key, '@');
     }
 
@@ -187,7 +277,6 @@ class FlowService extends BaseService implements FlowServiceInterface
             session_key: $this->session_key
         );
     }
-
 
     public function trigger()
     {
@@ -207,11 +296,7 @@ class FlowService extends BaseService implements FlowServiceInterface
                 if (!empty($jobs)) {
                     Bus::chain($jobs)
                         ->catch(function (Batch $batch, \Throwable $e) {
-                            return $this->error(
-                                path: __CLASS__ . '.' . __FUNCTION__,
-                                message: $e->getMessage(),
-                                code: 500
-                            );
+                            Log::error('Batch failed: ' . $e->getMessage());
                         })
                         ->dispatch();
                 }
@@ -282,7 +367,7 @@ class FlowService extends BaseService implements FlowServiceInterface
                 'session' => $this->session,
                 'text' => $text,
                 'command' => $command,
-                'steps' => $this->total_steps
+                'steps' => $this->total_steps,
             ]);
         }
 

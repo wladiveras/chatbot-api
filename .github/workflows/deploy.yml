@@ -13,16 +13,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Create Evolution Container
-        run: |
-          docker run -d \
-            --name evolution-api \
-            -p 8080:8080 \
-            -e AUTHENTICATION_API_KEY=${{ secrets.EVOLUTION_SECRET }} \
-            -v evolution_store:/evolution/store \
-            -v evolution_instances:/evolution/instances \
-            atendai/evolution-api
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -42,5 +32,16 @@ jobs:
           VAPOR_API_TEAM: ${{ secrets.VAPOR_TEAM_ID }}
           VAPOR_API_TOKEN: ${{ secrets.VAPOR_API_TOKEN }}
 
-      - name: Check Docker Logs
-        run: docker logs evolution-api
+      - name: Deploy Environment
+        run: vapor deploy production
+        env:
+          VAPOR_API_TOKEN: ${{ secrets.VAPOR_API_TOKEN }}
+
+      - name: Create Sentry Release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        with:
+          environment: production

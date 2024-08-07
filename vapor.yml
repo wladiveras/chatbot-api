@@ -1,21 +1,40 @@
 id: 62853
 name: marinabot-api
+default-environment: production
 environments:
     production:
-        domain: api.marinabot.com.br
+        domain:
+          - api.marinabot.com.br
         database: marinabot-db-production
         cache: marinabot-cache-production
+        storage: marinabot-bucket-production
         memory: 1024
         cli-memory: 1024
         runtime: 'php-8.3:al2'
         queues:
-            - flows
+            - flows-production
         build:
             - 'COMPOSER_MIRROR_PATH_REPOS=1 composer install --no-dev'
             - 'php artisan event:cache'
+            - 'php artisan config:cache'
+            - 'php artisan config:clear'
         deploy:
             - 'php artisan migrate --force'
-        network:
-          ports:
-            - 8080:8080
-
+    staging:
+        domain:
+          - staging.marinabot.com.br
+        database: marinabot-db-staging
+        cache: marinabot-cache-staging
+        storage: marinabot-bucket-staging
+        memory: 1024
+        cli-memory: 1024
+        runtime: 'php-8.3:al2'
+        queues:
+            - flows-staging
+        build:
+            - 'COMPOSER_MIRROR_PATH_REPOS=1 composer install --no-dev'
+            - 'php artisan event:cache'
+            - 'php artisan config:cache'
+            - 'php artisan config:clear'
+        deploy:
+            - 'php artisan migrate --force'

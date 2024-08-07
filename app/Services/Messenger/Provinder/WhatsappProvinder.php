@@ -2,6 +2,7 @@
 
 namespace App\Services\Messenger\Provinder;
 
+use App\Repositories\Connection\ConnectionProfileRepository;
 use App\Repositories\Connection\ConnectionRepository;
 use App\Repositories\Message\MessageRepository;
 use App\Services\BaseService;
@@ -30,6 +31,8 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     private ConnectionRepository $connectionRepository;
 
+    private ConnectionProfileRepository $connectionProfileRepository;
+
     public function __construct()
     {
         $this->url = Config::get('evolution.url');
@@ -40,6 +43,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
         $this->messageRepository = App::make(MessageRepository::class);
         $this->connectionRepository = App::make(ConnectionRepository::class);
+        $this->connectionProfileRepository = App::make(ConnectionProfileRepository::class);
 
         $this->request = Http::withHeaders([
             'apikey' => $this->key,
@@ -70,6 +74,14 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         ];
 
         try {
+            if ($this->connectionRepository->exists(column: 'connection_key', value: $number)) {
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Limite máximo de conexões atingindo.',
+                    code: 400
+                );
+            }
+
             if ($this->connectionRepository->exists(column: 'connection_key', value: $number)) {
                 return $this->error(
                     path: __CLASS__ . '.' . __FUNCTION__,
@@ -105,8 +117,10 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
                 );
             }
 
+            $user = auth()->user();
+
             $createConnection = $this->connectionRepository->create([
-                'user_id' => 1,
+                'user_id' => $user->id,
                 'name' => $name,
                 'description' => $description,
                 'type' => 'whatsapp',
@@ -228,13 +242,14 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
         $options = [];
         $message = [];
+        $delay = $data['delay'] ? ($data['delay'] * 1000) : 1000;
 
         // Default options
         if ($data['type'] !== 'status') {
             $options = [
                 'number' => $data['number'],
                 'options' => [
-                    'delay' => $data['delay'] ?? 1200,
+                    'delay' => $delay,
                     'presence' => $data['type'] === 'audio' ? 'recording' : 'composing',
                 ],
             ];
@@ -335,14 +350,56 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         return $message;
     }
 
-    public function fetch(string|int $connection): array|object
+    public function getConnectionProfile(string|int $connection, $data): array|object
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
-        // Esse fetch vai trazer todas as conexoes vinculada ao usuario
-        return (object) [
-            'connection' => $connection,
-        ];
+        try {
+            if ($this->isConnectionActive(connection: $connection, active: 1)) {
+
+                $response = $this->request->post("{$this->url}/chat/fetchProfile/{$connection}", [
+                    'number' => $data['number'],
+                ]);
+
+                $connection = $this->connectionRepository->first(column: 'token', value: $connection);
+
+                if ($response->successful()) {
+                    $response = $response->json();
+                    $number = Arr::get($response, 'wuid', null);
+                    $user = auth()->user();
+
+                    $payload = [
+                        'connection_key' => $number ? explode('@', $number)[0] : null,
+                        'user_id' => $user->id,
+                        'connection_id' => $connection->id,
+                        'name' => Arr::get($response, 'name', null),
+                        'number_exists' => Arr::get($response, 'numberExists', null),
+                        'picture' => Arr::get($response, 'picture', null),
+                        'is_business' => Arr::get($response, 'isBusiness', null),
+                        'email' => Arr::get($response, 'email', null),
+                        'description' => Arr::get($response, 'description', null),
+                        'website' => Arr::get($response, 'website', null),
+                    ];
+
+                    $this->connectionProfileRepository->createOrUpdateProfile($payload);
+
+                    return $this->success(message: 'Perfil retornado com sucesso.', payload: $response);
+                }
+            }
+
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: 'Não foi possivel retornar essa conexão.',
+                code: 400
+            );
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $exception->getMessage(),
+                code: 400
+            );
+        }
     }
 
     public function status(string|int $connection): array|object
@@ -379,6 +436,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
+
             if ($this->isConnectionActive(connection: $connection, active: 1)) {
 
                 $response = $this->request->delete("{$this->url}/instance/logout/{$connection}");
@@ -410,14 +468,12 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-            if ($this->isConnectionActive(connection: $connection, active: 0)) {
-                $response = $this->request->delete("{$this->url}/instance/delete/{$connection}");
+            $response = $this->request->delete("{$this->url}/instance/delete/{$connection}");
 
-                if ($response->successful()) {
-                    $this->connectionRepository->delete(column: 'token', value: $connection);
+            if ($response->successful()) {
+                $this->connectionRepository->delete(column: 'token', value: $connection);
 
-                    return $this->success(message: 'Conexão desconectada com sucesso.', payload: $response->json());
-                }
+                return $this->success(message: 'Conexão desconectada com sucesso.', payload: $response->json());
             }
 
             return $this->error(
@@ -478,11 +534,13 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
-        $connection = Arr::get($data, 'instance');
-        $FromOwner = Arr::get($data, 'data.key.fromMe');
 
         try {
+            $connection = Arr::get($data, 'instance');
+            $FromOwner = Arr::get($data, 'data.key.fromMe');
+
             $connection = $this->connectionRepository->first(column: 'token', value: $connection);
+
             $this->connectionExists($connection);
 
             $origin = $FromOwner ? 'owner' : 'client';

@@ -39,7 +39,10 @@ Route::prefix('/flow')
     ->middleware(['auth:sanctum'])
     ->group(function () {
         Route::get('/', [FlowController::class, 'index']);
-        Route::post('/', [FlowController::class, 'create']);
+        Route::post('/', [FlowController::class, 'store']);
+        Route::put('/{id}', [FlowController::class, 'update']);
+        Route::get('/{code}', [FlowController::class, 'show']);
+        Route::delete('/{id}', [FlowController::class, 'delete']);
     });
 
 // Payment Gateway service
@@ -51,15 +54,20 @@ Route::prefix('/payment/{gateway}')
     });
 
 // Connection Service
+Route::get('/connections', [MessengerController::class, 'index'])->middleware(['auth:sanctum']);
+Route::get('/connection/{id}', [MessengerController::class, 'show'])->middleware(['auth:sanctum']);
+
 Route::prefix('/integration/{integration}')
     ->middleware(['auth:sanctum'])
     ->group(function () {
         Route::post('/create-connection', [MessengerController::class, 'createConnection']);
-        Route::post('/{connection}/status', [MessengerController::class, 'status']);
+        Route::put('/select-flow/{connection_id}', [MessengerController::class, 'selectFlow']);
+        Route::post('/send-message', [MessengerController::class, 'sendMessage']);
         Route::get('/{connection}/connect', [MessengerController::class, 'connect']);
+        Route::post('/{connection}/status', [MessengerController::class, 'status']);
+        Route::post('/{connection}/profile', [MessengerController::class, 'profile']);
         Route::delete('/{connection}/delete', [MessengerController::class, 'delete']);
         Route::delete('/{connection}/disconnect', [MessengerController::class, 'disconnect']);
-        Route::post('/send-message', [MessengerController::class, 'sendMessage']);
     });
 
 Route::post('/integration/{integration}/callback', [MessengerController::class, 'callback']);
