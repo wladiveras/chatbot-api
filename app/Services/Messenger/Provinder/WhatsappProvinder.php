@@ -77,6 +77,14 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             if ($this->connectionRepository->exists(column: 'connection_key', value: $number)) {
                 return $this->error(
                     path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Limite máximo de conexões atingindo.',
+                    code: 400
+                );
+            }
+
+            if ($this->connectionRepository->exists(column: 'connection_key', value: $number)) {
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
                     message: 'Já existe uma conexão com esse número.',
                     code: 400
                 );
@@ -526,11 +534,13 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
-        $connection = Arr::get($data, 'instance');
-        $FromOwner = Arr::get($data, 'data.key.fromMe');
 
         try {
+            $connection = Arr::get($data, 'instance');
+            $FromOwner = Arr::get($data, 'data.key.fromMe');
+
             $connection = $this->connectionRepository->first(column: 'token', value: $connection);
+
             $this->connectionExists($connection);
 
             $origin = $FromOwner ? 'owner' : 'client';
