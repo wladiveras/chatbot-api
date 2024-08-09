@@ -332,6 +332,8 @@ class FlowService extends BaseService implements FlowServiceInterface
     private function getNextCommands($commands, $step)
     {
         // Filtrar comandos com step >= step fornecido
+        Log::debug('testado 1: ', [$commands]);
+
         $filteredCommands = collect($commands)->filter(function ($command) use ($step) {
             return $command['step'] >= $step;
         });
@@ -356,6 +358,9 @@ class FlowService extends BaseService implements FlowServiceInterface
         if ($inputIndex !== false) {
             return $filteredCommands->slice(0, $inputIndex)->values();
         }
+
+        Log::debug('testado 2: ', [$filteredCommands]);
+
 
         // Se não houver comando 'input', retornar todos os comandos filtrados
         return $filteredCommands;

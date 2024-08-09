@@ -15,11 +15,11 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'api/csrf-cookie'],
+    'paths' => ['api/*'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('APP_FRONT_URL', '*')],
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 
