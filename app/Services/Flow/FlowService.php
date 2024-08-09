@@ -286,7 +286,10 @@ class FlowService extends BaseService implements FlowServiceInterface
             $flow = $this->getFlow();
             $text = $this->getText();
             $commands = $this->getCommands($flow);
+
+
             $step = $this->session->step;
+
             $this->total_steps = $commands->count();
             $nextCommands = $this->getNextCommands($commands, $step);
 
@@ -328,27 +331,36 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     private function getNextCommands($commands, $step)
     {
-        $filteredCommands = collect($commands->filter(function ($command) use ($step) {
+        // Filtrar comandos com step >= step fornecido
+        $filteredCommands = collect($commands)->filter(function ($command) use ($step) {
             return $command['step'] >= $step;
-        }));
+        });
 
+        // Encontrar o primeiro comando com ação 'input'
         $inputCommand = $filteredCommands->first(function ($command) {
             return $command['action'] === 'input';
         });
 
+        // Converter para valores
         $filteredCommands = $filteredCommands->values();
 
+        // Encontrar o índice do comando 'input'
         $inputIndex = $filteredCommands->search($inputCommand);
 
+        // Se o comando 'input' estiver no início, retornar todos os comandos a partir desse ponto
         if ($inputIndex === 0) {
-            $filteredCommands = $filteredCommands->slice($inputIndex);
+            return $filteredCommands->slice($inputIndex)->values();
         }
 
-        if ($inputIndex !== 0) {
-            $filteredCommands = $filteredCommands->slice(0, $inputIndex);
+        // Se o comando 'input' não estiver no início, retornar todos os comandos até o ponto do comando 'input'
+        if ($inputIndex !== false) {
+            return $filteredCommands->slice(0, $inputIndex)->values();
         }
 
-        return $filteredCommands->values();
+        // Se não houver comando 'input', retornar todos os comandos filtrados
+        return $filteredCommands;
+
+
     }
 
     private function createJobs($nextCommands, $text, $step)

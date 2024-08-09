@@ -523,17 +523,12 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             return $this->success(message: 'Conexão Atualizada.', payload: $data);
         }
 
-        return $this->error(
-            path: __CLASS__ . '.' . __FUNCTION__,
-            message: 'Conexão não foi possivel atualizar a conexão.',
-            code: 400
-        );
+        return [];
     }
 
     public function triggerFlow(array|object $data): array|object
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
-
 
         try {
             $connection = Arr::get($data, 'instance');
