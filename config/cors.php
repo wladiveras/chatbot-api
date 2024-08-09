@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://marinabot-bucket-production.s3.amazonaws.com, https://marinabot.com.br'],
+    'allowed_origins' => ['http://localhost:8080', 'http://localhost:3000', 'https://marinabot.com.br', 'https://marinabot-bucket-production.s3.amazonaws.com'],
 
     'allowed_origins_patterns' => [],
 
