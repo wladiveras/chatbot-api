@@ -131,12 +131,8 @@ class ExecuteFlow implements ShouldQueue
             'delay' => Arr::get($command, 'command.delay', 1),
             'type' => Arr::get($command, 'command.type', 'text'), // text, audio, video, image, media_audio, list, pool, status
             'value' => $messageText,
+            'caption' => Arr::get($command, 'command.caption', "")
         ];
-
-        $caption = Arr::get($command, 'command.caption', null);
-        if ($caption !== null) {
-            $message['caption'] = $caption;
-        }
 
         $this->messengerService->integration('whatsapp')->send($message);
 
