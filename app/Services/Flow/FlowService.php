@@ -190,6 +190,7 @@ class FlowService extends BaseService implements FlowServiceInterface
                 'code' => $e->getCode(),
                 'message' => $e->getMessage(),
                 'data' => $payload,
+                'flow' => $flow
             ]);
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
