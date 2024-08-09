@@ -17,14 +17,14 @@ class ConnectionRepository extends BaseRepository implements ConnectionRepositor
     {
         $user = auth()->user();
 
-        return $this->model->where('user_id', $user->id)->with(['connectionProfile'])->get();
+        return $this->model->where('user_id', $user->id)->with(['connectionProfile'])->orderBy('id', 'desc')->select('id', 'name', 'description', 'is_active')->get();
     }
 
     public function getUserConnection(int $id): ?Connection
     {
         $user = auth()->user();
 
-        return $this->model->where('user_id', $user->id)->where('id', $id)->first();
+        return $this->model->where('user_id', $user->id)->where('id', $id)->orderBy('id', 'desc')->first();
     }
 
     public function updateSelectFlow($connection_id, $data): ?bool
