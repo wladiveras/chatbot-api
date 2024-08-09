@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use stdClass;
 
 class FlowService extends BaseService implements FlowServiceInterface
@@ -200,6 +201,7 @@ class FlowService extends BaseService implements FlowServiceInterface
         try {
             $user = auth()->user();
             $payload = $this->createPayload($data, $user->id);
+
             $flow = $this->updateFlow($id, $payload);
 
             if (!$flow) {
@@ -226,6 +228,9 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     private function createPayload(array $data, int $userId): array
     {
+
+        $data = $this->parsePayloadToS3($data);
+
         return [
             'user_id' => $userId,
             'name' => $data['name'],
@@ -234,6 +239,73 @@ class FlowService extends BaseService implements FlowServiceInterface
             'edge' => json_encode($data['edge']),
             'commands' => json_encode($data['commands']),
         ];
+    }
+
+
+    private function parsePayloadToS3($payload)
+    {
+        // Decodificar o payload JSON
+        $nodes = $payload['node'];
+
+        foreach ($nodes as &$node) {
+            foreach ($node['data']['commands'] as &$command) {
+                if (isset($command['value'])) {
+                    // Obter o valor base64 da imagem
+                    $base64Image = $command['value'];
+
+                    // Extrair o tipo MIME usando uma expressão regular
+                    if (preg_match('/^data:(\w+\/\w+);base64,/', $base64Image, $matches)) {
+                        $mimeType = $matches[1];
+
+                        // Mapeamento de tipos MIME para extensões de arquivo
+                        $mimeToExt = [
+                            'image/jpeg' => 'jpg',
+                            'image/png' => 'png',
+                            'image/gif' => 'gif',
+                            'video/mp4' => 'mp4',
+                            'video/ogg' => 'ogv',
+                            'video/webm' => 'webm',
+                            'audio/mpeg' => 'mpeg',
+                            'audio/mp3' => 'mp3',
+                            // Adicione mais mapeamentos conforme necessário
+                        ];
+
+                        // Obter a extensão do arquivo a partir do tipo MIME
+                        $extension = isset($mimeToExt[$mimeType]) ? $mimeToExt[$mimeType] : 'bin';
+
+                        // Remover o prefixo 'data:image/jpeg;base64,' se existir
+                        $base64Image = preg_replace('/^data:\w+\/\w+;base64,/', '', $base64Image);
+
+                        // Decodificar a string base64
+                        $imageData = base64_decode($base64Image);
+
+                        // Gerar um UUID para o nome do arquivo
+                        $uuid = Str::uuid()->toString();
+
+                        // Definir o caminho no S3 com o UUID e a extensão dinâmica
+                        $path = 'uploads/' . $uuid . '.' . $extension;
+
+                        // Armazenar o arquivo no S3 com permissões públicas
+                        $stored = Storage::disk('s3')->put($path, $imageData, 'public');
+
+                        // Verificar se o arquivo foi armazenado corretamente
+                        if ($stored) {
+                            $url = Storage::disk('s3')->url($path);
+
+                            // Substituir o valor base64 pelo URL do S3
+                            $command['value'] = $url;
+                        } else {
+                            // Tratar o erro de armazenamento, se necessário
+
+                        }
+                    }
+                }
+            }
+        }
+
+        $payload['node'] = $nodes;
+
+        return $payload;
     }
 
     private function createFlow(array $payload): ?Flow

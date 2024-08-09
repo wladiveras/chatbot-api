@@ -493,10 +493,12 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function callback(array|object $data): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         $event = Arr::get($data, 'data.event', Arr::get($data, 'event'));
 
+        if ($event !== 'connection.update') {
+            Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        }
         return match ($event) {
             'connection.update' => $this->TriggerConnection($data),
             'messages.upsert' => $this->triggerFlow($data),
@@ -508,7 +510,6 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
     public function triggerConnection(array|object $data): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         $connection = Arr::get($data, 'instance');
         $state = Arr::get($data, 'data.state', 'close');
