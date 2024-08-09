@@ -260,7 +260,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             $message = [
                 'mediaMessage' => [
                     'mediatype' => $data['type'] === 'media_audio' ? 'audio' : $data['type'],
-                    'caption' => $data['caption'],
+                    'caption' => $data['caption'] ?? "",
                     'media' => $data['value'],
                 ],
             ];
