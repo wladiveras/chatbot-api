@@ -51,17 +51,20 @@ class ExecuteFlow implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
+        Log::info('App\Jobs\ExecuteFlow ........................... RUNNING');
         $action = Arr::get($this->payload['command'], 'action', null);
         $data = $this->prepareData();
+        try {
+            $this->executeCommand($action, $data);
 
-        $this->executeCommand($action, $data);
-    }
-
-    public function failed(\Exception $exception)
-    {
-        Log::error('Job de fluxo falhou: ' . $exception->getMessage());
+            Log::info('App\Jobs\ExecuteFlow ........................... DONE', [$action, $data]);
+        } catch (\Exception $e) {
+            Log::error('App\Jobs\ExecuteFlow ...................... FAIL', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
     }
 
     /**
@@ -125,11 +128,15 @@ class ExecuteFlow implements ShouldQueue
         $message = [
             'connection' => Arr::get($command, 'token', null),
             'number' => Arr::get($command, 'session_key', null),
-            'delay' => Arr::get($command, 'command.delay', null),
+            'delay' => Arr::get($command, 'command.delay', 1),
             'type' => Arr::get($command, 'command.type', 'text'), // text, audio, video, image, media_audio, list, pool, status
             'value' => $messageText,
-            'caption' => Arr::get($command, 'command.caption', null),
         ];
+
+        $caption = Arr::get($command, 'command.caption', null);
+        if ($caption !== null) {
+            $message['caption'] = $caption;
+        }
 
         $this->messengerService->integration('whatsapp')->send($message);
 
