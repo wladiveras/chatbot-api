@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['https://marinabot-bucket-production.s3.amazonaws.com, https://marinabot.com.br'],
 
     'allowed_origins_patterns' => [],
 
