@@ -36,6 +36,11 @@ class MessengerController extends BaseController
             );
 
         } catch (\Exception $exception) {
+            Log::error('Error in MessengerController.callback: ' . $e->getMessage(), [
+                'aws_request_id' => $request->header('x-amzn-requestid'),
+                'request_data' => $request->all(),
+                'exception' => $exception,
+            ]);
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
