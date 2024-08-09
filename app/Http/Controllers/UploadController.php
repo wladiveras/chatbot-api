@@ -3,8 +3,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 use Validator;
+use Illuminate\Support\Str;
+
 
 class UploadController extends BaseController
 {
@@ -28,8 +29,11 @@ class UploadController extends BaseController
         // Obter o arquivo
         $file = $request->file('file');
 
-        // Definir o caminho no S3
-        $path = 'uploads/' . $file->getClientOriginalName();
+        // Gerar um UUID para o nome do arquivo
+        $uuid = Str::uuid()->toString();
+
+        // Definir o caminho no S3 com o UUID
+        $path = 'uploads/' . $uuid . '_' . $file->getClientOriginalName();
 
         // Armazenar o arquivo no S3 com permissões públicas
         $stored = Storage::disk('s3')->put($path, file_get_contents($file), 'public');
