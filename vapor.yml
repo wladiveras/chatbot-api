@@ -12,7 +12,7 @@ environments:
         cli-memory: 1024
         runtime: 'php-8.3:al2'
         queues:
-            - flows-production
+            - flows
         build:
             - 'COMPOSER_MIRROR_PATH_REPOS=1 composer install --no-dev'
             - 'php artisan event:cache'
