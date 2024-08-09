@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\ForceJsonRequestHeader;
+use App\Http\Middleware\Cors;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->statefulApi();
+        $middleware->append(Cors::class);
         $middleware->append(ForceJsonRequestHeader::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {

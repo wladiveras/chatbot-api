@@ -18,6 +18,8 @@ environments:
             - 'php artisan event:cache'
             - 'php artisan config:cache'
             - 'php artisan config:clear'
+            - 'php artisan route:cache'
+            - 'php artisan route:clear'
         deploy:
             - 'php artisan migrate --force'
     staging:
