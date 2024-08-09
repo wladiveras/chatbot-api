@@ -186,6 +186,12 @@ class FlowService extends BaseService implements FlowServiceInterface
             );
 
         } catch (\Exception $e) {
+            Log::error('Error saving flow: ' . $e->getMessage(), [
+                'code' => $e->getCode(),
+                'message' => $e->getMessage(),
+                'data' => $payload,
+                'flow' => $flow
+            ]);
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 message: $e->getMessage(),
