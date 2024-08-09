@@ -25,11 +25,17 @@ class UploadController extends BaseController
             return response()->json(['error' => 'Invalid file upload.'], 400);
         }
 
-        // Armazenar o arquivo no S3
-        $path = $request->file('file')->store('uploads', 's3');
+        // Obter o arquivo
+        $file = $request->file('file');
 
-        // Verificar se o caminho do arquivo foi gerado corretamente
-        if (!$path) {
+        // Definir o caminho no S3
+        $path = 'uploads/' . $file->getClientOriginalName();
+
+        // Armazenar o arquivo no S3 com permissões públicas
+        $stored = Storage::disk('s3')->put($path, file_get_contents($file), 'public');
+
+        // Verificar se o arquivo foi armazenado corretamente
+        if (!$stored) {
             return response()->json(['error' => 'Failed to store file.'], 500);
         }
 
