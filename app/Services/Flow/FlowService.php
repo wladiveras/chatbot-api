@@ -202,8 +202,6 @@ class FlowService extends BaseService implements FlowServiceInterface
             $user = auth()->user();
             $payload = $this->createPayload($data, $user->id);
 
-
-
             $flow = $this->updateFlow($id, $payload);
 
             if (!$flow) {
@@ -230,6 +228,9 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     private function createPayload(array $data, int $userId): array
     {
+
+        $data = $this->parsePayloadToS3($data);
+
         return [
             'user_id' => $userId,
             'name' => $data['name'],
@@ -244,7 +245,7 @@ class FlowService extends BaseService implements FlowServiceInterface
     private function parsePayloadToS3($payload)
     {
         // Decodificar o payload JSON
-        $nodes = json_decode($payload['node'], true);
+        $nodes = $payload['node'];
 
         foreach ($nodes as &$node) {
             foreach ($node['data']['commands'] as &$command) {
@@ -264,6 +265,8 @@ class FlowService extends BaseService implements FlowServiceInterface
                             'video/mp4' => 'mp4',
                             'video/ogg' => 'ogv',
                             'video/webm' => 'webm',
+                            'audio/mpeg' => 'mpeg',
+                            'audio/mp3' => 'mp3',
                             // Adicione mais mapeamentos conforme necessário
                         ];
 
@@ -300,20 +303,18 @@ class FlowService extends BaseService implements FlowServiceInterface
             }
         }
 
-        $payload['node'] = json_encode($nodes);
+        $payload['node'] = $nodes;
 
         return $payload;
     }
 
     private function createFlow(array $payload): ?Flow
     {
-        $payload = $this->parsePayloadToS3($payload);
         return $this->flowRepository->create($payload);
     }
 
     private function updateFlow(int $id, array $payload): ?Flow
     {
-        $payload = $this->parsePayloadToS3($payload);
         return $this->flowRepository->update($id, $payload);
     }
 
