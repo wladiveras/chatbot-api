@@ -141,7 +141,7 @@ class MessengerController extends BaseController
         $data = Validator::make($request->all(), [
             'name' => 'string|max:255',
             'description' => 'string',
-            'flow_id' => 'integer|required',
+            'flow_id' => 'integer|nullable',
         ]);
 
         if ($data->fails()) {

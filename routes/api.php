@@ -5,7 +5,10 @@ use App\Http\Controllers\FlowController;
 use App\Http\Controllers\MessengerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\Route;
+
+
 
 // Auth Service
 Route::prefix('/auth')
@@ -23,6 +26,8 @@ Route::prefix('/auth')
         Route::get('/redirect/{provider}', [AuthController::class, 'redirectToProvider']);
         Route::get('/callback/{provider}', [AuthController::class, 'callbackWithProvider']);
     });
+
+Route::post('/upload', [UploadController::class, 'upload']);
 
 // User Service
 Route::prefix('/user')
