@@ -27,7 +27,7 @@ Route::prefix('/auth')
         Route::get('/callback/{provider}', [AuthController::class, 'callbackWithProvider']);
     });
 
-Route::post('/upload', [UploadController::class, 'upload']);
+Route::post('/upload', [UploadController::class, 'upload'])->middleware(['auth:sanctum']);
 
 // User Service
 Route::prefix('/user')
