@@ -129,15 +129,10 @@ class ExecuteFlow implements ShouldQueue
         $commandType = Arr::get($command, 'command.type', 'text');
 
         if (in_array($commandType, ['video', 'image', 'audio', 'media_audio'])) {
-            $path = match ($commandType) {
-                'video' => 'videos',
-                'image' => 'images',
-                'audio' => 'audios',
-                'media_audio' => 'audios',
-                default => null,
-            };
 
-            $messageText = Config::get('app.front_url') . "/{$path}/{$messageText}";
+            $url = Config::get('app.storage_url');
+
+            $messageText = "{$url}/{$messageText}";
         }
 
         $message = [
