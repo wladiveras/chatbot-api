@@ -14,6 +14,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 class ExecuteFlow implements ShouldQueue
 {
@@ -123,6 +124,19 @@ class ExecuteFlow implements ShouldQueue
 
         if ($messageText && $sessionMetas) {
             $messageText = $this->replacePlaceholders($messageText, $sessionMetas);
+        }
+
+        if (
+            Arr::get($command, 'command.type', 'text') === 'video'
+            || Arr::get($command, 'command.type', 'text') === 'image'
+            || Arr::get($command, 'command.type', 'text') === 'audio'
+        ) {
+            $messageText = match (Arr::get($command, 'command.type', 'text')) {
+                'video' => Config::get('app.front_url') . "/videos/{$messageText}",
+                'image' => Config::get('app.front_url') . "/images/{$messageText}",
+                'audio' => Config::get('app.front_url') . "/audios/{$messageText}",
+                default => $messageText,
+            };
         }
 
         $message = [
