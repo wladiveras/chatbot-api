@@ -54,6 +54,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
     'front_url' => env('APP_FRONT_URL', 'http://localhost:3000'),
+    'storage_url' => env('APP_STORAGE_URL', 'http://localhost:3000'),
 
     /*
     |--------------------------------------------------------------------------
