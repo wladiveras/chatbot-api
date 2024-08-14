@@ -196,6 +196,7 @@ return [
     ],
 
     'environments' => [
+        'connection' => 'sqs',
         'production' => [
             'supervisor-1' => [
                 'queue' => ['default', 'flows'],
