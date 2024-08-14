@@ -6,6 +6,7 @@ return [
     App\Providers\HorizonServiceProvider::class,
     App\Providers\MailProvider::class,
     App\Providers\ObserverServiceProvider::class,
+    App\Providers\PulseServiceProvider::class,
     App\Providers\RepositoryServiceProvider::class,
     App\Providers\ServicesProvider::class,
     App\Providers\TelescopeServiceProvider::class,
