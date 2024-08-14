@@ -70,7 +70,7 @@ return [
     |
     */
 
-    'middleware' => ['web', 'assign.guard:web', 'auth:sanctum'],
+    'middleware' => [],
 
     /*
     |--------------------------------------------------------------------------
