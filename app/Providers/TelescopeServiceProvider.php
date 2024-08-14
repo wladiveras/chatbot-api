@@ -18,15 +18,23 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     public function register(): void
     {
         // Telescope::night();
-
         $this->hideSensitiveRequestDetails();
 
-        $isReportable = $this->app->environment('local') || $this->app->environment('production');
+        Telescope::night();
 
-        Telescope::filter(function (IncomingEntry $entry) use ($isReportable) {
-            return $isReportable ||
-                $entry->isReportableException() ||
-                $entry->isFailedRequest() ||
+        $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
+    }
+
+    public function boot(): void
+    {
+        $this->gate();
+
+        Telescope::filter(function (IncomingEntry $entry) {
+            if ($this->app->environment('local')) {
+                return true;
+            }
+
+            return $entry->isReportableException() ||
                 $entry->isFailedJob() ||
                 $entry->isScheduledTask() ||
                 $entry->hasMonitoredTag();
@@ -42,6 +50,12 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
             return;
         }
 
+        Telescope::hideRequestParameters(['_token']);
+        Telescope::hideRequestHeaders([
+            'cookie',
+            'x-csrf-token',
+            'x-xsrf-token',
+        ]);
     }
 
     /**
@@ -51,7 +65,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     protected function gate(): void
     {
-        Gate::define('viewTelescope', function (User $user = null) {
+        Gate::define('viewTelescope', function ($user = null) {
             $allowedIps = explode(',', Config::get('app.admin_ip'));
 
             return in_array(Request::ip(), $allowedIps);
