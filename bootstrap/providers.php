@@ -8,5 +8,6 @@ return [
     App\Providers\ObserverServiceProvider::class,
     App\Providers\RepositoryServiceProvider::class,
     App\Providers\ServicesProvider::class,
+    App\Providers\TelescopeServiceProvider::class,
     SocialiteProviders\Manager\ServiceProvider::class,
 ];
