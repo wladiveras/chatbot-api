@@ -9,5 +9,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote')->hourly();
 
 // Commands auto executable
-Schedule::command('queue:prune-batches --hours=48')->daily();
+Schedule::command('queue:prune-batches')->daily();
 Schedule::command('horizon:snapshot')->everyFiveMinutes();
+Schedule::command('telescope:prune')->daily();
