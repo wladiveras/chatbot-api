@@ -21,10 +21,10 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
         $this->hideSensitiveRequestDetails();
 
-        $isLocalOrProduction = $this->app->environment('local') || $this->app->environment('production');
+        $isReportable = $this->app->environment('local') || $this->app->environment('production');
 
-        Telescope::filter(function (IncomingEntry $entry) use ($isLocalOrProduction) {
-            return $isLocalOrProduction ||
+        Telescope::filter(function (IncomingEntry $entry) use ($isReportable) {
+            return $isReportable ||
                 $entry->isReportableException() ||
                 $entry->isFailedRequest() ||
                 $entry->isFailedJob() ||
@@ -42,13 +42,6 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
             return;
         }
 
-        Telescope::hideRequestParameters(['_token']);
-
-        Telescope::hideRequestHeaders([
-            'cookie',
-            'x-csrf-token',
-            'x-xsrf-token',
-        ]);
     }
 
     /**
@@ -58,8 +51,10 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     protected function gate(): void
     {
-        Gate::define('viewTelescope', function (User $user = null, Request $equest) {
-            return in_array($equest->ip(), [Config::get('app.admin_ip')]);
+        Gate::define('viewTelescope', function (User $user = null) {
+            $allowedIps = explode(',', Config::get('app.admin_ip'));
+
+            return in_array(Request::ip(), $allowedIps);
         });
     }
 }

@@ -24,7 +24,9 @@ class PulseServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('viewPulse', function (User $user = null) {
-            return in_array(Request::ip(), [Config::get('app.admin_ip')]);
+            $allowedIps = explode(',', Config::get('app.admin_ip'));
+
+            return in_array(Request::ip(), $allowedIps);
         });
     }
 }

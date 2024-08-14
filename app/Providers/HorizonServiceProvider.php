@@ -31,7 +31,9 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
     protected function gate(): void
     {
         Gate::define('viewHorizon', function (User $user = null) {
-            return in_array(Request::ip(), [Config::get('app.admin_ip')]);
+            $allowedIps = explode(',', Config::get('app.admin_ip'));
+
+            return in_array(Request::ip(), $allowedIps);
         });
     }
 }
