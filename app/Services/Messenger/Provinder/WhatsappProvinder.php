@@ -95,7 +95,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             if (!$response->successful()) {
                 return $this->error(
                     path: __CLASS__ . '.' . __FUNCTION__,
-                    message: 'Não foi possível criar uma nova conexão.',
+                    message: $response,
                     code: 400
                 );
             }

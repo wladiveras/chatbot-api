@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Arr;
 use Validator;
 
 class MessengerController extends BaseController
@@ -36,11 +37,6 @@ class MessengerController extends BaseController
             );
 
         } catch (\Exception $exception) {
-            Log::error('Error in MessengerController.callback: ' . $e->getMessage(), [
-                'aws_request_id' => $request->header('x-amzn-requestid'),
-                'request_data' => $request->all(),
-                'exception' => $exception,
-            ]);
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
@@ -137,10 +133,11 @@ class MessengerController extends BaseController
         }
     }
 
-    public function selectFlow(string $provinder, int|string $connection_id, Request $request): JsonResponse
+    public function selectFlow(int|string $provinder, int|string $connection_id, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
+            'provinder' => $provinder
         ]);
 
         $data = Validator::make($request->all(), [
@@ -329,12 +326,17 @@ class MessengerController extends BaseController
 
     public function callback(string $provider, Request $request)
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
-            'request' => $request,
-        ]);
+        $request = $request->all();
+        $event = Arr::get($request, 'data.event', Arr::get($request, 'event'));
+
+        if ($event !== 'connection.update') {
+            Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+                'request' => $request,
+            ]);
+        }
 
         try {
-            $messengerService = $this->messengerService->integration($provider)->callback($request->all());
+            $messengerService = $this->messengerService->integration($provider)->callback($request);
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
@@ -345,7 +347,7 @@ class MessengerController extends BaseController
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
-                service: $request->all(),
+                service: $request,
                 code: $exception->getCode()
             );
         }

@@ -20,8 +20,6 @@ class MessengerService extends BaseService
 
     public static function integration(string $provinder): MessengerServiceInterface
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
-
         return match ($provinder) {
             'whatsapp' => new WhatsappProvinder,
             default => throw new \InvalidArgumentException('Invalid integration service.', 404),
@@ -45,7 +43,7 @@ class MessengerService extends BaseService
             }
 
             return $this->success(
-                message: 'Tudo certo, os conexões foi retornado.',
+                message: 'Tudo certo, as conexões foi retornado.',
                 payload: $connections
             );
 
@@ -69,13 +67,13 @@ class MessengerService extends BaseService
             if (!$connections) {
                 return $this->error(
                     path: __CLASS__ . '.' . __FUNCTION__,
-                    message: 'Não deu certo, não foi possivel trazer as conexões.',
+                    message: 'Não deu certo, não foi possivel trazer as conexão.',
                     code: 400
                 );
             }
 
             return $this->success(
-                message: 'Tudo certo, os conexões foi retornado.',
+                message: 'Tudo certo, a conexão foi retornado.',
                 payload: $connections
             );
 
@@ -95,10 +93,12 @@ class MessengerService extends BaseService
         try {
             $connection = $this->connectionRepository->updateSelectFlow($connection_id, $data);
 
+
+
             if (!$connection) {
                 return $this->error(
                     path: __CLASS__ . '.' . __FUNCTION__,
-                    message: 'Não deu certo, não foi selecionar o fluxo novo.',
+                    message: 'Não deu certo, não foi alterar o fluxo.',
                     code: 400
                 );
             }

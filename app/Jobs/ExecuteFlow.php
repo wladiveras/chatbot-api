@@ -52,7 +52,6 @@ class ExecuteFlow implements ShouldQueue
      */
     public function handle(): void
     {
-
         Log::info('App\Jobs\ExecuteFlow ........................... RUNNING');
         $action = Arr::get($this->payload['command'], 'action', null);
         $data = $this->prepareData();
@@ -137,9 +136,9 @@ class ExecuteFlow implements ShouldQueue
             'connection' => Arr::get($command, 'token', null),
             'number' => Arr::get($command, 'session_key', null),
             'delay' => Arr::get($command, 'command.delay', 1),
-            'type' => $commandType, // text, audio, video, image, media_audio, list, pool, status
-            'value' => $messageText,
-            'caption' => Arr::get($command, 'command.caption', "")
+            'type' => $commandType ?? null, // text, audio, video, image, media_audio, list, pool, status
+            'value' => $messageText ?? null,
+            'caption' => Arr::get($command, 'command.caption', null)
         ];
 
         $this->messengerService->integration('whatsapp')->send($message);

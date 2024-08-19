@@ -70,7 +70,7 @@ return [
     |
     */
 
-    'middleware' => [],
+    'middleware' => ['web'],
 
     /*
     |--------------------------------------------------------------------------
@@ -182,7 +182,7 @@ return [
     'defaults' => [
         'supervisor-1' => [
             'connection' => 'redis',
-            'queue' => ['default', 'flows'],
+            'queue' => ['default', 'flow'],
             'balance' => 'auto',
             'autoScalingStrategy' => 'time',
             'maxProcesses' => 1,
@@ -196,30 +196,17 @@ return [
     ],
 
     'environments' => [
-        'connection' => 'sqs',
         'production' => [
             'supervisor-1' => [
-                'queue' => ['default', 'flows'],
-                'maxProcesses' => 50,
-                'balance' => 'auto',
-                'autoScalingStrategy' => 'time',
-                'maxTime' => 0,
-                'maxJobs' => 0,
-                'memory' => 512,
-                'tries' => 1,
-                'timeout' => 60,
-                'nice' => 0,
+                'maxProcesses' => 10,
+                'balanceMaxShift' => 1,
+                'balanceCooldown' => 3,
             ],
         ],
 
         'local' => [
             'supervisor-1' => [
-                'maxProcesses' => 25,
-            ],
-        ],
-        '*' => [
-            'supervisor-1' => [
-                'maxProcesses' => 25,
+                'maxProcesses' => 3,
             ],
         ],
     ],
