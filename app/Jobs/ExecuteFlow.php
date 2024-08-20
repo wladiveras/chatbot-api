@@ -26,6 +26,8 @@ class ExecuteFlow implements ShouldQueue
 
     protected $flowSessionRepository;
 
+    protected $session;
+
     /**
      * Create a new job instance.
      */
@@ -44,8 +46,14 @@ class ExecuteFlow implements ShouldQueue
 
         $this->messengerService = App::make(MessengerService::class);
         $this->flowSessionRepository = App::make(FlowSessionRepository::class);
-    }
 
+        $this->session = $this->flowSessionRepository->fetchClientSession(
+            flow_id: $this->payload['connection']->flow_id,
+            connection_id: $this->payload['connection']->id,
+            session_key: $this->payload['session']->session_key,
+            id: $this->payload['session']->id ?? null,
+        );
+    }
 
     /**
      * Execute the job.
@@ -93,9 +101,9 @@ class ExecuteFlow implements ShouldQueue
         };
     }
 
-    protected function updateSession()
+    protected function nextStep()
     {
-        return $this->flowSessionRepository->updateSession(
+        return $this->flowSessionRepository->nextSessionStep(
             flow_id: $this->payload['connection']->flow_id,
             connection_id: $this->payload['connection']->id,
             session_key: $this->payload['session']->session_key,
@@ -103,33 +111,38 @@ class ExecuteFlow implements ShouldQueue
         );
     }
 
+    protected function waitingClientResponse(bool $isWaiting)
+    {
+        return $this->flowSessionRepository->waitingClientResponse(
+            flow_id: $this->payload['connection']->flow_id,
+            connection_id: $this->payload['connection']->id,
+            session_key: $this->payload['session']->session_key,
+            is_waiting: $isWaiting
+        );
+    }
     // Commands
     protected function commandDelay($command)
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::channel('supervisor')->info($command);
 
         sleep(Arr::get($command, 'command.value', 1));
 
-        return $this->updateSession();
+        return $this->nextStep();
     }
 
     protected function commandMessage($command)
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::channel('supervisor')->info($command);
 
         $messageText = Arr::get($command, 'command.value', null);
-        $placeholders = $this->extractPlaceholders($messageText);
-        $sessionMetas = $this->getSessionMetas($placeholders);
-
-        if ($messageText && $sessionMetas) {
-            $messageText = $this->replacePlaceholders($messageText, $sessionMetas);
-        }
-
         $commandType = Arr::get($command, 'command.type', 'text');
 
         if (in_array($commandType, ['video', 'image', 'audio', 'media_audio'])) {
+            $directory = ($commandType === 'media_audio') ? 'audios' : "{$commandType}s";
             $url = Config::get('app.storage_url');
-            $messageText = "{$url}/{$messageText}";
+            $messageText = "{$url}/{$directory}/{$messageText}";
         }
 
         $message = [
@@ -143,54 +156,28 @@ class ExecuteFlow implements ShouldQueue
 
         $this->messengerService->integration('whatsapp')->send($message);
 
-        return $this->updateSession();
-    }
-
-    protected function extractPlaceholders($messageText)
-    {
-        preg_match_all('/\{(\w+)\}/', $messageText, $matches);
-
-        return $matches[1];
-    }
-
-    protected function getSessionMetas($placeholders)
-    {
-        $sessionMetas = [];
-
-        foreach ($placeholders as $placeholder) {
-            $sessionMeta = $this->flowSessionRepository->getSessionMeta(
-                flow_session_id: $this->payload['session']->id,
-                key: $placeholder
-            );
-
-            if ($sessionMeta) {
-                $sessionMetas[$placeholder] = $sessionMeta->value;
-            }
-
-            return $sessionMetas;
-        }
-    }
-
-    protected function replacePlaceholders($messageText, $sessionMetas)
-    {
-        return preg_replace_callback('/\{(\w+)\}/', function ($matches) use ($sessionMetas) {
-            $key = $matches[1];
-
-            return Arr::get($sessionMetas, $key, $matches[0]);
-        }, $messageText);
+        return $this->nextStep();
     }
 
     protected function commandInput($command)
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
-        $this->flowSessionRepository->setSessionMeta(
-            flow_session_id: $this->payload['session']->id,
-            key: Arr::get($command, 'command.name', null),
-            value: $this->payload['text'],
-            type: Arr::get($command, 'command.type', 'input'),
-        );
+        Log::channel('supervisor')->info($this->payload['text']);
 
-        return $this->updateSession();
+        if ($this->payload['text'] != null || $this->session->is_waiting) {
+            $this->flowSessionRepository->setSessionMeta(
+                flow_session_id: $this->payload['session']->id,
+                key: Arr::get($command, 'command.name', null),
+                value: $this->payload['text'],
+                type: Arr::get($command, 'command.type', 'input'),
+            );
+
+            $this->waitingClientResponse(false);
+            $this->nextStep();
+            return;
+        }
+
+        return $this->waitingClientResponse(true);
     }
 }

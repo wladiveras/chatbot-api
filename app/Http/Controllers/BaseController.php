@@ -11,7 +11,7 @@ class BaseController extends Controller
     public function success(?string $response, mixed $service): JsonResponse
     {
         if ($service) {
-            Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => success', [
+            Log::debug(__CLASS__.'.'.__FUNCTION__.' => success', [
                 'success' => true,
                 'response' => $response,
                 'service' => $service,
@@ -31,7 +31,7 @@ class BaseController extends Controller
 
     public function error(string $path, ?string $response, $service, string|int|null $code = 404): JsonResponse
     {
-        Log::error(__CLASS__ . '.' . __FUNCTION__ . ' => error', [
+        Log::error(__CLASS__.'.'.__FUNCTION__.' => error', [
             'success' => false,
             'response' => $response,
             'service' => $service,

@@ -3,10 +3,10 @@
 namespace App\Providers;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Request;
 use Laravel\Horizon\HorizonApplicationServiceProvider;
-use Illuminate\Support\Facades\Config;
 
 class HorizonServiceProvider extends HorizonApplicationServiceProvider
 {
@@ -29,8 +29,9 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
      */
     protected function gate(): void
     {
-        Gate::define('viewHorizon', function (User $user = null) {
+        Gate::define('viewHorizon', function (?User $user = null) {
             $allowedIps = explode(',', Config::get('app.admin_ip'));
+
             return in_array(Request::ip(), $allowedIps ?? []);
         });
     }
