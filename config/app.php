@@ -56,7 +56,6 @@ return [
     'front_url' => env('APP_FRONT_URL', 'http://localhost:3000'),
     'storage_url' => env('APP_STORAGE_URL', 'http://localhost:3000'),
 
-
     'admin_ip' => env('ADMIN_IP', '127.0.0.1'),
     'admin_mail' => env('ADMIN_EMAIL', 'example@mail.com'),
 

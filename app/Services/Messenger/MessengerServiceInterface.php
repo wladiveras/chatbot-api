@@ -19,4 +19,6 @@ interface MessengerServiceInterface
     public function callback(array|object $data): array|object;
 
     public function parse(array|object $data): array|object;
+
+    public function getConnectionProfile(string|int $connection, $data): array|object;
 }
