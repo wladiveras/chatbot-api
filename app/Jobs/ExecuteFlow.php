@@ -120,6 +120,42 @@ class ExecuteFlow implements ShouldQueue
             is_waiting: $isWaiting
         );
     }
+
+    protected function extractPlaceholders($messageText)
+    {
+        preg_match_all('/\{(\w+)\}/', $messageText, $matches);
+
+        return $matches[1];
+    }
+
+    protected function getSessionMetas($placeholders)
+    {
+        $sessionMetas = [];
+
+        foreach ($placeholders as $placeholder) {
+            $sessionMeta = $this->flowSessionRepository->getSessionMeta(
+                flow_session_id: $this->payload['session']->id,
+                key: $placeholder
+            );
+
+            if ($sessionMeta) {
+                $sessionMetas[$placeholder] = $sessionMeta->value;
+            }
+        }
+
+        return $sessionMetas;
+    }
+
+    protected function replacePlaceholders($messageText, $sessionMetas)
+    {
+        return preg_replace_callback('/\{(\w+)\}/', function ($matches) use ($sessionMetas) {
+            $key = $matches[1];
+
+            return Arr::get($sessionMetas, $key, $matches[0]);
+        }, $messageText);
+    }
+
+
     // Commands
     protected function commandDelay($command)
     {
@@ -138,6 +174,13 @@ class ExecuteFlow implements ShouldQueue
 
         $messageText = Arr::get($command, 'command.value', null);
         $commandType = Arr::get($command, 'command.type', 'text');
+
+        $placeholders = $this->extractPlaceholders($messageText);
+        $sessionMetas = $this->getSessionMetas($placeholders);
+
+        if ($messageText && $sessionMetas) {
+            $messageText = $this->replacePlaceholders($messageText, $sessionMetas);
+        }
 
         if (in_array($commandType, ['video', 'image', 'audio', 'media_audio'])) {
             $directory = ($commandType === 'media_audio') ? 'audios' : "{$commandType}s";

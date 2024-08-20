@@ -293,14 +293,11 @@ class FlowService extends BaseService implements FlowServiceInterface
             $flow = $this->getFlow();
             $text = $this->getText();
             $commands = $this->getCommands($flow);
-            $keys = $this->getPlaceholderKeys();
 
             $step = $this->session->step;
 
             $this->total_steps = $commands->count();
-
             $nextCommands = $this->getNextCommands($commands, $step);
-            $text = $this->replacePlaceholders($text, $keys);
 
             if (!$this->session->is_running) {
                 if (!$this->session->is_running) {
@@ -327,15 +324,6 @@ class FlowService extends BaseService implements FlowServiceInterface
                 code: 400
             );
         }
-    }
-
-    public function replacePlaceholders($text, $keys)
-    {
-        foreach ($keys as $key => $value) {
-            $pattern = '/{' . $key . '}/';
-            $text = preg_replace($pattern, $value, $text);
-        }
-        return $text;
     }
 
     private function getFlow()
