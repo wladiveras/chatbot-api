@@ -104,6 +104,10 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
             ->first();
     }
 
+    public function resetFlowSession(?int $flow_id): ?bool
+    {
+        return $this->model->where('flow_id', $flow_id)->delete();
+    }
 
     private function setNextSessionStep(FlowSession $flowSession, ?string $last_step): void
     {

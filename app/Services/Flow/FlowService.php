@@ -389,6 +389,13 @@ class FlowService extends BaseService implements FlowServiceInterface
         return $filteredCommands;
     }
 
+    public function resetFlowSession($flow_id)
+    {
+        return $this->flowSessionRepository->resetFlowSession(
+            flow_id: $flow_id,
+        );
+    }
+
     private function createJobs($nextCommands, $text, $step)
     {
         $jobs = [];
