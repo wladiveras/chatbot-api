@@ -36,6 +36,7 @@ class FlowService extends BaseService implements FlowServiceInterface
     public $session;
 
     public $data;
+    private $userInput = null;
 
     public function __construct()
     {
@@ -293,21 +294,26 @@ class FlowService extends BaseService implements FlowServiceInterface
             $text = $this->getText();
             $commands = $this->getCommands($flow);
 
-
             $step = $this->session->step;
 
             $this->total_steps = $commands->count();
             $nextCommands = $this->getNextCommands($commands, $step);
 
             if (!$this->session->is_running) {
-                $jobs = $this->createJobs($nextCommands, $text, $step);
+                if (!$this->session->is_running) {
+                    $jobs = $this->createJobs($nextCommands, $text, $step);
 
-                if (!empty($jobs)) {
-                    Bus::chain($jobs)
-                        ->catch(function (Batch $batch, \Throwable $e) {
-                            Log::error('Batch failed: ' . $e->getMessage());
-                        })
-                        ->dispatch();
+                    if (!empty($jobs)) {
+                        Bus::chain($jobs)
+                            ->catch(function (\Throwable $e) {
+
+                                $this->session->is_running = 0;
+                                $this->session->save();
+
+                                Log::error('Batch failed: ' . $e->getMessage());
+                            })
+                            ->dispatch();
+                    }
                 }
             }
 
@@ -337,46 +343,41 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     private function getNextCommands($commands, $step)
     {
-        // Filtrar comandos com step >= step fornecido
-        Log::debug('testado 1: ', [$commands]);
 
         $filteredCommands = collect($commands)->filter(function ($command) use ($step) {
             return $command['step'] >= $step;
+        })->values();
+
+
+        $inputIndices = $filteredCommands->keys()->filter(function ($key) use ($filteredCommands) {
+            return $filteredCommands[$key]['action'] === 'input';
         });
 
-        // Encontrar o primeiro comando com ação 'input'
-        $inputCommand = $filteredCommands->first(function ($command) {
-            return $command['action'] === 'input';
+        if ($inputIndices->isEmpty()) {
+            return $filteredCommands;
+        }
+
+        $nextInputIndex = $inputIndices->first(function ($index) use ($step, $filteredCommands) {
+            return $filteredCommands[$index]['step'] > $step;
         });
 
-        // Converter para valores
-        $filteredCommands = $filteredCommands->values();
+        if ($nextInputIndex === 0) {
+            $filteredCommands = $filteredCommands->slice($nextInputIndex)->values();
 
-        // Encontrar o índice do comando 'input'
-        $inputIndex = $filteredCommands->search($inputCommand);
-
-        // Se o comando 'input' estiver no início, retornar todos os comandos a partir desse ponto
-        if ($inputIndex === 0) {
-            return $filteredCommands->slice($inputIndex)->values();
+            return $filteredCommands;
         }
 
-        // Se o comando 'input' não estiver no início, retornar todos os comandos até o ponto do comando 'input'
-        if ($inputIndex !== false) {
-            return $filteredCommands->slice(0, $inputIndex)->values();
+        if ($nextInputIndex !== false) {
+            $filteredCommands = $filteredCommands->slice(0, $nextInputIndex + 1)->values();
+
+            return $filteredCommands;
         }
 
-        Log::debug('testado 2: ', [$filteredCommands]);
-
-
-        // Se não houver comando 'input', retornar todos os comandos filtrados
         return $filteredCommands;
-
-
     }
 
     private function createJobs($nextCommands, $text, $step)
     {
-
         $jobs = [];
         $jobs[] = new RunningFlow($this->session, 1);
 
@@ -385,13 +386,30 @@ class FlowService extends BaseService implements FlowServiceInterface
                 break;
             }
 
-            $jobs[] = new ExecuteFlow([
-                'connection' => $this->connection,
-                'session' => $this->session,
-                'text' => $text,
-                'command' => $command,
-                'steps' => $this->total_steps,
-            ]);
+            if ($command['action'] === 'input') {
+                $jobs[] = new ExecuteFlow([
+                    'connection' => $this->connection,
+                    'session' => $this->session,
+                    'text' => $this->session->is_waiting ? $text : null,
+                    'command' => $command,
+                    'steps' => $step,
+                ]);
+
+                if (!$this->session->is_waiting) {
+                    break;
+                } else {
+                    $text = null;
+                }
+
+            } else {
+                $jobs[] = new ExecuteFlow([
+                    'connection' => $this->connection,
+                    'session' => $this->session,
+                    'text' => $text,
+                    'command' => $command,
+                    'steps' => $step,
+                ]);
+            }
         }
 
         $jobs[] = new RunningFlow($this->session, 0);

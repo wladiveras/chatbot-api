@@ -4,11 +4,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FlowController;
 use App\Http\Controllers\MessengerController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\UploadController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-
-
 
 // Auth Service
 Route::prefix('/auth')

@@ -21,7 +21,7 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
     {
         $flowSession = $this->findSession($flow_id, $connection_id, $session_key);
 
-        if (! $flowSession) {
+        if (!$flowSession) {
             $flowSession = $this->createSession($flow_id, $connection_id, $session_key);
         }
 
@@ -38,6 +38,23 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
         ]);
     }
 
+
+    public function waitingClientResponse(?int $flow_id, ?int $connection_id, ?string $session_key, $is_waiting): void
+    {
+        $flowSession = $this->findSession($flow_id, $connection_id, $session_key);
+
+        if ($flowSession) {
+            $this->setWaitingClientResponse($flowSession, $is_waiting);
+        }
+    }
+
+    private function setWaitingClientResponse(FlowSession $flowSession, ?int $is_waiting): void
+    {
+        $flowSession->is_waiting = $is_waiting;
+        $flowSession->last_active = now();
+        $flowSession->save();
+    }
+
     public function getSessionMeta(?int $flow_session_id, ?string $key): ?FlowSessionMetas
     {
         return $this->flowSessionMetas->where('flow_session_id', $flow_session_id)
@@ -45,7 +62,7 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
             ->first();
     }
 
-    private function createSession(?int $flow_id, ?int $connection_id, ?string $session_key): FlowSession
+    private function createSession(?int $flow_id, ?int $connection_id, ?string $session_key = null): FlowSession
     {
         return $this->model->create([
             'flow_id' => $flow_id,
@@ -58,12 +75,12 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
         ]);
     }
 
-    public function updateSession(?int $flow_id, ?int $connection_id, ?string $session_key, ?string $last_step): ?FlowSession
+    public function nextSessionStep(?int $flow_id, ?int $connection_id, ?string $session_key, ?string $last_step): ?FlowSession
     {
         $flowSession = $this->findSession($flow_id, $connection_id, $session_key);
 
         if ($flowSession) {
-            $this->updateFlowSession($flowSession, $last_step);
+            $this->setNextSessionStep($flowSession, $last_step);
         }
 
         return $flowSession;
@@ -76,8 +93,19 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
             ->where('session_key', $session_key)
             ->first();
     }
+    public function fetchClientSession(?int $flow_id, ?int $connection_id, ?string $session_key, ?int $id = null): ?FlowSession
+    {
+        return $this->model->where('flow_id', $flow_id)
+            ->where('connection_id', $connection_id)
+            ->where('session_key', $session_key)
+            ->when($id, function ($query) use ($id) {
+                return $query->where('id', $id);
+            })
+            ->first();
+    }
 
-    private function updateFlowSession(FlowSession $flowSession, ?string $last_step): void
+
+    private function setNextSessionStep(FlowSession $flowSession, ?string $last_step): void
     {
         $flowSession->step += 1;
 
@@ -88,4 +116,6 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
         $flowSession->last_active = now();
         $flowSession->save();
     }
+
+
 }
