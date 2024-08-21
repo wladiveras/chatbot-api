@@ -182,10 +182,17 @@ class ExecuteFlow implements ShouldQueue
             $messageText = $this->replacePlaceholders($messageText, $sessionMetas);
         }
 
+        if (App::environment('local')) {
+            if (in_array($commandType, ['video', 'image', 'audio', 'media_audio'])) {
+                $directory = ($commandType === 'media_audio') ? 'audios' : "{$commandType}s";
+                $url = Config::get('app.storage_url');
+                $messageText = "{$url}/{$directory}/{$messageText}";
+            }
+        }
+
         if (in_array($commandType, ['video', 'image', 'audio', 'media_audio'])) {
-            $directory = ($commandType === 'media_audio') ? 'audios' : "{$commandType}s";
             $url = Config::get('app.storage_url');
-            $messageText = "{$url}/{$directory}/{$messageText}";
+            $messageText = "{$url}/{$messageText}";
         }
 
         $message = [
