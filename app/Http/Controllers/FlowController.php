@@ -156,46 +156,6 @@ class FlowController extends BaseController
         }
     }
 
-    public function flowActivation(int $id, Request $request): JsonResponse
-    {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
-            'request' => $request,
-        ]);
-
-        $data = Validator::make($request->all(), [
-            'is_active' => 'boolean',
-        ]);
-
-        if ($data->fails()) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
-            );
-        }
-
-        try {
-            $flowService = $this->flowService->update($id, $data->validate());
-
-            return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $flowService
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
-            );
-        }
-    }
-
-
-
-
     public function update(int $id, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [

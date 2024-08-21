@@ -37,11 +37,7 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function update(mixed $value, array $data, $column = 'id'): array|object|null
     {
-        $modelInstance = $this->model->where($column, $value)->first();
-        if ($modelInstance) {
-            $modelInstance->update($data);
-        }
-        return $modelInstance;
+        return tap($this->model->where($column, $value))->update($data)->first();
     }
 
     public function delete(mixed $value, $column = 'id'): bool
