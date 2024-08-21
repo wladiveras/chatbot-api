@@ -46,6 +46,7 @@ Route::prefix('/flow')
         Route::put('/{id}', [FlowController::class, 'update']);
         Route::get('/{code}', [FlowController::class, 'show']);
         Route::delete('/{id}', [FlowController::class, 'delete']);
+        Route::delete('/{id}/reset', [FlowController::class, 'reset']);
     });
 
 // Payment Gateway service
