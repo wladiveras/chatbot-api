@@ -10,11 +10,13 @@ class BaseController extends Controller
 {
     public function success(?string $response, mixed $service): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => success', [
-            'success' => true,
-            'response' => $response,
-            'service' => $service,
-        ]);
+        if ($service) {
+            Log::debug(__CLASS__.'.'.__FUNCTION__.' => success', [
+                'success' => true,
+                'response' => $response,
+                'service' => $service,
+            ]);
+        }
 
         $response = [
             'data' => [

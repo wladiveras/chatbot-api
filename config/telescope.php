@@ -62,6 +62,9 @@ return [
             'connection' => env('DB_CONNECTION', 'mysql'),
             'chunk' => 1000,
         ],
+        'file' => [
+            'path' => storage_path('telescope'),
+        ],
     ],
 
     /*

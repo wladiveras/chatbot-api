@@ -15,8 +15,12 @@ class ForceJsonRequestHeader
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $request->headers->set('Accept', 'application/json');
+        $response = $next($request);
 
-        return $next($request);
+        if ($response instanceof Response) {
+            $response->headers->set('Accept', 'application/json');
+        }
+
+        return $response;
     }
 }
