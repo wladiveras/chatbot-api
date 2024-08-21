@@ -295,25 +295,22 @@ class FlowService extends BaseService implements FlowServiceInterface
             $commands = $this->getCommands($flow);
 
             $step = $this->session->step;
-
             $this->total_steps = $commands->count();
+
             $nextCommands = $this->getNextCommands($commands, $step);
 
             if (!$this->session->is_running) {
-                if (!$this->session->is_running) {
-                    $jobs = $this->createJobs($nextCommands, $text, $step);
+                $this->session->is_running = true;
+                $this->session->save();
 
-                    if (!empty($jobs)) {
-                        Bus::chain($jobs)
-                            ->catch(function (\Throwable $e) {
+                $jobs = $this->createJobs($nextCommands, $text, $step);
 
-                                $this->session->is_running = 0;
-                                $this->session->save();
-
-                                Log::error('Batch failed: ' . $e->getMessage());
-                            })
-                            ->dispatch();
-                    }
+                if (!empty($jobs)) {
+                    Bus::chain($jobs)
+                        ->catch(function (\Throwable $e) {
+                            Log::error('Batch failed: ' . $e->getMessage());
+                        })
+                        ->dispatch();
                 }
             }
 
@@ -338,16 +335,34 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     private function getCommands($flow)
     {
-        return collect(json_decode($flow->commands, true));
+        $commands = collect(json_decode($flow->commands, true));
+
+        $commands = $commands->map(function ($command, $index) {
+            $command['step'] = $index + 1;
+            return $command;
+        });
+
+        $steps = $commands->count() + 1;
+
+        $newCommand = [
+            "name" => "finished",
+            "type" => "Input",
+            "label" => "Variável",
+            "action" => "input",
+            "nodeId" => "0",
+            "step" => $steps
+        ];
+
+        $commands->push($newCommand);
+
+        return $commands;
     }
 
     private function getNextCommands($commands, $step)
     {
-
         $filteredCommands = collect($commands)->filter(function ($command) use ($step) {
             return $command['step'] >= $step;
         })->values();
-
 
         $inputIndices = $filteredCommands->keys()->filter(function ($key) use ($filteredCommands) {
             return $filteredCommands[$key]['action'] === 'input';
@@ -361,15 +376,13 @@ class FlowService extends BaseService implements FlowServiceInterface
             return $filteredCommands[$index]['step'] > $step;
         });
 
-        if ($nextInputIndex === 0) {
+        if ($nextInputIndex !== null && $nextInputIndex === 0) {
             $filteredCommands = $filteredCommands->slice($nextInputIndex)->values();
-
             return $filteredCommands;
         }
 
-        if ($nextInputIndex !== false) {
+        if ($nextInputIndex !== false && $nextInputIndex !== $filteredCommands->count() - 1) {
             $filteredCommands = $filteredCommands->slice(0, $nextInputIndex + 1)->values();
-
             return $filteredCommands;
         }
 
@@ -379,7 +392,6 @@ class FlowService extends BaseService implements FlowServiceInterface
     private function createJobs($nextCommands, $text, $step)
     {
         $jobs = [];
-        $jobs[] = new RunningFlow($this->session, 1);
 
         foreach ($nextCommands as $command) {
             if ($step > $this->total_steps) {

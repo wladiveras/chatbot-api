@@ -205,20 +205,25 @@ class ExecuteFlow implements ShouldQueue
     protected function commandInput($command)
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::channel('supervisor')->info($command);
 
-        Log::channel('supervisor')->info($this->payload['text']);
+        $name = Arr::get($command, 'command.name', null);
+        $type = Arr::get($command, 'command.type', 'input');
+
+        if ($name === "finished") {
+            return;
+        }
 
         if ($this->payload['text'] != null || $this->session->is_waiting) {
             $this->flowSessionRepository->setSessionMeta(
                 flow_session_id: $this->payload['session']->id,
-                key: Arr::get($command, 'command.name', null),
+                key: $name,
                 value: $this->payload['text'],
-                type: Arr::get($command, 'command.type', 'input'),
+                type: $type,
             );
 
             $this->waitingClientResponse(false);
-            $this->nextStep();
-            return;
+            return $this->nextStep();
         }
 
         return $this->waitingClientResponse(true);
