@@ -10,4 +10,3 @@ Artisan::command('inspire', function () {
 
 // Commands auto executable
 Schedule::command('queue:prune-batches')->daily();
-Schedule::command('horizon:snapshot')->everyFiveMinutes();
