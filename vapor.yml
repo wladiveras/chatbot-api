@@ -23,7 +23,7 @@ environments:
             - 'php artisan route:clear'
         deploy:
             - 'php artisan migrate --force'
-            - 'php artisan horizon'
+            - 'php artisan horizon &'
     # staging:
     #     domain:
     #       - staging.marinabot.com.br
