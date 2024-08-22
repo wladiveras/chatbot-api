@@ -38,7 +38,7 @@ class RunningFlow implements ShouldQueue
      */
     public function __construct($session, bool $isRunning)
     {
-        $this->setConnection();
+
         $this->onQueue('flows');
         $this->session = $session;
         $this->isRunning = $isRunning;
@@ -48,12 +48,7 @@ class RunningFlow implements ShouldQueue
     /**
      * Set the connection for the job.
      */
-    protected function setConnection(): void
-    {
-        if (App::environment('production')) {
-            $this->onConnection('sqs');
-        }
-    }
+
 
     /**
      * Execute the job.

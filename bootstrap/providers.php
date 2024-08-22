@@ -11,7 +11,6 @@ return [
     App\Providers\RepositoryServiceProvider::class,
     App\Providers\ServicesProvider::class,
     App\Providers\DebugbarServiceProvider::class,
-    App\Providers\TelescopeServiceProvider::class,
     Barryvdh\Debugbar\ServiceProvider::class,
     SocialiteProviders\Manager\ServiceProvider::class,
 ];
