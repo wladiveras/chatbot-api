@@ -11,6 +11,7 @@ environments:
         memory: 1024
         cli-memory: 1024
         runtime: 'php-8.3:al2'
+        queue-database-session-persist: true
         queues:
             - flows
         build:

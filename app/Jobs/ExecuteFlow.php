@@ -36,10 +36,6 @@ class ExecuteFlow implements ShouldQueue
     public function __construct($payload)
     {
 
-        if (App::environment('production')) {
-            $this->onConnection('sqs');
-        }
-
         $this->onQueue('flows');
 
         $this->payload = $payload;
