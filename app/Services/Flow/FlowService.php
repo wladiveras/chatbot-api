@@ -307,8 +307,11 @@ class FlowService extends BaseService implements FlowServiceInterface
 
                 if (!empty($jobs)) {
                     Bus::chain($jobs)
-                        ->catch(function (\Throwable $e) {
-                            Log::error('Batch failed: ' . $e->getMessage());
+                        ->catch(function (Batch $batch, \Throwable $e) {
+                            Log::error('Batch failed: ', [
+                                $batch,
+                                $e->getMessage()
+                            ]);
                         })
                         ->dispatch();
                 }
