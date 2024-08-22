@@ -184,12 +184,13 @@ class ExecuteFlow implements ShouldQueue
                 $url = Config::get('app.storage_url');
                 $messageText = "{$url}/{$directory}/{$messageText}";
             }
+        } else {
+            if (in_array($commandType, ['video', 'image', 'audio', 'media_audio'])) {
+                $url = Config::get('app.storage_url');
+                $messageText = "{$url}/{$messageText}";
+            }
         }
 
-        if (in_array($commandType, ['video', 'image', 'audio', 'media_audio'])) {
-            $url = Config::get('app.storage_url');
-            $messageText = "{$url}/{$messageText}";
-        }
 
         $message = [
             'connection' => Arr::get($command, 'token', null),
