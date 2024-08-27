@@ -178,15 +178,13 @@ class ExecuteFlow implements ShouldQueue
             $messageText = $this->replacePlaceholders($messageText, $sessionMetas);
         }
 
-        if (App::environment('local')) {
-            if (in_array($commandType, ['video', 'image', 'audio', 'media_audio'])) {
+        if (in_array($commandType, ['video', 'image', 'audio', 'media_audio'])) {
+            $url = Config::get('app.storage_url');
+
+            if (App::environment('local')) {
                 $directory = ($commandType === 'media_audio') ? 'audios' : "{$commandType}s";
-                $url = Config::get('app.storage_url');
                 $messageText = "{$url}/{$directory}/{$messageText}";
-            }
-        } else {
-            if (in_array($commandType, ['video', 'image', 'audio', 'media_audio'])) {
-                $url = Config::get('app.storage_url');
+            } else {
                 $messageText = "{$url}/{$messageText}";
             }
         }
@@ -215,7 +213,7 @@ class ExecuteFlow implements ShouldQueue
         $type = Arr::get($command, 'command.type', 'input');
 
         if ($name === "finished") {
-            return;
+            return $this->nextStep();
         }
 
         if ($this->payload['text'] != null || $this->session->is_waiting) {
