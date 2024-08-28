@@ -20,6 +20,10 @@ class Flow extends Model
         'commands',
         'is_active',
         'is_public',
+        'recovery_flow_id',
+        'finished_flow_id',
+        'recovery_days',
+        'finished_days'
     ];
 
     public function user()
