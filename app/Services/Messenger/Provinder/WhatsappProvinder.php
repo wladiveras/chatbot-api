@@ -448,11 +448,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
                 }
             }
 
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                message: 'Não foi possivel desconectar essa conexão.',
-                code: 400
-            );
+            return $this->success(message: 'A conexão já está desconectada.', payload: []);
 
         } catch (\Exception $exception) {
             return $this->error(

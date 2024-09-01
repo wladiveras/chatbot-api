@@ -10,7 +10,7 @@ use Illuminate\Queue\SerializesModels;
 
 class ExecuteRemarketing implements ShouldQueue
 {
-    use Queueable;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Create a new job instance.
