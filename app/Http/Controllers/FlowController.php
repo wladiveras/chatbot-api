@@ -76,9 +76,10 @@ class FlowController extends BaseController
         $data = Validator::make($request->all(), [
             'name' => 'required|string',
             'description' => 'required|string',
-            'node' => 'required|array',
-            'edge' => 'required|array',
+            'node' => 'array',
+            'edge' => 'array',
             'commands' => 'required|array',
+            'type' => 'required|string',
         ]);
 
         if ($data->fails()) {
@@ -168,6 +169,7 @@ class FlowController extends BaseController
             'node' => 'array',
             'edge' => 'array',
             'commands' => 'array',
+            'type' => 'string',
         ]);
 
         if ($data->fails()) {

@@ -28,6 +28,7 @@ class FlowRepository extends BaseRepository implements FlowRepositoryInterface
             'recovery_days',
             'finished_flow_id',
             'finished_days',
+            'type'
         )->get();
     }
 

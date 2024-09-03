@@ -23,7 +23,8 @@ class Flow extends Model
         'recovery_flow_id',
         'finished_flow_id',
         'recovery_days',
-        'finished_days'
+        'finished_days',
+        'type'
     ];
 
     public function user()
