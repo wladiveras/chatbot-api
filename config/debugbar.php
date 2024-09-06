@@ -146,7 +146,7 @@ return [
     | Extension, without the server-side code. It uses Debugbar collectors instead.
     |
      */
-    'clockwork' => true,
+    'clockwork' => false,
 
     /*
     |--------------------------------------------------------------------------

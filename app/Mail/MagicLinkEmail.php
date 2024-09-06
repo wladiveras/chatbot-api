@@ -7,11 +7,13 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Config;
 
 class MagicLinkEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    protected $AppName;
     /**
      * Create a new message instance.
      */
@@ -19,6 +21,8 @@ class MagicLinkEmail extends Mailable
     {
         $this->name = $name;
         $this->magicLink = $magicLink;
+        $this->AppName = Config::get('app.name');
+
     }
 
     /**
@@ -27,7 +31,7 @@ class MagicLinkEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[MARINABOT] Junte-se ao maior bot com fluxo automatizado do mercado.',
+            subject: "[{{$this->AppName}] Junte-se ao maior bot com fluxo automatizado do mercado.",
         );
     }
 
@@ -39,6 +43,7 @@ class MagicLinkEmail extends Mailable
         return new Content(
             view: 'mail.magic',
             with: [
+                'appName' => $this->AppName,
                 'name' => $this->name,
                 'link' => $this->magicLink,
             ],

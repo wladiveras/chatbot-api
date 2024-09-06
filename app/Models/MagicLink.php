@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class MagicLink extends Model
 {
@@ -21,4 +22,6 @@ class MagicLink extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+
 }

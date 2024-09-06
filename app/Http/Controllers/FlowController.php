@@ -26,7 +26,7 @@ class FlowController extends BaseController
         ]);
 
         try {
-            $flowService = $this->flowService->userFlows();
+            $flowService = $this->flowService->fetchFlows();
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),

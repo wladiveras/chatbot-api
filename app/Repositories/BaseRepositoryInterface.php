@@ -2,19 +2,69 @@
 
 namespace App\Repositories;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+
 interface BaseRepositoryInterface
 {
-    public function all(): array|object;
+    /**
+     * Get all records.
+     *
+     * @return Collection
+     */
+    public function all(): Collection;
 
-    public function paginate(int $limitPerPage): array|object;
+    /**
+     * Paginate records.
+     *
+     * @param int $limitPerPage
+     * @return CursorPaginator
+     */
+    public function paginate(int $limitPerPage): CursorPaginator;
 
-    public function find(mixed $value, $column = 'id'): array|object|null;
+    /**
+     * Find a record by a specific column.
+     *
+     * @param mixed $value
+     * @param string $column
+     * @return Model|null
+     */
+    public function find(mixed $value, string $column = 'id'): ?Model;
 
-    public function first(mixed $value, $column = 'id'): array|object|null;
+    /**
+     * Create a new record.
+     *
+     * @param array $data
+     * @return Model
+     */
+    public function create(array $data): Model;
 
-    public function create(array $data): array|object;
+    /**
+     * Update a record by a specific column.
+     *
+     * @param mixed $value
+     * @param array $data
+     * @param string $column
+     * @return Model|null
+     */
+    public function update(mixed $value, array $data, string $column = 'id'): ?Model;
 
-    public function update(mixed $value, array $data, $column = 'id'): array|object|null;
+    /**
+     * Delete a record by a specific column.
+     *
+     * @param mixed $value
+     * @param string $column
+     * @return bool
+     */
+    public function delete(mixed $value, string $column = 'id'): bool;
 
-    public function delete(mixed $value, $column = 'id'): bool;
+    /**
+     * Check if a record exists by a specific column.
+     *
+     * @param mixed $value
+     * @param string $column
+     * @return bool
+     */
+    public function exists(mixed $value, string $column = 'id'): bool;
 }

@@ -180,15 +180,8 @@ class ExecuteFlow implements ShouldQueue
 
         if (in_array($commandType, ['video', 'image', 'audio', 'media_audio'])) {
             $url = Config::get('app.storage_url');
-
-            if (App::environment('local')) {
-                $directory = ($commandType === 'media_audio') ? 'audios' : "{$commandType}s";
-                $messageText = "{$url}/{$directory}/{$messageText}";
-            } else {
-                $messageText = "{$url}/{$messageText}";
-            }
+            $messageText = "{$url}/{$messageText}";
         }
-
 
         $message = [
             'connection' => Arr::get($command, 'token', null),

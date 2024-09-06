@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Order extends Model
 {
@@ -59,4 +60,9 @@ class Order extends Model
     // {
     //     return $this->hasMany(OrderItem::class);
     // }
+
+    public function scopeUser(Builder $query): Builder
+    {
+        return $query->where('user_id', auth()->id());
+    }
 }

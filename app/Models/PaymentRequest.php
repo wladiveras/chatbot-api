@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class PaymentRequest extends Model
 {
@@ -30,5 +31,10 @@ class PaymentRequest extends Model
     public function order()
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function scopeUser(Builder $query): Builder
+    {
+        return $query->where('user_id', auth()->id());
     }
 }

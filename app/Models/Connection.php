@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Connection extends Model
 {
@@ -49,5 +50,10 @@ class Connection extends Model
     public function connectionProfile()
     {
         return $this->hasOne(ConnectionProfile::class);
+    }
+
+    public function scopeUser(Builder $query): Builder
+    {
+        return $query->where('user_id', auth()->id());
     }
 }

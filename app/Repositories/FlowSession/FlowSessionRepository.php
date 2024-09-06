@@ -17,6 +17,14 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
         $this->flowSessionMetas = App::make(FlowSessionMetas::class);
     }
 
+    /**
+     * Get or create a client session.
+     *
+     * @param int|null $flow_id
+     * @param int|null $connection_id
+     * @param string|null $session_key
+     * @return FlowSession|null
+     */
     public function clientSession(?int $flow_id, ?int $connection_id, ?string $session_key): ?FlowSession
     {
         $flowSession = $this->findSession($flow_id, $connection_id, $session_key);
@@ -28,6 +36,15 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
         return $flowSession;
     }
 
+    /**
+     * Set session meta data.
+     *
+     * @param int $flow_session_id
+     * @param string $key
+     * @param string $value
+     * @param string $type
+     * @return void
+     */
     public function setSessionMeta(int $flow_session_id, string $key, string $value, string $type = 'input'): void
     {
         $this->flowSessionMetas->create([
@@ -38,8 +55,16 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
         ]);
     }
 
-
-    public function waitingClientResponse(?int $flow_id, ?int $connection_id, ?string $session_key, $is_waiting): void
+    /**
+     * Update the waiting client response status.
+     *
+     * @param int|null $flow_id
+     * @param int|null $connection_id
+     * @param string|null $session_key
+     * @param int|null $is_waiting
+     * @return void
+     */
+    public function waitingClientResponse(?int $flow_id, ?int $connection_id, ?string $session_key, ?int $is_waiting): void
     {
         $flowSession = $this->findSession($flow_id, $connection_id, $session_key);
 
@@ -48,13 +73,13 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
         }
     }
 
-    private function setWaitingClientResponse(FlowSession $flowSession, ?int $is_waiting): void
-    {
-        $flowSession->is_waiting = $is_waiting;
-        $flowSession->last_active = now();
-        $flowSession->save();
-    }
-
+    /**
+     * Get session meta data.
+     *
+     * @param int|null $flow_session_id
+     * @param string|null $key
+     * @return FlowSessionMetas|null
+     */
     public function getSessionMeta(?int $flow_session_id, ?string $key): ?FlowSessionMetas
     {
         return $this->flowSessionMetas->where('flow_session_id', $flow_session_id)
@@ -62,6 +87,81 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
             ->first();
     }
 
+    /**
+     * Move to the next session step.
+     *
+     * @param int|null $flow_id
+     * @param int|null $connection_id
+     * @param string|null $session_key
+     * @param string|null $last_step
+     * @return FlowSession|null
+     */
+    public function nextSessionStep(?int $flow_id, ?int $connection_id, ?string $session_key, ?string $last_step): ?FlowSession
+    {
+        $flowSession = $this->findSession($flow_id, $connection_id, $session_key);
+
+        if ($flowSession) {
+            $this->setNextSessionStep($flowSession, $last_step);
+        }
+
+        return $flowSession;
+    }
+
+    /**
+     * Fetch a client session.
+     *
+     * @param int|null $flow_id
+     * @param int|null $connection_id
+     * @param string|null $session_key
+     * @param int|null $id
+     * @return FlowSession|null
+     */
+    public function fetchClientSession(?int $flow_id, ?int $connection_id, ?string $session_key, ?int $id = null): ?FlowSession
+    {
+        return $this->model->where('flow_id', $flow_id)
+            ->where('connection_id', $connection_id)
+            ->where('session_key', $session_key)
+            ->when($id, function ($query) use ($id) {
+                return $query->where('id', $id);
+            })
+            ->first();
+    }
+
+    /**
+     * Reset flow sessions by flow ID.
+     *
+     * @param int|null $flow_id
+     * @return bool|null
+     */
+    public function resetFlowSession(?int $flow_id): ?bool
+    {
+        return $this->model->where('flow_id', $flow_id)->delete();
+    }
+
+    /**
+     * Find a session by flow ID, connection ID, and session key.
+     *
+     * @param int|null $flow_id
+     * @param int|null $connection_id
+     * @param string|null $session_key
+     * @return FlowSession|null
+     */
+    private function findSession(?int $flow_id, ?int $connection_id, ?string $session_key): ?FlowSession
+    {
+        return $this->model->where('flow_id', $flow_id)
+            ->where('connection_id', $connection_id)
+            ->where('session_key', $session_key)
+            ->first();
+    }
+
+    /**
+     * Create a new session.
+     *
+     * @param int|null $flow_id
+     * @param int|null $connection_id
+     * @param string|null $session_key
+     * @return FlowSession
+     */
     private function createSession(?int $flow_id, ?int $connection_id, ?string $session_key = null): FlowSession
     {
         return $this->model->create([
@@ -75,40 +175,27 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
         ]);
     }
 
-    public function nextSessionStep(?int $flow_id, ?int $connection_id, ?string $session_key, ?string $last_step): ?FlowSession
+    /**
+     * Set the waiting client response status for a session.
+     *
+     * @param FlowSession $flowSession
+     * @param int|null $is_waiting
+     * @return void
+     */
+    private function setWaitingClientResponse(FlowSession $flowSession, ?int $is_waiting): void
     {
-        $flowSession = $this->findSession($flow_id, $connection_id, $session_key);
-
-        if ($flowSession) {
-            $this->setNextSessionStep($flowSession, $last_step);
-        }
-
-        return $flowSession;
+        $flowSession->is_waiting = $is_waiting;
+        $flowSession->last_active = now();
+        $flowSession->save();
     }
 
-    private function findSession(?int $flow_id, ?int $connection_id, ?string $session_key): ?FlowSession
-    {
-        return $this->model->where('flow_id', $flow_id)
-            ->where('connection_id', $connection_id)
-            ->where('session_key', $session_key)
-            ->first();
-    }
-    public function fetchClientSession(?int $flow_id, ?int $connection_id, ?string $session_key, ?int $id = null): ?FlowSession
-    {
-        return $this->model->where('flow_id', $flow_id)
-            ->where('connection_id', $connection_id)
-            ->where('session_key', $session_key)
-            ->when($id, function ($query) use ($id) {
-                return $query->where('id', $id);
-            })
-            ->first();
-    }
-
-    public function resetFlowSession(?int $flow_id): ?bool
-    {
-        return $this->model->where('flow_id', $flow_id)->delete();
-    }
-
+    /**
+     * Move to the next step in the session.
+     *
+     * @param FlowSession $flowSession
+     * @param string|null $last_step
+     * @return void
+     */
     private function setNextSessionStep(FlowSession $flowSession, ?string $last_step): void
     {
         $flowSession->step += 1;
@@ -120,6 +207,4 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
         $flowSession->last_active = now();
         $flowSession->save();
     }
-
-
 }

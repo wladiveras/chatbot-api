@@ -13,6 +13,7 @@ use App\Services\Messenger\MessengerService;
 use Illuminate\Bus\Batch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
@@ -24,6 +25,7 @@ class FlowService extends BaseService implements FlowServiceInterface
     private $flowRepository;
 
     private $flowSessionRepository;
+    private $user;
 
     public $messengerService;
 
@@ -44,44 +46,16 @@ class FlowService extends BaseService implements FlowServiceInterface
         $this->flowRepository = App::make(FlowRepository::class);
         $this->flowSessionRepository = App::make(FlowSessionRepository::class);
         $this->messengerService = App::make(MessengerService::class);
+        $this->user = auth()->user();
     }
 
-    public function parse(array $data): JsonResponse
-    {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
-
-        try {
-            $createFlow = $this->flowRepository->create($data);
-
-            if (!$createFlow) {
-                return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
-                    message: 'Não deu certo.',
-                    code: 400
-                );
-            }
-
-            return $this->success(
-                message: 'Tudo certo, vamos continuar.',
-                payload: $createFlow
-            );
-
-        } catch (\Exception $e) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                message: $e->getMessage(),
-                code: $e->getCode()
-            );
-        }
-    }
-
-    public function userFlows(): ?stdClass
+    public function fetchFlows(): ?stdClass
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
 
-            $flows = (object) $this->flowRepository->getUserFlows();
+            $flows = $this->flowRepository->getUserFlows();
 
             if (!$flows) {
                 return $this->error(
@@ -101,33 +75,6 @@ class FlowService extends BaseService implements FlowServiceInterface
                 path: __CLASS__ . '.' . __FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
-            );
-        }
-    }
-
-    public function delete(string|int $id): array|object
-    {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
-
-        try {
-
-            $deleteFlow = $this->flowRepository->delete($id);
-
-            if ($deleteFlow) {
-                return $this->success(message: 'Fluxo deletado com sucesso.', payload: $deleteFlow);
-            }
-
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                message: 'Não foi possível deletar esse fluxo.',
-                code: 400
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                message: $exception->getMessage(),
-                code: 400
             );
         }
     }
@@ -167,8 +114,7 @@ class FlowService extends BaseService implements FlowServiceInterface
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-            $user = auth()->user();
-            $payload = $this->createPayload($data, $user->id);
+            $payload = $this->createPayload($data);
             $flow = $this->createFlow($payload);
 
             if (!$flow) {
@@ -204,9 +150,7 @@ class FlowService extends BaseService implements FlowServiceInterface
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-            $user = auth()->user();
-            $payload = $this->createPayload($data, $user->id);
-
+            $payload = $this->createPayload($data);
             $flow = $this->updateFlow($id, $payload);
 
             if (!$flow) {
@@ -231,24 +175,56 @@ class FlowService extends BaseService implements FlowServiceInterface
         }
     }
 
-    private function createPayload(array $data, int $userId): array
+    public function delete(string|int $id): array|object
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+
+        try {
+            $deleteFlow = $this->flowRepository->delete($id);
+
+            if (!$deleteFlow) {
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não foi possível deletar esse fluxo.',
+                    code: 400
+                );
+            }
+
+            return $this->success(message: 'Fluxo deletado com sucesso.', payload: $deleteFlow);
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $exception->getMessage(),
+                code: 400
+            );
+        }
+    }
+
+    private function createPayload(array $data): array
     {
         return [
-            'user_id' => $userId,
+            'user_id' => $this->user->id,
             'name' => $data['name'],
             'description' => $data['description'],
             'node' => json_encode($data['node']),
             'edge' => json_encode($data['edge']),
             'commands' => json_encode($data['commands']),
+            'type' => $data['type'] ?? "flow",
         ];
     }
     private function createFlow(array $payload): ?Flow
     {
+        $this->flowRepository->deleteUserFlowsCacheKey();
+
         return $this->flowRepository->create($payload);
+
     }
 
     private function updateFlow(int $id, array $payload): ?Flow
     {
+        $this->flowRepository->deleteUserFlowCacheKey($id);
+
         return $this->flowRepository->update($id, $payload);
     }
 
@@ -307,10 +283,13 @@ class FlowService extends BaseService implements FlowServiceInterface
                 if (!empty($jobs)) {
                     Bus::chain($jobs)
                         ->catch(function (Batch $batch, \Throwable $e) {
-                            Log::error('Batch failed: ', [
+                            Log::error('Job failed: ', [
                                 $batch,
                                 $e->getMessage()
                             ]);
+
+                            $this->session->is_running = false;
+                            $this->session->save();
                         })
                         ->dispatch();
                 }
@@ -346,7 +325,7 @@ class FlowService extends BaseService implements FlowServiceInterface
 
         $steps = $commands->count() + 1;
 
-        $newCommand = [
+        $finished = [
             "name" => "finished",
             "type" => "Input",
             "label" => "Variável",
@@ -355,7 +334,7 @@ class FlowService extends BaseService implements FlowServiceInterface
             "step" => $steps
         ];
 
-        $commands->push($newCommand);
+        $commands->push($finished);
 
         return $commands;
     }
@@ -411,7 +390,7 @@ class FlowService extends BaseService implements FlowServiceInterface
                 $jobs[] = new ExecuteFlow([
                     'connection' => $this->connection,
                     'session' => $this->session,
-                    'text' => $this->session->is_waiting ? $text : null,
+                    'text' => $this->session->is_waiting ? $text : "",
                     'command' => $command,
                     'steps' => $step,
                 ]);
@@ -419,7 +398,7 @@ class FlowService extends BaseService implements FlowServiceInterface
                 if (!$this->session->is_waiting) {
                     break;
                 } else {
-                    $text = null;
+                    $text = "";
                 }
 
             } else {

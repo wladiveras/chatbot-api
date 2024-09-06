@@ -10,8 +10,6 @@ interface MessengerServiceInterface
 
     public function connect(string|int $connection): array|object;
 
-    public function status(string|int $connection): array|object;
-
     public function disconnect(string|int $connection): array|object;
 
     public function delete(string|int $connection): array|object;

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class ConnectionSetting extends Model
 {
@@ -26,5 +27,10 @@ class ConnectionSetting extends Model
     public function connection()
     {
         return $this->belongsTo(Connection::class);
+    }
+
+    public function scopeUser(Builder $query): Builder
+    {
+        return $query->where('user_id', auth()->id());
     }
 }
