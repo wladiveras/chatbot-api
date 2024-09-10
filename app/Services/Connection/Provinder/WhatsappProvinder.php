@@ -196,9 +196,7 @@ class WhatsappProvinder extends BaseService implements ConnectionServiceInterfac
         $endpoint = match ($data['type']) {
             'text', 'link' => 'sendText',
             'audio' => 'sendWhatsAppAudio',
-            'image' => 'sendMedia',
-            'video' => 'sendMedia',
-            'media_audio' => 'sendMedia',
+            'image', 'video', 'sendMedia' => 'sendMedia',
             'list' => 'sendList',
             'pool' => 'sendPoll',
             'status' => 'sendStatus',
