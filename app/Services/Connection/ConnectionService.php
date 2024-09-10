@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Services\Messenger;
+namespace App\Services\Connection;
 
 use App\Repositories\Connection\ConnectionRepository;
 use App\Services\BaseService;
-use App\Services\Messenger\Provinder\WhatsappProvinder;
+use App\Services\Connection\Provinder\WhatsappProvinder;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use stdClass;
 
-class MessengerService extends BaseService
+class ConnectionService extends BaseService
 {
     private ConnectionRepository $connectionRepository;
 
@@ -18,7 +18,7 @@ class MessengerService extends BaseService
         $this->connectionRepository = App::make(ConnectionRepository::class);
     }
 
-    public static function integration(string $provinder): MessengerServiceInterface
+    public static function integration(string $provinder): ConnectionServiceInterface
     {
         return match ($provinder) {
             'whatsapp' => new WhatsappProvinder,
@@ -31,7 +31,6 @@ class MessengerService extends BaseService
         Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
-
             $connections = $this->connectionRepository->getUserConnections();
 
             if (! $connections) {
@@ -86,12 +85,12 @@ class MessengerService extends BaseService
         }
     }
 
-    public function updateSelectFlow($connection_id, $data): ?stdClass
+    public function changeConnectionFlow($connection_id, $data): ?stdClass
     {
         Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
-            $connection = $this->connectionRepository->updateSelectFlow($connection_id, $data);
+            $connection = $this->connectionRepository->changeConnectionFlow($connection_id, $data);
 
             if (! $connection) {
                 return $this->error(
@@ -100,6 +99,8 @@ class MessengerService extends BaseService
                     code: 400
                 );
             }
+
+            $this->connectionRepository->deleteUserConnectionCacheKey($connection_id);
 
             return $this->success(
                 message: 'Tudo certo, o fluxo foi alterado com sucesso.',

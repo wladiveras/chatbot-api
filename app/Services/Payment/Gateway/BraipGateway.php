@@ -23,14 +23,14 @@ class BraipGateway extends BaseService implements PaymentServiceInterface
 
     public function pay(array|object $data): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $orderCreate = $this->orderRepository->create($data);
 
-            if (!$orderCreate) {
+            if (! $orderCreate) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não foi possível redirecionar.',
                     code: 502
                 );
@@ -40,7 +40,7 @@ class BraipGateway extends BaseService implements PaymentServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -49,14 +49,14 @@ class BraipGateway extends BaseService implements PaymentServiceInterface
 
     public function checkPayment(int|string $id): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $orderCreate = $this->orderRepository->find(column: 'id', value: $id);
 
-            if (!$orderCreate) {
+            if (! $orderCreate) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'pagamento não confirmado.',
                     code: 502
                 );
@@ -66,7 +66,7 @@ class BraipGateway extends BaseService implements PaymentServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );

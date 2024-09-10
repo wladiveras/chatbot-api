@@ -30,23 +30,23 @@ class AuthService extends BaseService implements AuthServiceInterface
 
     public function signIn(array $data): ?stdClass
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $user = $this->userRepository->signIn($data['email']);
 
-            if (!$user) {
+            if (! $user) {
                 $user = $this->userRepository->signUpWithEmail([
                     'name' => null,
                     'email' => $data['email'],
                     'password' => Hash::make(Str::random(30)),
-                    'avatar' => Config::get('app.front_url') . '/assets/images/logo-1920.png',
+                    'avatar' => Config::get('app.front_url').'/assets/images/logo-1920.png',
                 ]);
             }
 
-            if (!$user) {
+            if (! $user) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não foi possivel identificar o usuário.',
                     code: 400
                 );
@@ -60,7 +60,7 @@ class AuthService extends BaseService implements AuthServiceInterface
                 'active' => 0,
             ]);
 
-            $magicLink = Config::get('app.front_url') . "/callback/$token";
+            $magicLink = Config::get('app.front_url')."/callback/$token";
 
             Mail::to($user->email)->send(new MagicLinkEmail($user->name, $magicLink));
 
@@ -71,7 +71,7 @@ class AuthService extends BaseService implements AuthServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -80,7 +80,7 @@ class AuthService extends BaseService implements AuthServiceInterface
 
     public function redirectToProvider($provider): RedirectResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         $this->availableProviders($provider);
 
@@ -89,9 +89,9 @@ class AuthService extends BaseService implements AuthServiceInterface
 
     public function availableProviders($provider): array|object|bool
     {
-        if (!in_array($provider, ['apple', 'twitter', 'google'])) {
+        if (! in_array($provider, ['apple', 'twitter', 'google'])) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: 'Não foi possivel identificar o provedor.',
                 code: 400
             );
@@ -102,7 +102,7 @@ class AuthService extends BaseService implements AuthServiceInterface
 
     public function callbackWithProvider($provider, $data): array|object
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         $this->availableProviders($provider);
 
@@ -113,9 +113,9 @@ class AuthService extends BaseService implements AuthServiceInterface
                 $user = $this->userRepository->signUpWithProvider($provider, $user);
             }
 
-            if (!$user) {
+            if (! $user) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Não foi possivel realizar o login.',
                     code: 400
                 );
@@ -130,7 +130,7 @@ class AuthService extends BaseService implements AuthServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -145,9 +145,9 @@ class AuthService extends BaseService implements AuthServiceInterface
 
             $user = $this->userRepository->find($magicLink->user_id);
 
-            if (!$user || !$magicLink) {
+            if (! $user || ! $magicLink) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Token inválido.',
                     code: 400
                 );
@@ -158,9 +158,9 @@ class AuthService extends BaseService implements AuthServiceInterface
 
             $token = $user->createToken(Str::uuid()->toString())->plainTextToken;
 
-            if (!$token) {
+            if (! $token) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Token invalido.',
                     code: 400
                 );
@@ -173,7 +173,7 @@ class AuthService extends BaseService implements AuthServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -182,14 +182,14 @@ class AuthService extends BaseService implements AuthServiceInterface
 
     public function auth(): ?stdClass
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $auth = $this->userRepository->auth();
 
-            if (!$auth) {
+            if (! $auth) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Usuário não está autenticado.',
                     code: 400
                 );
@@ -202,7 +202,7 @@ class AuthService extends BaseService implements AuthServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -211,14 +211,14 @@ class AuthService extends BaseService implements AuthServiceInterface
 
     public function refreshToken(): ?stdClass
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $auth = $this->userRepository->refreshToken();
 
-            if (!$auth) {
+            if (! $auth) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Usuário não está autenticado.',
                     code: 400
                 );
@@ -231,7 +231,7 @@ class AuthService extends BaseService implements AuthServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );
@@ -240,14 +240,14 @@ class AuthService extends BaseService implements AuthServiceInterface
 
     public function logout(): ?stdClass
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
+        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
             $auth = $this->userRepository->logout();
 
-            if (!$auth) {
+            if (! $auth) {
                 return $this->error(
-                    path: __CLASS__ . '.' . __FUNCTION__,
+                    path: __CLASS__.'.'.__FUNCTION__,
                     message: 'Houve um problema na solicitação.',
                     code: 400
                 );
@@ -260,7 +260,7 @@ class AuthService extends BaseService implements AuthServiceInterface
 
         } catch (\Exception $e) {
             return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
+                path: __CLASS__.'.'.__FUNCTION__,
                 message: $e->getMessage(),
                 code: $e->getCode()
             );

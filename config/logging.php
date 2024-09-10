@@ -69,7 +69,7 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/supervisor.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'locking' => false
+            'locking' => false,
         ],
 
         'daily' => [
@@ -96,7 +96,7 @@ return [
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
-                'connectionString' => 'tls://' . env('PAPERTRAIL_URL') . ':' . env('PAPERTRAIL_PORT'),
+                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],

@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ResponseResource;
+use App\Http\Resources\ResponseCollection;
 use App\Enums\UserStatus;
-use App\Http\Resources\UserResource;
 use App\Services\User\UserService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -23,7 +24,7 @@ class UserController extends BaseController
 
     public function index(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -32,12 +33,12 @@ class UserController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: $users,
+                service: new ResponseResource($users),
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -47,7 +48,7 @@ class UserController extends BaseController
 
     public function store(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -59,7 +60,7 @@ class UserController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
                 service: $data->errors(),
                 code: 400
@@ -71,12 +72,12 @@ class UserController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new UserResource($user)
+                service: new ResponseResource($user)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -87,7 +88,7 @@ class UserController extends BaseController
 
     public function show(int|string $id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -96,12 +97,12 @@ class UserController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new UserResource($user)
+                service: new ResponseResource($user)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -109,21 +110,21 @@ class UserController extends BaseController
         }
     }
 
-    public function update(Request $request, int|string $id): JsonResponse
+    public function update(Request $request, int $id): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
         $data = Validator::make($request->all(), [
-            'name' => 'nullable|string|required|max:100|min:3',
-            'email' => 'nullable|string|email|max:254',
-            'status' => ['nullable', Rule::enum(UserStatus::class)],
+            'name' => 'string|required|max:100|min:3',
+            'avatar' => 'string|url|max:254',
+            'status' => [Rule::enum(UserStatus::class)],
         ]);
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
                 service: $data->errors(),
                 code: 400
@@ -135,12 +136,12 @@ class UserController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new UserResource($user)
+                service: new ResponseResource($user)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -151,7 +152,7 @@ class UserController extends BaseController
 
     public function destroy(int|string $id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -165,7 +166,7 @@ class UserController extends BaseController
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()

@@ -3,8 +3,7 @@
 namespace App\Jobs;
 
 use App\Repositories\FlowSession\FlowSessionRepository;
-use App\Services\Messenger\MessengerService;
-use Carbon\Carbon;
+use App\Services\Connection\ConnectionService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,8 +12,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 class ExecuteFlow implements ShouldQueue
 {
@@ -22,7 +21,7 @@ class ExecuteFlow implements ShouldQueue
 
     protected $payload;
 
-    protected $messengerService;
+    protected $connectionService;
 
     protected $flowSessionRepository;
 
@@ -32,7 +31,9 @@ class ExecuteFlow implements ShouldQueue
      * Create a new job instance.
      */
     public $tries = 1;
+
     public $maxExceptions = 1;
+
     public function __construct($payload)
     {
 
@@ -40,7 +41,7 @@ class ExecuteFlow implements ShouldQueue
 
         $this->payload = $payload;
 
-        $this->messengerService = App::make(MessengerService::class);
+        $this->connectionService = App::make(ConnectionService::class);
         $this->flowSessionRepository = App::make(FlowSessionRepository::class);
 
         $this->session = $this->flowSessionRepository->fetchClientSession(
@@ -151,7 +152,6 @@ class ExecuteFlow implements ShouldQueue
         }, $messageText);
     }
 
-
     // Commands
     protected function commandDelay($command)
     {
@@ -183,16 +183,20 @@ class ExecuteFlow implements ShouldQueue
             $messageText = "{$url}/{$messageText}";
         }
 
+        if (in_array($commandType, ['link'])) {
+            $commandType = 'text';
+        }
+
         $message = [
             'connection' => Arr::get($command, 'token', null),
             'number' => Arr::get($command, 'session_key', null),
             'delay' => Arr::get($command, 'command.delay', 1),
             'type' => $commandType ?? null, // text, audio, video, image, media_audio, list, pool, status
             'value' => $messageText ?? null,
-            'caption' => Arr::get($command, 'command.caption', null)
+            'caption' => Arr::get($command, 'command.caption', null),
         ];
 
-        $this->messengerService->integration('whatsapp')->send($message);
+        $this->connectionService->integration('whatsapp')->send($message);
 
         return $this->nextStep();
     }
@@ -205,7 +209,7 @@ class ExecuteFlow implements ShouldQueue
         $name = Arr::get($command, 'command.name', null);
         $type = Arr::get($command, 'command.type', 'input');
 
-        if ($name === "finished") {
+        if ($name === 'finished') {
             return $this->nextStep();
         }
 
@@ -218,6 +222,7 @@ class ExecuteFlow implements ShouldQueue
             );
 
             $this->waitingClientResponse(false);
+
             return $this->nextStep();
         }
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services\Messenger;
+namespace App\Services\Connection;
 
-interface MessengerServiceInterface
+interface ConnectionServiceInterface
 {
     public function createConnection(array|object $data): array|object;
 

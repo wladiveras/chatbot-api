@@ -18,8 +18,6 @@ class ConnectionProfileRepository extends BaseRepository implements ConnectionRe
 
     /**
      * Get all connections for the authenticated user.
-     *
-     * @return Collection|null
      */
     public function getUserConnections(): ?Collection
     {
@@ -28,9 +26,6 @@ class ConnectionProfileRepository extends BaseRepository implements ConnectionRe
 
     /**
      * Create or update a connection profile.
-     *
-     * @param array $data
-     * @return ConnectionProfile
      */
     public function createOrUpdateProfile(array $data): ConnectionProfile
     {
@@ -39,5 +34,4 @@ class ConnectionProfileRepository extends BaseRepository implements ConnectionRe
             $data
         );
     }
-
 }

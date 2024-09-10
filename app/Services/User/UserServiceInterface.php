@@ -6,11 +6,11 @@ interface UserServiceInterface
 {
     public function findAllUsers();
 
-    public function findUser(int|string $id);
+    public function findUser(int $id);
 
     public function createUser(array $data);
 
-    public function updateUser(int|string $id, array $data);
+    public function updateUser(int $id, array $data);
 
-    public function deleteUser(int|string $id);
+    public function deleteUser(int $id);
 }

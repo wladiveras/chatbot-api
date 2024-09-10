@@ -49,7 +49,6 @@ class RunningFlow implements ShouldQueue
      * Set the connection for the job.
      */
 
-
     /**
      * Execute the job.
      */

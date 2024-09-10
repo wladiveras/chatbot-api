@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\FlowController;
-use App\Http\Controllers\MessengerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -23,7 +23,6 @@ Route::prefix('/auth')
         Route::get('/redirect/{provider}', [AuthController::class, 'redirectToProvider']);
         Route::get('/callback/{provider}', [AuthController::class, 'callbackWithProvider']);
     });
-
 
 // User Service
 Route::prefix('/user')
@@ -56,22 +55,22 @@ Route::prefix('/payment/{gateway}')
     });
 
 // Connection Service
-Route::get('/connections', [MessengerController::class, 'index'])->middleware(['auth:sanctum']);
-Route::get('/connection/{id}', [MessengerController::class, 'show'])->middleware(['auth:sanctum']);
+Route::get('/connections', [ConnectionController::class, 'index'])->middleware(['auth:sanctum']);
+Route::get('/connection/{id}', [ConnectionController::class, 'show'])->middleware(['auth:sanctum']);
 
 Route::prefix('/integration/{integration}')
     ->middleware(['auth:sanctum'])
     ->group(function () {
-        Route::post('/create-connection', [MessengerController::class, 'createConnection']);
-        Route::put('/select-flow/{connection_id}', [MessengerController::class, 'selectFlow']);
-        Route::post('/send-message', [MessengerController::class, 'sendMessage']);
-        Route::get('/{connection}/connect', [MessengerController::class, 'connect']);
-        Route::post('/{connection}/status', [MessengerController::class, 'status']);
-        Route::post('/{connection}/profile', [MessengerController::class, 'profile']);
-        Route::delete('/{connection}/delete', [MessengerController::class, 'delete']);
-        Route::delete('/{connection}/disconnect', [MessengerController::class, 'disconnect']);
+        Route::post('/create-connection', [ConnectionController::class, 'createConnection']);
+        Route::put('/select-flow/{connection_id}', [ConnectionController::class, 'selectFlow']);
+        Route::post('/send-message', [ConnectionController::class, 'sendMessage']);
+        Route::get('/{connection}/connect', [ConnectionController::class, 'connect']);
+        Route::post('/{connection}/status', [ConnectionController::class, 'status']);
+        Route::post('/{connection}/profile', [ConnectionController::class, 'profile']);
+        Route::delete('/{connection}/delete', [ConnectionController::class, 'delete']);
+        Route::delete('/{connection}/disconnect', [ConnectionController::class, 'disconnect']);
     });
 
-Route::post('/integration/{integration}/callback', [MessengerController::class, 'callback']);
+Route::post('/integration/{integration}/callback', [ConnectionController::class, 'callback']);
 
 // More Services

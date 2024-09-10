@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 class FlowRepository extends BaseRepository implements FlowRepositoryInterface
 {
     protected $cacheTime = 120;
+
     protected $user;
 
     public function __construct(Flow $model)
@@ -20,16 +21,13 @@ class FlowRepository extends BaseRepository implements FlowRepositoryInterface
 
     /**
      * Get all flows for the authenticated user.
-     *
-     * @return Collection|null
      */
     public function getUserFlows(): ?Collection
     {
         $cacheKey = $this->getUserFlowsCacheKey();
 
         return Cache::remember($cacheKey, $this->cacheTime, function () {
-            return $this->model->UserScope()->where('user_id', $this->user->id)
-
+            return $this->model->auth()
                 ->orderBy('id', 'desc')
                 ->select(
                     'name',
@@ -49,16 +47,13 @@ class FlowRepository extends BaseRepository implements FlowRepositoryInterface
 
     /**
      * Get a specific flow for the authenticated user by ID.
-     *
-     * @param int $id
-     * @return Flow|null
      */
     public function getUserFlow(int $id): ?Flow
     {
         $cacheKey = $this->getUserFlowCacheKey($id);
 
         return Cache::remember($cacheKey, $this->cacheTime, function () use ($id) {
-            return $this->model->where('user_id', $this->user->id)
+            return $this->model->auth()
                 ->where('id', $id)
                 ->first();
         });
@@ -66,8 +61,6 @@ class FlowRepository extends BaseRepository implements FlowRepositoryInterface
 
     /**
      * Generate cache key for user flows.
-     *
-     * @return string
      */
     private function getUserFlowsCacheKey(): string
     {
@@ -82,14 +75,12 @@ class FlowRepository extends BaseRepository implements FlowRepositoryInterface
     public function deleteUserFlowsCacheKey(): bool
     {
         $cacheKey = $this->getUserFlowsCacheKey();
+
         return $this->deleteCacheKey($cacheKey);
     }
 
     /**
      * Generate cache key for a specific user flow.
-     *
-     * @param int $id
-     * @return string
      */
     private function getUserFlowCacheKey(int $id): string
     {
@@ -99,28 +90,12 @@ class FlowRepository extends BaseRepository implements FlowRepositoryInterface
     /**
      * Delete the user flow cache key if it exists.
      *
-     * @param int $id
      * @return bool True if the cache key was deleted, false otherwise.
      */
     public function deleteUserFlowCacheKey(int $id): bool
     {
         $cacheKey = $this->getUserFlowCacheKey($id);
+
         return $this->deleteCacheKey($cacheKey);
-    }
-
-    /**
-     * Delete a cache key if it exists.
-     *
-     * @param string $cacheKey
-     * @return bool True if the cache key was deleted, false otherwise.
-     */
-    private function deleteCacheKey(string $cacheKey): bool
-    {
-        if (!Cache::has($cacheKey)) {
-            return false;
-        }
-
-        Cache::forget($cacheKey);
-        return true;
     }
 }

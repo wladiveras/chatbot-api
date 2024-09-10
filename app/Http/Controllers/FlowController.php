@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\FlowResource;
+use App\Http\Resources\ResponseResource;
+use App\Http\Resources\ResponseCollection;
 use App\Services\Flow\FlowService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -30,7 +31,7 @@ class FlowController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new FlowResource($flowService)
+                service: new ResponseResource($flowService)
             );
 
         } catch (\Exception $exception) {
@@ -54,7 +55,7 @@ class FlowController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new FlowResource($flowService)
+                service: new ResponseResource($flowService)
             );
 
         } catch (\Exception $exception) {
@@ -96,7 +97,7 @@ class FlowController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new FlowResource($flowService)
+                service: new ResponseResource($flowService)
             );
 
         } catch (\Exception $exception) {
@@ -120,7 +121,7 @@ class FlowController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new FlowResource($flowService)
+                service: $flowService
             );
 
         } catch (\Exception $exception) {
@@ -186,7 +187,7 @@ class FlowController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new FlowResource($flowService)
+                service: new ResponseResource($flowService)
             );
 
         } catch (\Exception $exception) {

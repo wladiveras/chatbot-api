@@ -19,11 +19,6 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
 
     /**
      * Get or create a client session.
-     *
-     * @param int|null $flow_id
-     * @param int|null $connection_id
-     * @param string|null $session_key
-     * @return FlowSession|null
      */
     public function clientSession(?int $flow_id, ?int $connection_id, ?string $session_key): ?FlowSession
     {
@@ -38,12 +33,6 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
 
     /**
      * Set session meta data.
-     *
-     * @param int $flow_session_id
-     * @param string $key
-     * @param string $value
-     * @param string $type
-     * @return void
      */
     public function setSessionMeta(int $flow_session_id, string $key, string $value, string $type = 'input'): void
     {
@@ -57,12 +46,6 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
 
     /**
      * Update the waiting client response status.
-     *
-     * @param int|null $flow_id
-     * @param int|null $connection_id
-     * @param string|null $session_key
-     * @param int|null $is_waiting
-     * @return void
      */
     public function waitingClientResponse(?int $flow_id, ?int $connection_id, ?string $session_key, ?int $is_waiting): void
     {
@@ -75,10 +58,6 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
 
     /**
      * Get session meta data.
-     *
-     * @param int|null $flow_session_id
-     * @param string|null $key
-     * @return FlowSessionMetas|null
      */
     public function getSessionMeta(?int $flow_session_id, ?string $key): ?FlowSessionMetas
     {
@@ -89,12 +68,6 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
 
     /**
      * Move to the next session step.
-     *
-     * @param int|null $flow_id
-     * @param int|null $connection_id
-     * @param string|null $session_key
-     * @param string|null $last_step
-     * @return FlowSession|null
      */
     public function nextSessionStep(?int $flow_id, ?int $connection_id, ?string $session_key, ?string $last_step): ?FlowSession
     {
@@ -109,12 +82,6 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
 
     /**
      * Fetch a client session.
-     *
-     * @param int|null $flow_id
-     * @param int|null $connection_id
-     * @param string|null $session_key
-     * @param int|null $id
-     * @return FlowSession|null
      */
     public function fetchClientSession(?int $flow_id, ?int $connection_id, ?string $session_key, ?int $id = null): ?FlowSession
     {
@@ -129,9 +96,6 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
 
     /**
      * Reset flow sessions by flow ID.
-     *
-     * @param int|null $flow_id
-     * @return bool|null
      */
     public function resetFlowSession(?int $flow_id): ?bool
     {
@@ -140,11 +104,6 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
 
     /**
      * Find a session by flow ID, connection ID, and session key.
-     *
-     * @param int|null $flow_id
-     * @param int|null $connection_id
-     * @param string|null $session_key
-     * @return FlowSession|null
      */
     private function findSession(?int $flow_id, ?int $connection_id, ?string $session_key): ?FlowSession
     {
@@ -156,11 +115,6 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
 
     /**
      * Create a new session.
-     *
-     * @param int|null $flow_id
-     * @param int|null $connection_id
-     * @param string|null $session_key
-     * @return FlowSession
      */
     private function createSession(?int $flow_id, ?int $connection_id, ?string $session_key = null): FlowSession
     {
@@ -177,10 +131,6 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
 
     /**
      * Set the waiting client response status for a session.
-     *
-     * @param FlowSession $flowSession
-     * @param int|null $is_waiting
-     * @return void
      */
     private function setWaitingClientResponse(FlowSession $flowSession, ?int $is_waiting): void
     {
@@ -191,10 +141,6 @@ class FlowSessionRepository extends BaseRepository implements FlowSessionReposit
 
     /**
      * Move to the next step in the session.
-     *
-     * @param FlowSession $flowSession
-     * @param string|null $last_step
-     * @return void
      */
     private function setNextSessionStep(FlowSession $flowSession, ?string $last_step): void
     {

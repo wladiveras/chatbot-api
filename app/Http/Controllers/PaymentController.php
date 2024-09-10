@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\PaymentResource;
+use App\Http\Resources\ResponseResource;
+use App\Http\Resources\ResponseCollection;
 use App\Services\Payment\PaymentService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -21,7 +22,7 @@ class PaymentController extends BaseController
 
     public function pay(string $gateway, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -32,7 +33,7 @@ class PaymentController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
                 service: $data->errors(),
                 code: 400
@@ -44,12 +45,12 @@ class PaymentController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new PaymentResource($payment)
+                service: new ResponseResource($payment)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()
@@ -59,7 +60,7 @@ class PaymentController extends BaseController
 
     public function checkPayment(string $gateway, int|string $id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -70,7 +71,7 @@ class PaymentController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: Carbon::now()->toDateTimeString(),
                 service: $data->errors(),
                 code: 400
@@ -82,12 +83,12 @@ class PaymentController extends BaseController
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new PaymentResource($payment)
+                service: new ResponseResource($payment)
             );
 
         } catch (\Exception $exception) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
+                path: __CLASS__ . '.' . __FUNCTION__,
                 response: $exception->getMessage(),
                 service: $request->all(),
                 code: $exception->getCode()

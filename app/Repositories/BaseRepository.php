@@ -2,9 +2,10 @@
 
 namespace App\Repositories;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class BaseRepository implements BaseRepositoryInterface
 {
@@ -14,8 +15,6 @@ class BaseRepository implements BaseRepositoryInterface
 
     /**
      * Get all records.
-     *
-     * @return Collection
      */
     public function all(): Collection
     {
@@ -24,9 +23,6 @@ class BaseRepository implements BaseRepositoryInterface
 
     /**
      * Paginate records.
-     *
-     * @param int $limitPerPage
-     * @return CursorPaginator
      */
     public function paginate(int $limitPerPage): CursorPaginator
     {
@@ -35,10 +31,6 @@ class BaseRepository implements BaseRepositoryInterface
 
     /**
      * Find a record by a specific column.
-     *
-     * @param mixed $value
-     * @param string $column
-     * @return Model|null
      */
     public function find(mixed $value, string $column = 'id'): ?Model
     {
@@ -47,9 +39,6 @@ class BaseRepository implements BaseRepositoryInterface
 
     /**
      * Create a new record.
-     *
-     * @param array $data
-     * @return Model
      */
     public function create(array $data): Model
     {
@@ -58,11 +47,6 @@ class BaseRepository implements BaseRepositoryInterface
 
     /**
      * Update a record by a specific column.
-     *
-     * @param mixed $value
-     * @param array $data
-     * @param string $column
-     * @return Model|null
      */
     public function update(mixed $value, array $data, string $column = 'id'): ?Model
     {
@@ -70,15 +54,12 @@ class BaseRepository implements BaseRepositoryInterface
         if ($record) {
             $record->update($data);
         }
+
         return $record;
     }
 
     /**
      * Delete a record by a specific column.
-     *
-     * @param mixed $value
-     * @param string $column
-     * @return bool
      */
     public function delete(mixed $value, string $column = 'id'): bool
     {
@@ -87,13 +68,25 @@ class BaseRepository implements BaseRepositoryInterface
 
     /**
      * Check if a record exists by a specific column.
-     *
-     * @param mixed $value
-     * @param string $column
-     * @return bool
      */
     public function exists(mixed $value, string $column = 'id'): bool
     {
         return $this->model->where($column, $value)->exists();
+    }
+
+    /**
+     * Delete a cache key if it exists.
+     *
+     * @return bool True if the cache key was deleted, false otherwise.
+     */
+    public function deleteCacheKey(string $cacheKey): bool
+    {
+        if (!Cache::has($cacheKey)) {
+            return false;
+        }
+
+        Cache::forget($cacheKey);
+
+        return true;
     }
 }

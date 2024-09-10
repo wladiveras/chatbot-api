@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Enums\MessagesType;
-use App\Http\Resources\MessengerResource;
-use App\Services\Messenger\MessengerService;
+use App\Http\Resources\ResponseResource;
+use App\Http\Resources\ResponseCollection;
+use App\Services\Connection\ConnectionService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,13 +14,13 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Validator;
 
-class MessengerController extends BaseController
+class ConnectionController extends BaseController
 {
-    private MessengerService $messengerService;
+    private ConnectionService $connectionService;
 
-    public function __construct(MessengerService $messengerService)
+    public function __construct(ConnectionService $connectionService)
     {
-        $this->messengerService = $messengerService;
+        $this->connectionService = $connectionService;
     }
 
     public function index(Request $request): JsonResponse
@@ -29,11 +30,11 @@ class MessengerController extends BaseController
         ]);
 
         try {
-            $messengerService = $this->messengerService->fetchConnections();
+            $connectionService = $this->connectionService->fetchConnections();
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new MessengerResource($messengerService)
+                service: new ResponseResource($connectionService)
             );
 
         } catch (\Exception $exception) {
@@ -53,11 +54,11 @@ class MessengerController extends BaseController
         ]);
 
         try {
-            $messengerService = $this->messengerService->fetchConnection($id);
+            $connectionService = $this->connectionService->fetchConnection($id);
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new MessengerResource($messengerService)
+                service: $connectionService
             );
 
         } catch (\Exception $exception) {
@@ -92,11 +93,11 @@ class MessengerController extends BaseController
         }
 
         try {
-            $messengerService = $this->messengerService->integration($provinder)->createConnection($data->validate());
+            $connectionService = $this->connectionService->integration($provinder)->createConnection($data->validate());
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: $messengerService
+                service: $connectionService
             );
 
         } catch (\Exception $exception) {
@@ -116,11 +117,11 @@ class MessengerController extends BaseController
         ]);
 
         try {
-            $messengerService = $this->messengerService->integration($provinder)->connect($connection);
+            $connectionService = $this->connectionService->integration($provinder)->connect($connection);
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new MessengerResource($messengerService)
+                service: new ResponseResource($connectionService)
             );
 
         } catch (\Exception $exception) {
@@ -156,11 +157,11 @@ class MessengerController extends BaseController
         }
 
         try {
-            $messengerService = $this->messengerService->updateSelectFlow($connection_id, $data->validate());
+            $connectionService = $this->connectionService->changeConnectionFlow($connection_id, $data->validate());
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new MessengerResource($messengerService)
+                service: new $connectionService
             );
 
         } catch (\Exception $exception) {
@@ -193,11 +194,11 @@ class MessengerController extends BaseController
         }
 
         try {
-            $messengerService = $this->messengerService->integration($provinder)->getConnectionProfile($connection, $data->validate());
+            $connectionService = $this->connectionService->integration($provinder)->getConnectionProfile($connection, $data->validate());
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new MessengerResource($messengerService)
+                service: new ResponseResource($connectionService)
             );
 
         } catch (\Exception $exception) {
@@ -210,8 +211,6 @@ class MessengerController extends BaseController
         }
     }
 
-
-
     public function disconnect(string $provinder, int|string $connection, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
@@ -219,11 +218,11 @@ class MessengerController extends BaseController
         ]);
 
         try {
-            $messengerService = $this->messengerService->integration($provinder)->disconnect($connection);
+            $connectionService = $this->connectionService->integration($provinder)->disconnect($connection);
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new MessengerResource($messengerService)
+                service: new ResponseResource($connectionService)
             );
 
         } catch (\Exception $exception) {
@@ -243,11 +242,11 @@ class MessengerController extends BaseController
         ]);
 
         try {
-            $messengerService = $this->messengerService->integration($provinder)->delete($connection);
+            $connectionService = $this->connectionService->integration($provinder)->delete($connection);
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new MessengerResource($messengerService)
+                service: $connectionService
             );
 
         } catch (\Exception $exception) {
@@ -285,11 +284,11 @@ class MessengerController extends BaseController
         }
 
         try {
-            $messengerService = $this->messengerService->integration($provider)->send($data->validate());
+            $connectionService = $this->connectionService->integration($provider)->send($data->validate());
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: new MessengerResource($messengerService)
+                service: $connectionService
             );
 
         } catch (\Exception $exception) {
@@ -314,11 +313,11 @@ class MessengerController extends BaseController
         }
 
         try {
-            $messengerService = $this->messengerService->integration($provider)->callback($request);
+            $connectionService = $this->connectionService->integration($provider)->callback($request);
 
             return $this->success(
                 response: Carbon::now()->toDateTimeString(),
-                service: $messengerService
+                service: $connectionService
             );
 
         } catch (\Exception $exception) {

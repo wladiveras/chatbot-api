@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 
 class Order extends Model
 {
@@ -29,6 +29,11 @@ class Order extends Model
         'payment_gateway_id',
         'last_activity',
     ];
+
+    public function scopeAuth(Builder $query): Builder
+    {
+        return $query->where('user_id', auth()->id());
+    }
 
     public function user()
     {
@@ -61,8 +66,4 @@ class Order extends Model
     //     return $this->hasMany(OrderItem::class);
     // }
 
-    public function scopeUser(Builder $query): Builder
-    {
-        return $query->where('user_id', auth()->id());
-    }
 }

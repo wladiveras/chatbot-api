@@ -4,16 +4,16 @@ namespace App\Services\Flow;
 
 use App\Jobs\ExecuteFlow;
 use App\Jobs\RunningFlow;
+use App\Models\User;
 use App\Models\Flow;
 use App\Models\FlowSession;
 use App\Repositories\Flow\FlowRepository;
 use App\Repositories\FlowSession\FlowSessionRepository;
 use App\Services\BaseService;
-use App\Services\Messenger\MessengerService;
+use App\Services\Connection\ConnectionService;
 use Illuminate\Bus\Batch;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
@@ -22,30 +22,22 @@ use stdClass;
 
 class FlowService extends BaseService implements FlowServiceInterface
 {
-    private $flowRepository;
-
-    private $flowSessionRepository;
-    private $user;
-
-    public $messengerService;
-
-    public $session_key;
-
-    public $total_steps;
-
+    private FlowRepository $flowRepository;
+    private FlowSessionRepository $flowSessionRepository;
+    private ?User $user;
+    public ConnectionService $connectionService;
+    public string $session_key;
+    public int $total_steps;
     public $connection;
-
     public $session;
-
-    public $data;
+    public array $data;
     private $userInput = null;
 
     public function __construct()
     {
-
         $this->flowRepository = App::make(FlowRepository::class);
         $this->flowSessionRepository = App::make(FlowSessionRepository::class);
-        $this->messengerService = App::make(MessengerService::class);
+        $this->connectionService = App::make(ConnectionService::class);
         $this->user = auth()->user();
     }
 
@@ -54,7 +46,6 @@ class FlowService extends BaseService implements FlowServiceInterface
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-
             $flows = $this->flowRepository->getUserFlows();
 
             if (!$flows) {
@@ -84,7 +75,6 @@ class FlowService extends BaseService implements FlowServiceInterface
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-
             $flow = $this->flowRepository->getUserFlow($flow_id);
 
             if (!$flow) {
@@ -190,6 +180,8 @@ class FlowService extends BaseService implements FlowServiceInterface
                 );
             }
 
+            $this->flowRepository->deleteUserFlowsCacheKey();
+
             return $this->success(message: 'Fluxo deletado com sucesso.', payload: $deleteFlow);
 
         } catch (\Exception $exception) {
@@ -213,25 +205,22 @@ class FlowService extends BaseService implements FlowServiceInterface
             'type' => $data['type'] ?? "flow",
         ];
     }
+
     private function createFlow(array $payload): ?Flow
     {
         $this->flowRepository->deleteUserFlowsCacheKey();
-
         return $this->flowRepository->create($payload);
-
     }
 
     private function updateFlow(int $id, array $payload): ?Flow
     {
         $this->flowRepository->deleteUserFlowCacheKey($id);
-
         return $this->flowRepository->update($id, $payload);
     }
 
     public function connection($connection): self
     {
         $this->connection = $connection;
-
         return $this;
     }
 
@@ -240,14 +229,12 @@ class FlowService extends BaseService implements FlowServiceInterface
         $this->session_key = $this->extractSessionKey($data);
         $this->session = $this->initializeSession();
         $this->data = $data;
-
         return $this;
     }
 
     private function extractSessionKey($data): string
     {
         $session_key = Arr::get($data, 'data.key.remoteJid');
-
         return Str::before($session_key, '@');
     }
 
@@ -304,17 +291,17 @@ class FlowService extends BaseService implements FlowServiceInterface
         }
     }
 
-    private function getFlow()
+    private function getFlow(): ?Flow
     {
         return $this->flowRepository->find($this->connection->flow_id);
     }
 
-    private function getText()
+    private function getText(): string
     {
         return Arr::get($this->data, 'data.message.extendedTextMessage.text', Arr::get($this->data, 'data.message.conversation', 'undefined'));
     }
 
-    private function getCommands($flow)
+    private function getCommands($flow): ?Collection
     {
         $commands = collect(json_decode($flow->commands, true));
 
@@ -339,7 +326,7 @@ class FlowService extends BaseService implements FlowServiceInterface
         return $commands;
     }
 
-    private function getNextCommands($commands, $step)
+    private function getNextCommands($commands, $step): ?Collection
     {
         $filteredCommands = collect($commands)->filter(function ($command) use ($step) {
             return $command['step'] >= $step;
@@ -358,26 +345,22 @@ class FlowService extends BaseService implements FlowServiceInterface
         });
 
         if ($nextInputIndex !== null && $nextInputIndex === 0) {
-            $filteredCommands = $filteredCommands->slice($nextInputIndex)->values();
-            return $filteredCommands;
+            return $filteredCommands->slice($nextInputIndex)->values();
         }
 
         if ($nextInputIndex !== false && $nextInputIndex !== $filteredCommands->count() - 1) {
-            $filteredCommands = $filteredCommands->slice(0, $nextInputIndex + 1)->values();
-            return $filteredCommands;
+            return $filteredCommands->slice(0, $nextInputIndex + 1)->values();
         }
 
         return $filteredCommands;
     }
 
-    public function resetFlowSession($flow_id)
+    public function resetFlowSession($flow_id): bool
     {
-        return $this->flowSessionRepository->resetFlowSession(
-            flow_id: $flow_id,
-        );
+        return $this->flowSessionRepository->resetFlowSession($flow_id);
     }
 
-    private function createJobs($nextCommands, $text, $step)
+    private function createJobs($nextCommands, $text, $step): array
     {
         $jobs = [];
 
@@ -386,29 +369,18 @@ class FlowService extends BaseService implements FlowServiceInterface
                 break;
             }
 
-            if ($command['action'] === 'input') {
-                $jobs[] = new ExecuteFlow([
-                    'connection' => $this->connection,
-                    'session' => $this->session,
-                    'text' => $this->session->is_waiting ? $text : "",
-                    'command' => $command,
-                    'steps' => $step,
-                ]);
+            $jobs[] = new ExecuteFlow([
+                'connection' => $this->connection,
+                'session' => $this->session,
+                'text' => $command['action'] === 'input' && $this->session->is_waiting ? $text : "",
+                'command' => $command,
+                'steps' => $step,
+            ]);
 
-                if (!$this->session->is_waiting) {
-                    break;
-                } else {
-                    $text = "";
-                }
-
+            if ($command['action'] === 'input' && !$this->session->is_waiting) {
+                break;
             } else {
-                $jobs[] = new ExecuteFlow([
-                    'connection' => $this->connection,
-                    'session' => $this->session,
-                    'text' => $text,
-                    'command' => $command,
-                    'steps' => $step,
-                ]);
+                $text = "";
             }
         }
 

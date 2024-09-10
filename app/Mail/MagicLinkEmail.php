@@ -14,6 +14,7 @@ class MagicLinkEmail extends Mailable
     use Queueable, SerializesModels;
 
     protected $AppName;
+
     /**
      * Create a new message instance.
      */
