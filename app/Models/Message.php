@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Message extends Model
 {
@@ -22,17 +23,17 @@ class Message extends Model
         'payload',
     ];
 
-    public function connection()
+    public function connection(): BelongsTo
     {
         return $this->belongsTo(Connection::class);
     }
 
-    public function flow()
+    public function flow(): BelongsTo
     {
         return $this->belongsTo(Flow::class);
     }
 
-    public function flowSession()
+    public function flowSession(): BelongsTo
     {
         return $this->belongsTo(FlowSession::class);
     }

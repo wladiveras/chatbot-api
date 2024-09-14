@@ -24,7 +24,7 @@ class FlowRepository extends BaseRepository implements FlowRepositoryInterface
      */
     public function getUserFlows(): ?Collection
     {
-        $cacheKey = $this->getUserFlowsCacheKey();
+        $cacheKey = $this->getUserFlowsCacheKey($this->user->id);
 
         return Cache::remember($cacheKey, $this->cacheTime, function () {
             return $this->model->auth()
@@ -50,21 +50,17 @@ class FlowRepository extends BaseRepository implements FlowRepositoryInterface
      */
     public function getUserFlow(int $id): ?Flow
     {
-        $cacheKey = $this->getUserFlowCacheKey($id);
-
-        return Cache::remember($cacheKey, $this->cacheTime, function () use ($id) {
-            return $this->model->auth()
-                ->where('id', $id)
-                ->first();
-        });
+        return $this->model->auth()
+            ->where('id', $id)
+            ->first();
     }
 
     /**
      * Generate cache key for user flows.
      */
-    private function getUserFlowsCacheKey(): string
+    private function getUserFlowsCacheKey($userId): string
     {
-        return "user_flows_{$this->user->id}";
+        return "user_flows_{$userId}";
     }
 
     /**
@@ -72,30 +68,11 @@ class FlowRepository extends BaseRepository implements FlowRepositoryInterface
      *
      * @return bool True if the cache key was deleted, false otherwise.
      */
-    public function deleteUserFlowsCacheKey(): bool
+    public function deleteUserFlowsCacheKey($userId): bool
     {
-        $cacheKey = $this->getUserFlowsCacheKey();
+        $cacheKey = $this->getUserFlowsCacheKey($userId);
 
         return $this->deleteCacheKey($cacheKey);
     }
 
-    /**
-     * Generate cache key for a specific user flow.
-     */
-    private function getUserFlowCacheKey(int $id): string
-    {
-        return "user_{$this->user->id}_flow_{$id}";
-    }
-
-    /**
-     * Delete the user flow cache key if it exists.
-     *
-     * @return bool True if the cache key was deleted, false otherwise.
-     */
-    public function deleteUserFlowCacheKey(int $id): bool
-    {
-        $cacheKey = $this->getUserFlowCacheKey($id);
-
-        return $this->deleteCacheKey($cacheKey);
-    }
 }

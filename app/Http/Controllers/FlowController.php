@@ -26,22 +26,21 @@ class FlowController extends BaseController
             'request' => $request,
         ]);
 
-        try {
-            $flowService = $this->flowService->fetchFlows();
+        $service = $this->flowService->fetchFlows();
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($flowService)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Fluxos retornados.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
     public function show(Request $request, int $id): JsonResponse
@@ -50,22 +49,21 @@ class FlowController extends BaseController
             'request' => $request,
         ]);
 
-        try {
-            $flowService = $this->flowService->fetchFlow($id);
+        $service = $this->flowService->fetchFlow($id);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($flowService)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Fluxo retornado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
     public function store(Request $request): JsonResponse
@@ -86,28 +84,25 @@ class FlowController extends BaseController
         if ($data->fails()) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                code: 422
             );
         }
 
-        try {
-            $flowService = $this->flowService->create($data->validate());
+        $service = $this->flowService->create($data->validate());
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($flowService)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Fluxo criado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
     public function delete(int $id, Request $request): JsonResponse
@@ -116,46 +111,44 @@ class FlowController extends BaseController
             'request' => $request,
         ]);
 
-        try {
-            $flowService = $this->flowService->delete($id);
+        $service = $this->flowService->delete($id);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $flowService
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Fluxo deletado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
-    public function reset(int $id, Request $request): JsonResponse
+    public function resetSession(int $id, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
-        try {
-            $flowService = $this->flowService->resetFlowSession($id);
+        $service = $this->flowService->resetFlowSession($id);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $flowService
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Sessão do fluxo reiniciada.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
     public function update(int $id, Request $request): JsonResponse
@@ -176,27 +169,24 @@ class FlowController extends BaseController
         if ($data->fails()) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                code: 422
             );
         }
 
-        try {
-            $flowService = $this->flowService->update($id, $data->validate());
+        $service = $this->flowService->update($id, $data->validate());
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($flowService)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Fluxo atualizado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 }

@@ -1,11 +1,16 @@
 <?php
 
+use App\Http\Controllers\ServerSentEventController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\FlowController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+
+
+// Server Realtime Events
+Route::get('/server-events', [ServerSentEventController::class, 'stream']);
 
 // Auth Service
 Route::prefix('/auth')
@@ -43,7 +48,7 @@ Route::prefix('/flow')
         Route::put('/{id}', [FlowController::class, 'update']);
         Route::get('/{code}', [FlowController::class, 'show']);
         Route::delete('/{id}', [FlowController::class, 'delete']);
-        Route::delete('/{id}/reset', [FlowController::class, 'reset']);
+        Route::delete('/{id}/resetSession', [FlowController::class, 'resetSession']);
     });
 
 // Payment Gateway service

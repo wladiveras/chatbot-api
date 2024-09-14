@@ -27,9 +27,6 @@ class ExecuteFlow implements ShouldQueue
 
     protected $session;
 
-    /**
-     * Create a new job instance.
-     */
     public $tries = 1;
 
     public $maxExceptions = 1;
@@ -38,9 +35,7 @@ class ExecuteFlow implements ShouldQueue
     {
 
         $this->onQueue('flows');
-
         $this->payload = $payload;
-
         $this->connectionService = App::make(ConnectionService::class);
         $this->flowSessionRepository = App::make(FlowSessionRepository::class);
 
@@ -98,7 +93,7 @@ class ExecuteFlow implements ShouldQueue
         };
     }
 
-    protected function nextStep()
+    protected function nextStep(): mixed
     {
         return $this->flowSessionRepository->nextSessionStep(
             flow_id: $this->payload['connection']->flow_id,
@@ -108,7 +103,7 @@ class ExecuteFlow implements ShouldQueue
         );
     }
 
-    protected function waitingClientResponse(bool $isWaiting)
+    protected function waitingClientResponse(bool $isWaiting): mixed
     {
         return $this->flowSessionRepository->waitingClientResponse(
             flow_id: $this->payload['connection']->flow_id,
@@ -118,14 +113,14 @@ class ExecuteFlow implements ShouldQueue
         );
     }
 
-    protected function extractPlaceholders($messageText)
+    protected function extractPlaceholders($messageText): mixed
     {
         preg_match_all('/\{(\w+)\}/', $messageText, $matches);
 
         return $matches[1];
     }
 
-    protected function getSessionMetas($placeholders)
+    protected function getSessionMetas($placeholders): array
     {
         $sessionMetas = [];
 
@@ -143,7 +138,7 @@ class ExecuteFlow implements ShouldQueue
         return $sessionMetas;
     }
 
-    protected function replacePlaceholders($messageText, $sessionMetas)
+    protected function replacePlaceholders($messageText, $sessionMetas): mixed
     {
         return preg_replace_callback('/\{(\w+)\}/', function ($matches) use ($sessionMetas) {
             $key = $matches[1];
@@ -153,7 +148,7 @@ class ExecuteFlow implements ShouldQueue
     }
 
     // Commands
-    protected function commandDelay($command)
+    protected function commandDelay($command): mixed
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
         Log::channel('supervisor')->info($command);
@@ -163,7 +158,7 @@ class ExecuteFlow implements ShouldQueue
         return $this->nextStep();
     }
 
-    protected function commandMessage($command)
+    protected function commandMessage($command): mixed
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
         Log::channel('supervisor')->info($command);
@@ -201,7 +196,7 @@ class ExecuteFlow implements ShouldQueue
         return $this->nextStep();
     }
 
-    protected function commandInput($command)
+    protected function commandInput($command): mixed
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
         Log::channel('supervisor')->info($command);

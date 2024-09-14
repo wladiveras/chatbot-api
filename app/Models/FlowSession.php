@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FlowSession extends Model
 {
@@ -23,12 +24,12 @@ class FlowSession extends Model
         'session_end',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function flow()
+    public function flow(): BelongsTo
     {
         return $this->belongsTo(Flow::class);
     }

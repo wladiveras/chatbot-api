@@ -6,6 +6,8 @@ use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+
 
 class BaseRepository implements BaseRepositoryInterface
 {
@@ -81,6 +83,10 @@ class BaseRepository implements BaseRepositoryInterface
      */
     public function deleteCacheKey(string $cacheKey): bool
     {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => cacheKey', [
+            'cacheKey' => $cacheKey,
+        ]);
+
         if (!Cache::has($cacheKey)) {
             return false;
         }

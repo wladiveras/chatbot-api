@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\ResponseResource;
-use App\Http\Resources\ResponseCollection;
+
 use App\Enums\UserStatus;
 use App\Services\User\UserService;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +14,7 @@ use Validator;
 class UserController extends BaseController
 {
     private UserService $userService;
+
 
     public function __construct(UserService $userService)
     {
@@ -28,22 +27,21 @@ class UserController extends BaseController
             'request' => $request,
         ]);
 
-        try {
-            $users = $this->userService->findAllUsers();
+        $service = $this->userService->findAllUsers();
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($users),
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Usuários retornados.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
     public function store(Request $request): JsonResponse
@@ -61,28 +59,25 @@ class UserController extends BaseController
         if ($data->fails()) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                code: 422
             );
         }
 
-        try {
-            $user = $this->userService->createUser($data->validate());
+        $service = $this->userService->createUser($data->validate());
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($user)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Usuário criado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
 
     }
 
@@ -92,22 +87,22 @@ class UserController extends BaseController
             'request' => $request,
         ]);
 
-        try {
-            $user = $this->userService->findUser($id);
+        $service = $this->userService->findUser($id);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($user)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Usuário retornado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
+
     }
 
     public function update(Request $request, int $id): JsonResponse
@@ -118,36 +113,32 @@ class UserController extends BaseController
 
         $data = Validator::make($request->all(), [
             'name' => 'string|required|max:100|min:3',
-            'avatar' => 'string|url|max:254',
+            'avatar' => 'string|max:254',
             'status' => [Rule::enum(UserStatus::class)],
         ]);
 
         if ($data->fails()) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                code: 422
             );
         }
 
-        try {
-            $user = $this->userService->updateUser($id, $data->validate());
+        $service = $this->userService->updateUser($id, $data->validate());
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($user)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Usuário atualizado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
 
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
     public function destroy(int|string $id, Request $request): JsonResponse
@@ -156,21 +147,20 @@ class UserController extends BaseController
             'request' => $request,
         ]);
 
-        try {
-            $user = $this->userService->deleteUser($id);
+        $service = $this->userService->deleteUser($id);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $user
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Usuário deletado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 }

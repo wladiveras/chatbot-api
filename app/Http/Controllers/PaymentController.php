@@ -34,28 +34,25 @@ class PaymentController extends BaseController
         if ($data->fails()) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                code: 422
             );
         }
 
-        try {
-            $payment = $this->paymentService->gateway($gateway)->pay($data->validate());
+        $service = $this->paymentService->gateway($gateway)->pay($data->validate());
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($payment)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Redirecionando para o pagamento.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
     public function checkPayment(string $gateway, int|string $id, Request $request): JsonResponse
@@ -72,27 +69,24 @@ class PaymentController extends BaseController
         if ($data->fails()) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                code: 422
             );
         }
 
-        try {
-            $payment = $this->paymentService->gateway($gateway)->checkPayment($id);
+        $service = $this->paymentService->gateway($gateway)->checkPayment($id);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($payment)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Pagamento efetuado com sucesso!",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 }

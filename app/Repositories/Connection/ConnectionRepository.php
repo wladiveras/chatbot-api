@@ -24,7 +24,7 @@ class ConnectionRepository extends BaseRepository implements ConnectionRepositor
      */
     public function getUserConnections(): ?Collection
     {
-        $cacheKey = $this->getUserConnectionsCacheKey();
+        $cacheKey = $this->getUserConnectionsCacheKey($this->user->id);
 
         return Cache::remember($cacheKey, $this->cacheTime, function () {
             return $this->model
@@ -41,15 +41,11 @@ class ConnectionRepository extends BaseRepository implements ConnectionRepositor
      */
     public function getUserConnection(int|string $id): ?Connection
     {
-        $cacheKey = $this->getUserConnectionCacheKey($id);
-
-        return Cache::remember($cacheKey, $this->cacheTime, function () use ($id) {
-            return $this->model
-                ->auth()
-                ->where('id', $id)
-                ->orderBy('id', 'desc')
-                ->first();
-        });
+        return $this->model
+            ->auth()
+            ->where('id', $id)
+            ->orderBy('id', 'desc')
+            ->first();
     }
 
     /**
@@ -64,42 +60,17 @@ class ConnectionRepository extends BaseRepository implements ConnectionRepositor
             ]);
     }
 
-    //
-
-    private function getUserConnectionsCacheKey(): string
+    // Caches control
+    private function getUserConnectionsCacheKey(int $UserId): string
     {
-        return "user_connections_{$this->user->id}";
+        return "user_connections_{$UserId}";
     }
 
-    /**
-     * Delete the user flows cache key if it exists.
-     *
-     * @return bool True if the cache key was deleted, false otherwise.
-     */
-    public function deleteUserConnectionsCacheKey(): bool
+    public function deleteUserConnectionsCacheKey(int $userId): bool
     {
-        $cacheKey = $this->getUserConnectionsCacheKey();
+        $cacheKey = $this->getUserConnectionsCacheKey($userId);
 
         return $this->deleteCacheKey($cacheKey);
     }
 
-    /**
-     * Generate cache key for a specific user flow.
-     */
-    private function getUserConnectionCacheKey(int|string $id): string
-    {
-        return "user_{$this->user->id}_connection_{$id}";
-    }
-
-    /**
-     * Delete the user flow cache key if it exists.
-     *
-     * @return bool True if the cache key was deleted, false otherwise.
-     */
-    public function deleteUserConnectionCacheKey(int|string $id): bool
-    {
-        $cacheKey = $this->getUserConnectionCacheKey($id);
-
-        return $this->deleteCacheKey($cacheKey);
-    }
 }

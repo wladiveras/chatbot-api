@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\MessagesType;
-use App\Http\Resources\ResponseResource;
-use App\Http\Resources\ResponseCollection;
 use App\Services\Connection\ConnectionService;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -16,6 +13,7 @@ use Validator;
 
 class ConnectionController extends BaseController
 {
+
     private ConnectionService $connectionService;
 
     public function __construct(ConnectionService $connectionService)
@@ -29,22 +27,21 @@ class ConnectionController extends BaseController
             'request' => $request,
         ]);
 
-        try {
-            $connectionService = $this->connectionService->fetchConnections();
+        $service = $this->connectionService->fetchConnections();
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($connectionService)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Conexões retornadas.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
     public function show(int|string $id, Request $request): JsonResponse
@@ -53,27 +50,26 @@ class ConnectionController extends BaseController
             'request' => $request,
         ]);
 
-        try {
-            $connectionService = $this->connectionService->fetchConnection($id);
+        $service = $this->connectionService->fetchConnection($id);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $connectionService
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Conexão retornada.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
-    public function createConnection(string $provinder, Request $request): JsonResponse
+    public function createConnection(string $provider, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
+        Log::debug(message: __CLASS__ . '.' . __FUNCTION__ . ' => running', context: [
             'request' => $request,
         ]);
 
@@ -86,59 +82,56 @@ class ConnectionController extends BaseController
         if ($data->fails()) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                code: 422
             );
         }
 
-        try {
-            $connectionService = $this->connectionService->integration($provinder)->createConnection($data->validate());
+        $service = $this->connectionService->integration(provider: $provider)->createConnection($data->validate());
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $connectionService
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Conexão criada.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
-    public function connect(string $provinder, int|string $connection, Request $request): JsonResponse
+    public function connect(string $provider, int|string $connection, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
-        try {
-            $connectionService = $this->connectionService->integration($provinder)->connect($connection);
+        $service = $this->connectionService->integration(provider: $provider)->connect(connection: $connection);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($connectionService)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Conexão estabelecida.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
+
     }
 
-    public function selectFlow(int|string $provinder, int|string $connection_id, Request $request): JsonResponse
+    public function selectFlow(int|string $provider, int|string $connection_id, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
-            'provinder' => $provinder,
+            'provider' => $provider,
         ]);
 
         $data = Validator::make($request->all(), [
@@ -150,31 +143,28 @@ class ConnectionController extends BaseController
         if ($data->fails()) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                code: 422
             );
         }
 
-        try {
-            $connectionService = $this->connectionService->changeConnectionFlow($connection_id, $data->validate());
+        $service = $this->connectionService->changeConnectionFlow($connection_id, $data->validate());
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new $connectionService
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Fluxo selecionado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
-    public function profile(string $provinder, int|string $connection, Request $request): JsonResponse
+    public function profile(string $provider, int|string $connection, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
@@ -187,76 +177,71 @@ class ConnectionController extends BaseController
         if ($data->fails()) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                code: 422
             );
         }
 
-        try {
-            $connectionService = $this->connectionService->integration($provinder)->getConnectionProfile($connection, $data->validate());
+        $service = $this->connectionService->integration($provider)->getConnectionProfile($connection, $data->validate());
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($connectionService)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Whatsapp estabelecido.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
-    public function disconnect(string $provinder, int|string $connection, Request $request): JsonResponse
+    public function disconnect(string $provider, int|string $connection, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
-        try {
-            $connectionService = $this->connectionService->integration($provinder)->disconnect($connection);
+        $service = $this->connectionService->integration($provider)->disconnect($connection);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new ResponseResource($connectionService)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Conexão encerrada.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
-    public function delete(string $provinder, int|string $connection, Request $request): JsonResponse
+    public function delete(string $provider, int|string $connection, Request $request): JsonResponse
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
-        try {
-            $connectionService = $this->connectionService->integration($provinder)->delete($connection);
+        $service = $this->connectionService->integration($provider)->delete($connection);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $connectionService
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Conexão deletada.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
     public function sendMessage(string $provider, Request $request): JsonResponse
@@ -277,31 +262,28 @@ class ConnectionController extends BaseController
         if ($data->fails()) {
             return $this->error(
                 path: __CLASS__ . '.' . __FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                code: 422
             );
         }
 
-        try {
-            $connectionService = $this->connectionService->integration($provider)->send($data->validate());
+        $service = $this->connectionService->integration($provider)->send($data->validate());
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $connectionService
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Mensagem enviada.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
-    public function callback(string $provider, Request $request)
+    public function callback(string $provider, Request $request): JsonResponse
     {
         $request = $request->all();
         $event = Arr::get($request, 'data.event', Arr::get($request, 'event'));
@@ -312,21 +294,21 @@ class ConnectionController extends BaseController
             ]);
         }
 
-        try {
-            $connectionService = $this->connectionService->integration($provider)->callback($request);
+        $service = $this->connectionService->integration($provider)->callback($request);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $connectionService
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request,
-                code: $exception->getCode()
+                title: "Callback recebido.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
+
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Connection\Provinder;
+namespace App\Services\Connection\Provider;
 
 use App\Repositories\Connection\ConnectionProfileRepository;
 use App\Repositories\Connection\ConnectionRepository;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class WhatsappProvinder extends BaseService implements ConnectionServiceInterface
+class WhatsappProvider extends BaseService implements ConnectionServiceInterface
 {
     private mixed $url;
 
@@ -139,8 +139,6 @@ class WhatsappProvinder extends BaseService implements ConnectionServiceInterfac
                 ],
             ];
 
-            $this->connectionRepository->deleteUserConnectionsCacheKey();
-
             $payload = (object) array_merge((array) $createConnection, $qrcode);
 
             return $this->success(message: 'Nova conexão criada com sucesso.', payload: $payload);
@@ -196,7 +194,7 @@ class WhatsappProvinder extends BaseService implements ConnectionServiceInterfac
         $endpoint = match ($data['type']) {
             'text', 'link' => 'sendText',
             'audio' => 'sendWhatsAppAudio',
-            'image', 'video', 'sendMedia' => 'sendMedia',
+            'image', 'video', 'media_audio' => 'sendMedia',
             'list' => 'sendList',
             'pool' => 'sendPoll',
             'status' => 'sendStatus',
@@ -337,7 +335,7 @@ class WhatsappProvinder extends BaseService implements ConnectionServiceInterfac
 
                     $this->connectionProfileRepository->createOrUpdateProfile($payload);
 
-                    return $this->success(message: 'Perfil retornado com sucesso.', payload: $response);
+                    return $this->success(message: 'Seu perfil foi atualizado e sincronizado com whatsapp', payload: $response);
                 }
             }
 
@@ -392,8 +390,6 @@ class WhatsappProvinder extends BaseService implements ConnectionServiceInterfac
             $response = $this->request->delete("{$this->url}/instance/delete/{$connection}");
 
             $this->connectionRepository->delete(column: 'token', value: $connection);
-
-            $this->connectionRepository->deleteUserConnectionsCacheKey();
 
             return $this->success(message: 'Conexão deletada com sucesso.', payload: $response->json());
 

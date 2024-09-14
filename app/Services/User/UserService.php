@@ -16,22 +16,22 @@ class UserService extends BaseService implements UserServiceInterface
         $this->userRepository = App::make(UserRepository::class);
     }
 
-    public function findAllUsers()
+    public function findAllUsers(): object
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-            $users = $this->userRepository->paginate(10);
+            $repository = $this->userRepository->paginate(10);
 
-            if (!$users) {
+            if (!$repository) {
                 return $this->error(
                     path: __CLASS__ . '.' . __FUNCTION__,
-                    message: 'Usuários não identificados.',
-                    code: 400
+                    message: 'Usuários não encontrados.',
+                    code: 404
                 );
             }
 
-            return $this->success(message: 'Usuário retornado com sucesso.', payload: $users);
+            return $this->success(message: 'Usuário retornado com sucesso.', payload: $repository);
 
         } catch (\Exception $e) {
             return $this->error(
@@ -42,22 +42,22 @@ class UserService extends BaseService implements UserServiceInterface
         }
     }
 
-    public function findUser(int $id)
+    public function findUser(int $id): object
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-            $user = $this->userRepository->find($id);
+            $repository = $this->userRepository->find($id);
 
-            if (!$user) {
+            if (!$repository) {
                 return $this->error(
                     path: __CLASS__ . '.' . __FUNCTION__,
-                    message: 'Usuários não identificados..',
-                    code: 400
+                    message: 'Usuário não encontrado.',
+                    code: 404
                 );
             }
 
-            return $this->success(message: 'Usuário retornado com sucesso.');
+            return $this->success(message: 'Usuário retornado com sucesso.', payload: $repository);
 
         } catch (\Exception $e) {
             return $this->error(
@@ -68,22 +68,22 @@ class UserService extends BaseService implements UserServiceInterface
         }
     }
 
-    public function createUser(array $data)
+    public function createUser(array $data): object
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-            $newUser = $this->userRepository->create($data);
+            $repository = $this->userRepository->create($data);
 
-            if (!$newUser) {
+            if (!$repository) {
                 return $this->error(
                     path: __CLASS__ . '.' . __FUNCTION__,
-                    message: 'Não foi possivel criar o usuário.',
-                    code: 400
+                    message: 'Falha ao criar o usuário.',
+                    code: 500
                 );
             }
 
-            return $this->success(message: 'Usuário criado com sucesso.');
+            return $this->success(message: 'Usuário criado com sucesso.', payload: $repository);
 
         } catch (\Exception $e) {
             return $this->error(
@@ -95,22 +95,22 @@ class UserService extends BaseService implements UserServiceInterface
 
     }
 
-    public function updateUser(int $id, array $data)
+    public function updateUser(int $id, array $data): object
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-            $updatedUser = $this->userRepository->update($id, $data);
+            $repository = $this->userRepository->update($id, $data);
 
-            if (!$updatedUser) {
+            if (!$repository) {
                 return $this->error(
                     path: __CLASS__ . '.' . __FUNCTION__,
-                    message: 'Não foi possivel atualizar o usuário.',
-                    code: 400
+                    message: 'Falha ao atualizar o usuário. Usuário não encontrado.',
+                    code: 404
                 );
             }
 
-            return $this->success(message: 'Usuário atualizado com sucesso.');
+            return $this->success(message: 'Seus dados foram atualizados.', payload: $repository);
 
         } catch (\Exception $e) {
             return $this->error(
@@ -121,22 +121,22 @@ class UserService extends BaseService implements UserServiceInterface
         }
     }
 
-    public function deleteUser(int $id): array
+    public function deleteUser(int $id): object
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-            $deleteUser = $this->userRepository->delete($id);
+            $repository = $this->userRepository->delete($id);
 
-            if (!$deleteUser) {
+            if (!$repository) {
                 return $this->error(
                     path: __CLASS__ . '.' . __FUNCTION__,
-                    message: 'Não foi possivel deletar o usuário.',
-                    code: 400
+                    message: 'Falha ao deletar o usuário. Usuário não encontrado.',
+                    code: 404
                 );
             }
 
-            return $this->success(message: 'Usuário deletado com sucesso.');
+            return $this->success(message: 'Usuário deletado com sucesso.', payload: $repository);
 
         } catch (\Exception $e) {
             return $this->error(

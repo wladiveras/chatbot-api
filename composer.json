@@ -12,6 +12,7 @@
         "aws/aws-sdk-php": "^3.320",
         "laravel/framework": "^11.9",
         "laravel/horizon": "^5.27",
+        "laravel/octane": "^2.5",
         "laravel/pail": "^1.1",
         "laravel/prompts": "^0.1.24",
         "laravel/pulse": "^1.2",
@@ -51,7 +52,6 @@
         }
     },
     "scripts": {
-        "start-queue": "@php artisan queue:work --queue=default,flows",
         "phpstan": [
             "./vendor/bin/phpstan analyse"
         ],
@@ -72,7 +72,8 @@
         ]
     },
     "scripts-descriptions": {
-        "start-queue": "Start the queue worker for the default and flows queues.",
+        "jobs-production": "Start workers to run jobs and events local.",
+        "jobs-local": "Start workers to run jobs and events local.",
         "phpstan": "Run PHPStan static analysis against your application."
     },
     "extra": {

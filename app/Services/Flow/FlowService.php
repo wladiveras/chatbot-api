@@ -170,6 +170,7 @@ class FlowService extends BaseService implements FlowServiceInterface
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
+
             $deleteFlow = $this->flowRepository->delete($id);
 
             if (!$deleteFlow) {
@@ -179,8 +180,6 @@ class FlowService extends BaseService implements FlowServiceInterface
                     code: 400
                 );
             }
-
-            $this->flowRepository->deleteUserFlowsCacheKey();
 
             return $this->success(message: 'Fluxo deletado com sucesso.', payload: $deleteFlow);
 
@@ -208,13 +207,11 @@ class FlowService extends BaseService implements FlowServiceInterface
 
     private function createFlow(array $payload): ?Flow
     {
-        $this->flowRepository->deleteUserFlowsCacheKey();
         return $this->flowRepository->create($payload);
     }
 
     private function updateFlow(int $id, array $payload): ?Flow
     {
-        $this->flowRepository->deleteUserFlowCacheKey($id);
         return $this->flowRepository->update($id, $payload);
     }
 
@@ -262,8 +259,8 @@ class FlowService extends BaseService implements FlowServiceInterface
             $nextCommands = $this->getNextCommands($commands, $step);
 
             if (!$this->session->is_running) {
-                $this->session->is_running = true;
-                $this->session->save();
+                // $this->session->is_running = true;
+                // $this->session->save();
 
                 $jobs = $this->createJobs($nextCommands, $text, $step);
 
@@ -355,9 +352,28 @@ class FlowService extends BaseService implements FlowServiceInterface
         return $filteredCommands;
     }
 
-    public function resetFlowSession($flow_id): bool
+    public function resetFlowSession($flow_id): object
     {
-        return $this->flowSessionRepository->resetFlowSession($flow_id);
+        try {
+            $resetFlowSession = $this->flowSessionRepository->resetFlowSession($flow_id);
+
+            if (!$resetFlowSession) {
+                return $this->error(
+                    path: __CLASS__ . '.' . __FUNCTION__,
+                    message: 'Não foi possivel reiniciar a automação.',
+                    code: 400
+                );
+            }
+
+            return $this->success(message: 'Automação reiniciada com sucesso.', payload: $resetFlowSession);
+
+        } catch (\Exception $exception) {
+            return $this->error(
+                path: __CLASS__ . '.' . __FUNCTION__,
+                message: $exception->getMessage(),
+                code: 400
+            );
+        }
     }
 
     private function createJobs($nextCommands, $text, $step): array
@@ -369,13 +385,17 @@ class FlowService extends BaseService implements FlowServiceInterface
                 break;
             }
 
-            $jobs[] = new ExecuteFlow([
-                'connection' => $this->connection,
-                'session' => $this->session,
-                'text' => $command['action'] === 'input' && $this->session->is_waiting ? $text : "",
-                'command' => $command,
-                'steps' => $step,
-            ]);
+            $jobs[] = new RunningFlow(session: $this->session, isRunning: 1);
+
+            $jobs[] = new ExecuteFlow(
+                payload: [
+                    'connection' => $this->connection,
+                    'session' => $this->session,
+                    'text' => $command['action'] === 'input' && $this->session->is_waiting ? $text : "",
+                    'command' => $command,
+                    'steps' => $step,
+                ]
+            );
 
             if ($command['action'] === 'input' && !$this->session->is_waiting) {
                 break;
@@ -384,7 +404,7 @@ class FlowService extends BaseService implements FlowServiceInterface
             }
         }
 
-        $jobs[] = new RunningFlow($this->session, 0);
+        $jobs[] = new RunningFlow(session: $this->session, isRunning: 0);
 
         return $jobs;
     }
