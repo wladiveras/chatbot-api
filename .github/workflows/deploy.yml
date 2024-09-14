@@ -3,8 +3,8 @@ name: Deploy Project
 on:
   push:
     branches:
-      - Production
-      - Staging
+      - production
+      - staging
 jobs:
   deploy:
     name: Deploy project with Nginx
