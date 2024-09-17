@@ -2,19 +2,44 @@
 
 namespace App\Repositories;
 
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+
 interface BaseRepositoryInterface
 {
-    public function all(): array|object;
+    /**
+     * Get all records.
+     */
+    public function all(): Collection;
 
-    public function paginate(int $limitPerPage): array|object;
+    /**
+     * Paginate records.
+     */
+    public function paginate(int $limitPerPage): CursorPaginator;
 
-    public function find(mixed $value, $column = 'id'): array|object|null;
+    /**
+     * Find a record by a specific column.
+     */
+    public function find(mixed $value, string $column = 'id'): ?Model;
 
-    public function first(mixed $value, $column = 'id'): array|object|null;
+    /**
+     * Create a new record.
+     */
+    public function create(array $data): Model;
 
-    public function create(array $data): array|object;
+    /**
+     * Update a record by a specific column.
+     */
+    public function update(mixed $value, array $data, string $column = 'id'): ?Model;
 
-    public function update(mixed $value, array $data, $column = 'id'): array|object|null;
+    /**
+     * Delete a record by a specific column.
+     */
+    public function delete(mixed $value, string $column = 'id'): bool;
 
-    public function delete(mixed $value, $column = 'id'): bool;
+    /**
+     * Check if a record exists by a specific column.
+     */
+    public function exists(mixed $value, string $column = 'id'): bool;
 }

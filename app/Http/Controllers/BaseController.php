@@ -2,50 +2,67 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller as Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-class BaseController extends Controller
+class BaseController
 {
-    public function success(?string $response, mixed $service): JsonResponse
+    /**
+     * Handle a successful response.
+     *
+     * @param string|null $title
+     * @param string|null $message
+     * @param array|object|string $payload
+     * @return JsonResponse
+     */
+    public function success(?string $title, ?string $message, array|object|string $payload): JsonResponse
     {
-        if ($service) {
-            Log::debug(__CLASS__.'.'.__FUNCTION__.' => success', [
+        if ($payload) {
+            Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => success', [
                 'success' => true,
-                'response' => $response,
-                'service' => $service,
+                'service' => $payload,
             ]);
         }
 
-        $response = [
+        return response()->json([
             'data' => [
                 'success' => true,
-                'response' => $response,
-                'service' => $service,
+                'title' => $title,
+                'message' => $message,
+                'service' => $payload,
             ],
-        ];
-
-        return response()->json($response, 200);
+        ], 200);
     }
 
-    public function error(string $path, ?string $response, $service, string|int|null $code = 404): JsonResponse
+    /**
+     * Handle an error response.
+     *
+     * @param string $path
+     * @param string|null $title
+     * @param string|null $message
+     * @param string|int|null $code
+     * @return JsonResponse
+     */
+    public function error(string $path, ?string $title = null, ?string $message = null, string|int|null $code = JsonResponse::HTTP_NOT_FOUND): JsonResponse
     {
-        Log::error(__CLASS__.'.'.__FUNCTION__.' => error', [
+        $defaultMessage = "Os dados fornecidos são inválidos. Por favor, verifique e tente novamente.";
+        $title ??= "Erro ao processar a requisição";
+        $message ??= $defaultMessage;
+
+        Log::error(__CLASS__ . '.' . __FUNCTION__ . ' => error', [
             'success' => false,
-            'response' => $response,
-            'service' => $service,
+            'title' => $title,
+            'message' => $message,
             'path' => $path,
         ]);
 
-        $response = [
+        return response()->json([
             'data' => [
                 'success' => false,
-                'response' => $response,
-                'service' => $service,
+                'title' => $title,
+                'message' => $message,
+                'service' => [],
             ],
-        ];
-
-        return response()->json($response, ($code == 0) ? 500 : $code);
+        ], $code == 0 ? 500 : $code);
     }
 }

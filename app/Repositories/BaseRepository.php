@@ -2,7 +2,12 @@
 
 namespace App\Repositories;
 
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+
 
 class BaseRepository implements BaseRepositoryInterface
 {
@@ -10,44 +15,84 @@ class BaseRepository implements BaseRepositoryInterface
     {
     }
 
-    public function all(): array|object
+    /**
+     * Get all records.
+     */
+    public function all(): Collection
     {
         return $this->model->all();
     }
 
-    public function paginate(int $limitPerPage): array|object
+    /**
+     * Paginate records.
+     */
+    public function paginate(int $limitPerPage): CursorPaginator
     {
         return $this->model->cursorPaginate($limitPerPage);
     }
 
-    public function find(mixed $value, $column = 'id'): array|object|null
+    /**
+     * Find a record by a specific column.
+     */
+    public function find(mixed $value, string $column = 'id'): ?Model
     {
         return $this->model->where($column, $value)->first();
     }
 
-    public function first(mixed $value, $column = 'id'): array|object|null
-    {
-        return $this->model->where($column, $value)->first();
-    }
-
-    public function create(array $data): array|object
+    /**
+     * Create a new record.
+     */
+    public function create(array $data): Model
     {
         return $this->model->create($data);
     }
 
-    public function update(mixed $value, array $data, $column = 'id'): array|object|null
+    /**
+     * Update a record by a specific column.
+     */
+    public function update(mixed $value, array $data, string $column = 'id'): ?Model
     {
-        return tap($this->model->where($column, $value))->update($data)->first();
+        $record = $this->model->where($column, $value)->first();
+        if ($record) {
+            $record->update($data);
+        }
+
+        return $record;
     }
 
-    public function delete(mixed $value, $column = 'id'): bool
+    /**
+     * Delete a record by a specific column.
+     */
+    public function delete(mixed $value, string $column = 'id'): bool
     {
         return (bool) $this->model->where($column, $value)->delete();
     }
 
-    public function exists(mixed $value, $column = 'id'): bool
+    /**
+     * Check if a record exists by a specific column.
+     */
+    public function exists(mixed $value, string $column = 'id'): bool
     {
+        return $this->model->where($column, $value)->exists();
+    }
 
-        return (bool) $this->model->where($column, $value)->exists();
+    /**
+     * Delete a cache key if it exists.
+     *
+     * @return bool True if the cache key was deleted, false otherwise.
+     */
+    public function deleteCacheKey(string $cacheKey): bool
+    {
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => cacheKey', [
+            'cacheKey' => $cacheKey,
+        ]);
+
+        if (!Cache::has($cacheKey)) {
+            return false;
+        }
+
+        Cache::forget($cacheKey);
+
+        return true;
     }
 }

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Services\Messenger\Provinder;
+namespace App\Services\Connection\Provider;
 
 use App\Repositories\Connection\ConnectionProfileRepository;
 use App\Repositories\Connection\ConnectionRepository;
 use App\Repositories\Message\MessageRepository;
 use App\Services\BaseService;
+use App\Services\Connection\ConnectionServiceInterface;
 use App\Services\Flow\FlowService;
-use App\Services\Messenger\MessengerServiceInterface;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class WhatsappProvinder extends BaseService implements MessengerServiceInterface
+class WhatsappProvider extends BaseService implements ConnectionServiceInterface
 {
     private mixed $url;
 
@@ -77,7 +77,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             if ($this->connectionRepository->exists(column: 'connection_key', value: $number)) {
                 return $this->error(
                     path: __CLASS__ . '.' . __FUNCTION__,
-                    message: 'Limite máximo de conexões atingindo.',
+                    message: 'Nao foi possivel criar uma nova conexão.',
                     code: 400
                 );
             }
@@ -192,11 +192,9 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         $payload = $this->parse($data);
 
         $endpoint = match ($data['type']) {
-            'text' => 'sendText',
+            'text', 'link' => 'sendText',
             'audio' => 'sendWhatsAppAudio',
-            'image' => 'sendMedia',
-            'video' => 'sendMedia',
-            'media_audio' => 'sendMedia',
+            'image', 'video', 'media_audio' => 'sendMedia',
             'list' => 'sendList',
             'pool' => 'sendPoll',
             'status' => 'sendStatus',
@@ -204,7 +202,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         };
 
         try {
-            $connection = $this->connectionRepository->first(column: 'token', value: $data['connection']);
+            $connection = $this->connectionRepository->find(column: 'token', value: $data['connection']);
             $this->connectionExists($connection);
 
             $response = $this->request->post("{$this->url}/message/{$endpoint}/{$data['connection']}", $payload);
@@ -242,7 +240,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
         $options = [];
         $message = [];
-        $delay = $data['delay'] ? ($data['delay'] * 1000) : 1000;
+        $delay = $data['delay'] ? ($data['delay'] * 1000) : 0;
 
         // Default options
         if ($data['type'] !== 'status') {
@@ -250,6 +248,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
                 'number' => $data['number'],
                 'options' => [
                     'delay' => $delay,
+                    'linkPreview' => true,
                     'presence' => $data['type'] === 'audio' ? 'recording' : 'composing',
                 ],
             ];
@@ -257,76 +256,26 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
         // Media files
         if (in_array($data['type'], ['video', 'image', 'media_audio'])) {
+
             $message = [
-                'mediaMessage' => [
-                    'mediatype' => $data['type'] === 'media_audio' ? 'audio' : $data['type'],
-                    'caption' => $data['caption'] ?? '',
-                    'media' => $data['value'],
-                ],
+                "number" => $data['number'],
+                "mediatype" => $data['type'] === 'media_audio' ? 'audio' : $data['type'],
+                "media" => $data['value'],
+                "delay" => $delay,
+                "caption" => $data['caption'],
             ];
         }
 
-        // A list message
-        if ($data['type'] === 'list') {
+        // Text message and link
+        if ($data['type'] === 'text' || $data['type'] === 'link') {
+            $data['type'] = 'text';
             $message = [
-                'listMessage' => [
-                    'title' => 'Title',
-                    'description' => 'Description',
-                    'buttonText' => 'Button',
-                    'footerText' => 'Footer',
-                    'sections' => [
-                        [
-                            'rows' => [
-                                [
-                                    'title' => 'row title',
-                                    'description' => 'row description',
-                                    'rowId' => '21515020',
-                                ],
-                            ],
-                            'title' => 'Section Title',
-                        ],
-                    ],
-                ],
-            ];
-        }
 
-        // Post a status
-        if ($data['type'] === 'status') {
-            $message = [
-                'statusMessage' => [
-                    'type' => 'text',
-                    'content' => 'Hi, how are you 2today?',
-                    'backgroundColor' => '#008000',
-                    'font' => 1,
-                    'allContacts' => true,
-                    'statusJidList' => [
-                        '5521969098986@s.whatsapp.net',
-                    ],
-                ],
-            ];
-        }
+                "number" => $data['number'],
+                "text" => $data['value'],
+                "delay" => $delay,
+                "linkPreview" => true
 
-        // Create a quiz message
-        if ($data['type'] === 'pool') {
-            $message = [
-                'pollMessage' => [
-                    'name' => 'Title',
-                    'selectableCount' => 2,
-                    'values' => [
-                        'option 1',
-                        'option 2',
-                        'option 3',
-                    ],
-                ],
-            ];
-        }
-
-        // Text message
-        if ($data['type'] === 'text') {
-            $message = [
-                'textMessage' => [
-                    'text' => $data['value'],
-                ],
             ];
         }
 
@@ -334,6 +283,9 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         if ($data['type'] === 'audio') {
             $message = [
                 'audioMessage' => [
+                    "number" => $data['number'],
+                    "encoding" => true,
+                    "delay" > $delay,
                     'audio' => $data['value'],
                 ],
             ];
@@ -361,7 +313,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
                     'number' => $data['number'],
                 ]);
 
-                $connection = $this->connectionRepository->first(column: 'token', value: $connection);
+                $connection = $this->connectionRepository->find(column: 'token', value: $connection);
 
                 if ($response->successful()) {
                     $response = $response->json();
@@ -383,36 +335,7 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
 
                     $this->connectionProfileRepository->createOrUpdateProfile($payload);
 
-                    return $this->success(message: 'Perfil retornado com sucesso.', payload: $response);
-                }
-            }
-
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                message: 'Não foi possivel retornar essa conexão.',
-                code: 400
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__ . '.' . __FUNCTION__,
-                message: $exception->getMessage(),
-                code: 400
-            );
-        }
-    }
-
-    public function status(string|int $connection): array|object
-    {
-        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
-
-        try {
-            if ($this->isConnectionActive(connection: $connection, active: 0)) {
-
-                $response = $this->request->delete("{$this->url}/instance/connectionState/{$connection}");
-
-                if ($response->successful()) {
-                    return $this->success(message: 'Status da conexão retornado com sucesso.', payload: $response->json());
+                    return $this->success(message: 'Seu perfil foi atualizado e sincronizado com whatsapp', payload: $response);
                 }
             }
 
@@ -464,9 +387,11 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
+            $user = auth()->user();
             $response = $this->request->delete("{$this->url}/instance/delete/{$connection}");
 
             $this->connectionRepository->delete(column: 'token', value: $connection);
+            $this->connectionRepository->deleteUserConnectionsCacheKey($user->id);
 
             return $this->success(message: 'Conexão deletada com sucesso.', payload: $response->json());
 
@@ -524,11 +449,11 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
             $connection = Arr::get($data, 'instance');
             $FromOwner = Arr::get($data, 'data.key.fromMe');
 
-            $connection = $this->connectionRepository->first(column: 'token', value: $connection);
+            $connection = $this->connectionRepository->find(column: 'token', value: $connection);
 
             $this->connectionExists($connection);
 
-            $origin = $FromOwner ? 'owner' : 'client';
+            $origin = $FromOwner ? 'owner' : 'user';
 
             $createMessage = $this->createMessage(
                 flowId: $connection->flow_id,
@@ -556,11 +481,11 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         }
     }
 
-    private function createMessage(string|int|null $flowId, string|int|null $connectionId, $data, $payload = [], $origin = 'system'): array|object
+    private function createMessage(?int $flowId, ?int $connectionId, $data, $payload = [], $origin = 'system'): array|object
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
-        if ($payload) {
+        if (empty($payload)) {
             $payload = $data;
         }
 
@@ -568,9 +493,8 @@ class WhatsappProvinder extends BaseService implements MessengerServiceInterface
         $text = Arr::get($data, 'data.message.extendedTextMessage.text', Arr::get($data, 'data.message.conversation', 'Entendi...'));
 
         $message = match ($origin) {
-            'client' => $text,
-            'owner' => $text,
-            default => $data['value'],
+            'user', 'owner' => $text,
+            default => Arr::get($data, 'value', ''),
         };
 
         $createMessage = $this->messageRepository->create([

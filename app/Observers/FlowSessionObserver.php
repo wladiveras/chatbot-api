@@ -19,7 +19,7 @@ class FlowSessionObserver
      */
     public function updated(FlowSession $flowSession): void
     {
-        //
+
     }
 
     /**

@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FlowSessionMetas extends Model
 {
@@ -19,8 +21,14 @@ class FlowSessionMetas extends Model
         'type',
     ];
 
-    public function flowSession()
+    public function scopeAuth(Builder $query): Builder
+    {
+        return $query->where('user_id', auth()->id());
+    }
+
+    public function flowSession(): BelongsTo
     {
         return $this->belongsTo(FlowSession::class);
     }
+
 }

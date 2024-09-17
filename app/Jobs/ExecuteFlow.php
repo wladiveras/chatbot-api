@@ -3,8 +3,7 @@
 namespace App\Jobs;
 
 use App\Repositories\FlowSession\FlowSessionRepository;
-use App\Services\Messenger\MessengerService;
-use Carbon\Carbon;
+use App\Services\Connection\ConnectionService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,8 +12,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 class ExecuteFlow implements ShouldQueue
 {
@@ -22,25 +21,22 @@ class ExecuteFlow implements ShouldQueue
 
     protected $payload;
 
-    protected $messengerService;
+    protected $connectionService;
 
     protected $flowSessionRepository;
 
     protected $session;
 
-    /**
-     * Create a new job instance.
-     */
     public $tries = 1;
+
     public $maxExceptions = 1;
+
     public function __construct($payload)
     {
 
         $this->onQueue('flows');
-
         $this->payload = $payload;
-
-        $this->messengerService = App::make(MessengerService::class);
+        $this->connectionService = App::make(ConnectionService::class);
         $this->flowSessionRepository = App::make(FlowSessionRepository::class);
 
         $this->session = $this->flowSessionRepository->fetchClientSession(
@@ -97,7 +93,7 @@ class ExecuteFlow implements ShouldQueue
         };
     }
 
-    protected function nextStep()
+    protected function nextStep(): mixed
     {
         return $this->flowSessionRepository->nextSessionStep(
             flow_id: $this->payload['connection']->flow_id,
@@ -107,7 +103,7 @@ class ExecuteFlow implements ShouldQueue
         );
     }
 
-    protected function waitingClientResponse(bool $isWaiting)
+    protected function waitingClientResponse(bool $isWaiting): mixed
     {
         return $this->flowSessionRepository->waitingClientResponse(
             flow_id: $this->payload['connection']->flow_id,
@@ -117,14 +113,14 @@ class ExecuteFlow implements ShouldQueue
         );
     }
 
-    protected function extractPlaceholders($messageText)
+    protected function extractPlaceholders($messageText): mixed
     {
         preg_match_all('/\{(\w+)\}/', $messageText, $matches);
 
         return $matches[1];
     }
 
-    protected function getSessionMetas($placeholders)
+    protected function getSessionMetas($placeholders): array
     {
         $sessionMetas = [];
 
@@ -142,7 +138,7 @@ class ExecuteFlow implements ShouldQueue
         return $sessionMetas;
     }
 
-    protected function replacePlaceholders($messageText, $sessionMetas)
+    protected function replacePlaceholders($messageText, $sessionMetas): mixed
     {
         return preg_replace_callback('/\{(\w+)\}/', function ($matches) use ($sessionMetas) {
             $key = $matches[1];
@@ -151,9 +147,8 @@ class ExecuteFlow implements ShouldQueue
         }, $messageText);
     }
 
-
     // Commands
-    protected function commandDelay($command)
+    protected function commandDelay($command): mixed
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
         Log::channel('supervisor')->info($command);
@@ -163,7 +158,7 @@ class ExecuteFlow implements ShouldQueue
         return $this->nextStep();
     }
 
-    protected function commandMessage($command)
+    protected function commandMessage($command): mixed
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
         Log::channel('supervisor')->info($command);
@@ -180,15 +175,12 @@ class ExecuteFlow implements ShouldQueue
 
         if (in_array($commandType, ['video', 'image', 'audio', 'media_audio'])) {
             $url = Config::get('app.storage_url');
-
-            if (App::environment('local')) {
-                $directory = ($commandType === 'media_audio') ? 'audios' : "{$commandType}s";
-                $messageText = "{$url}/{$directory}/{$messageText}";
-            } else {
-                $messageText = "{$url}/{$messageText}";
-            }
+            $messageText = "{$url}/{$messageText}";
         }
 
+        if (in_array($commandType, ['link'])) {
+            $commandType = 'text';
+        }
 
         $message = [
             'connection' => Arr::get($command, 'token', null),
@@ -196,15 +188,15 @@ class ExecuteFlow implements ShouldQueue
             'delay' => Arr::get($command, 'command.delay', 1),
             'type' => $commandType ?? null, // text, audio, video, image, media_audio, list, pool, status
             'value' => $messageText ?? null,
-            'caption' => Arr::get($command, 'command.caption', null)
+            'caption' => Arr::get($command, 'command.caption', null),
         ];
 
-        $this->messengerService->integration('whatsapp')->send($message);
+        $this->connectionService->integration('whatsapp')->send($message);
 
         return $this->nextStep();
     }
 
-    protected function commandInput($command)
+    protected function commandInput($command): mixed
     {
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
         Log::channel('supervisor')->info($command);
@@ -212,7 +204,7 @@ class ExecuteFlow implements ShouldQueue
         $name = Arr::get($command, 'command.name', null);
         $type = Arr::get($command, 'command.type', 'input');
 
-        if ($name === "finished") {
+        if ($name === 'finished') {
             return $this->nextStep();
         }
 
@@ -225,6 +217,7 @@ class ExecuteFlow implements ShouldQueue
             );
 
             $this->waitingClientResponse(false);
+
             return $this->nextStep();
         }
 

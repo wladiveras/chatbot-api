@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\PaymentResource;
+use App\Http\Resources\ResponseResource;
+use App\Http\Resources\ResponseCollection;
 use App\Services\Payment\PaymentService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -21,7 +22,7 @@ class PaymentController extends BaseController
 
     public function pay(string $gateway, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -32,34 +33,31 @@ class PaymentController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                path: __CLASS__ . '.' . __FUNCTION__,
+                code: 422
             );
         }
 
-        try {
-            $payment = $this->paymentService->gateway($gateway)->pay($data->validate());
+        $service = $this->paymentService->gateway($gateway)->pay($data->validate());
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new PaymentResource($payment)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Redirecionando para o pagamento.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
     public function checkPayment(string $gateway, int|string $id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -70,28 +68,25 @@ class PaymentController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                path: __CLASS__ . '.' . __FUNCTION__,
+                code: 422
             );
         }
 
-        try {
-            $payment = $this->paymentService->gateway($gateway)->checkPayment($id);
+        $service = $this->paymentService->gateway($gateway)->checkPayment($id);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new PaymentResource($payment)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Pagamento efetuado com sucesso!",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 }

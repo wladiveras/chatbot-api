@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Enums\UserStatus;
-use App\Http\Resources\UserResource;
 use App\Services\User\UserService;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +15,7 @@ class UserController extends BaseController
 {
     private UserService $userService;
 
+
     public function __construct(UserService $userService)
     {
         $this->userService = $userService;
@@ -23,31 +23,30 @@ class UserController extends BaseController
 
     public function index(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
-        try {
-            $users = $this->userService->findAllUsers();
+        $service = $this->userService->findAllUsers();
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $users,
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Usuários retornados.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
     public function store(Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
@@ -59,117 +58,109 @@ class UserController extends BaseController
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                path: __CLASS__ . '.' . __FUNCTION__,
+                code: 422
             );
         }
 
-        try {
-            $user = $this->userService->createUser($data->validate());
+        $service = $this->userService->createUser($data->validate());
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new UserResource($user)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Usuário criado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
 
     }
 
     public function show(int|string $id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
-        try {
-            $user = $this->userService->findUser($id);
+        $service = $this->userService->findUser($id);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new UserResource($user)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Usuário retornado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
+
     }
 
-    public function update(Request $request, int|string $id): JsonResponse
+    public function update(Request $request, int $id): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
         $data = Validator::make($request->all(), [
-            'name' => 'nullable|string|required|max:100|min:3',
-            'email' => 'nullable|string|email|max:254',
-            'status' => ['nullable', Rule::enum(UserStatus::class)],
+            'name' => 'string|required|max:100|min:3',
+            'avatar' => 'string|max:254',
+            'status' => [Rule::enum(UserStatus::class)],
         ]);
 
         if ($data->fails()) {
             return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                response: Carbon::now()->toDateTimeString(),
-                service: $data->errors(),
-                code: 400
+                path: __CLASS__ . '.' . __FUNCTION__,
+                code: 422
             );
         }
 
-        try {
-            $user = $this->userService->updateUser($id, $data->validate());
+        $service = $this->userService->updateUser($id, $data->validate());
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: new UserResource($user)
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Usuário atualizado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
 
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 
     public function destroy(int|string $id, Request $request): JsonResponse
     {
-        Log::debug(__CLASS__.'.'.__FUNCTION__.' => running', [
+        Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running', [
             'request' => $request,
         ]);
 
-        try {
-            $user = $this->userService->deleteUser($id);
+        $service = $this->userService->deleteUser($id);
 
+        if ($service->success) {
             return $this->success(
-                response: Carbon::now()->toDateTimeString(),
-                service: $user
-            );
-
-        } catch (\Exception $exception) {
-            return $this->error(
-                path: __CLASS__.'.'.__FUNCTION__,
-                response: $exception->getMessage(),
-                service: $request->all(),
-                code: $exception->getCode()
+                title: "Usuário deletado.",
+                message: $service->message,
+                payload: $service->payload
             );
         }
+
+        return $this->error(
+            path: __CLASS__ . '.' . __FUNCTION__,
+            message: $service->message,
+            code: $service->code
+        );
     }
 }

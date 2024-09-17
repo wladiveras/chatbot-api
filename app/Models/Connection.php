@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Connection extends Model
 {
@@ -31,22 +34,27 @@ class Connection extends Model
         ];
     }
 
-    public function user()
+    public function scopeAuth(Builder $query): Builder
+    {
+        return $query->where('user_id', auth()->id());
+    }
+
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function flow()
+    public function flow(): HasOne
     {
         return $this->hasOne(Flow::class);
     }
 
-    public function connectionSettings()
+    public function connectionSettings(): HasOne
     {
         return $this->hasOne(ConnectionSetting::class);
     }
 
-    public function connectionProfile()
+    public function connectionProfile(): HasOne
     {
         return $this->hasOne(ConnectionProfile::class);
     }

@@ -52,7 +52,7 @@ class BraipGateway extends BaseService implements PaymentServiceInterface
         Log::debug(__CLASS__.'.'.__FUNCTION__.' => running');
 
         try {
-            $orderCreate = $this->orderRepository->first(column: 'id', value: $id);
+            $orderCreate = $this->orderRepository->find(column: 'id', value: $id);
 
             if (! $orderCreate) {
                 return $this->error(

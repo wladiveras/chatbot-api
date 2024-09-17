@@ -1,0 +1,22 @@
+apps:
+  - name: default
+    script: artisan
+    exec_mode: fork
+    interpreter: php
+    instances: 1
+    args:
+      - queue:work
+      - --queue=default
+      - --tries=5
+      - --sleep=1
+
+  - name: flows
+    script: artisan
+    exec_mode: fork
+    interpreter: php
+    instances: 1
+    args:
+      - queue:work
+      - --queue=flows
+      - --tries=5
+      - --sleep=1

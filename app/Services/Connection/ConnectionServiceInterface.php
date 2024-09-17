@@ -1,16 +1,14 @@
 <?php
 
-namespace App\Services\Messenger;
+namespace App\Services\Connection;
 
-interface MessengerServiceInterface
+interface ConnectionServiceInterface
 {
     public function createConnection(array|object $data): array|object;
 
     public function send(array|object $data): array|object;
 
     public function connect(string|int $connection): array|object;
-
-    public function status(string|int $connection): array|object;
 
     public function disconnect(string|int $connection): array|object;
 

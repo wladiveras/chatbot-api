@@ -3,7 +3,11 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "jobs-production": "pm2 start workers/production.yml --watch  -i 4 --ignore-watch='node_modules'",
+        "jobs-local": "pm2 start workers/local.yml --watch --ignore-watch='node_modules'",
+        "jobs-monitor": "pm2 monit",
+        "jobs-save": " pm2 save --force"
     },
     "devDependencies": {
         "axios": "^1.7.4",
