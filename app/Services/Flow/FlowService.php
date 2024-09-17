@@ -170,7 +170,6 @@ class FlowService extends BaseService implements FlowServiceInterface
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
-
             $deleteFlow = $this->flowRepository->delete($id);
 
             if (!$deleteFlow) {
@@ -180,6 +179,8 @@ class FlowService extends BaseService implements FlowServiceInterface
                     code: 400
                 );
             }
+
+            $this->flowRepository->deleteUserFlowsCacheKey($this->user->id);
 
             return $this->success(message: 'Fluxo deletado com sucesso.', payload: $deleteFlow);
 

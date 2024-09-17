@@ -387,9 +387,11 @@ class WhatsappProvider extends BaseService implements ConnectionServiceInterface
         Log::debug(__CLASS__ . '.' . __FUNCTION__ . ' => running');
 
         try {
+            $user = auth()->user();
             $response = $this->request->delete("{$this->url}/instance/delete/{$connection}");
 
             $this->connectionRepository->delete(column: 'token', value: $connection);
+            $this->connectionRepository->deleteUserConnectionsCacheKey($user->id);
 
             return $this->success(message: 'Conexão deletada com sucesso.', payload: $response->json());
 
