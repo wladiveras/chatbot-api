@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ServerSentEventController
 {
-    public function stream()
+    public function stream(): StreamedResponse
     {
         $response = new StreamedResponse(function () {
             while (true) {
@@ -19,8 +19,7 @@ class ServerSentEventController
                 $event = [
                     'event' => 'ping',
                     'data' => [
-                        'message' =>
-                            '',
+                        'message' => 'pong',
                         'timestamp' => now()->toDateTimeString()
                     ]
                 ];
@@ -33,9 +32,9 @@ class ServerSentEventController
 
                 $this->listenForEvents();
 
-                usleep(25); // 0.25 seconds
+                usleep(25);
 
-                if (microtime(true) - LARAVEL_START > 55) { // Break after ~55 seconds
+                if (microtime(true) - LARAVEL_START > 55) {
                     break;
                 }
             }
@@ -46,7 +45,7 @@ class ServerSentEventController
         $response->headers->set('Connection', 'keep-alive');
         $response->headers->set('X-Accel-Buffering', 'no');
 
-        // Set CORS headers if needed
+
         $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST');
         $response->headers->set('Access-Control-Allow-Headers', 'X-Requested-With');
